@@ -1,0 +1,15 @@
+{
+    "name": "AssemblyStateMachine",
+    "references": [
+        "GUID:1a4a9145c49172041a1a2c63e25939c7"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

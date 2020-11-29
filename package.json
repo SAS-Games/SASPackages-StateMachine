@@ -1,0 +1,10 @@
+{
+  "name": "com.sas.statemachine",
+  "version": "0.0.1",
+  "displayName": "SAS StateMachine",
+  "unity": "2019.1",
+  "hideInEditor": true,
+  "dependencies": {
+    "com.sas.tagsystem": "0.0.1"
+  }
+}
