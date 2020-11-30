@@ -79,5 +79,9 @@ namespace SAS.StateMachineGraph
         {
             StateMachineController?.SetFloat(name, value);
         }
+        public void SetBool(string name, bool value)
+        {
+            StateMachineController?.SetBool(name, value);
+        }
     }
 }
