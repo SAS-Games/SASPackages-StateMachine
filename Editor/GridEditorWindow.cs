@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEditor;
 
-namespace SAS.StateMachineGraphEditor
+namespace SAS.StateMachineGraph.Editor
 {
     public class GridEditorWindow : EditorWindow
     {

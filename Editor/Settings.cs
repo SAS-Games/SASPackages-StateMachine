@@ -2,7 +2,7 @@
 using UnityEditor;
 using System;
 
-namespace SAS.StateMachineGraphEditor
+namespace SAS.StateMachineGraph.Editor
 {
     public class Settings : ScriptableObject
     {

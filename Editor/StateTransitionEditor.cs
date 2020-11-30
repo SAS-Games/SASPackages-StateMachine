@@ -1,9 +1,8 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-namespace SAS.StateMachineGraphEditor
+namespace SAS.StateMachineGraph.Editor
 {
     public class StateTransitionEditor
     {

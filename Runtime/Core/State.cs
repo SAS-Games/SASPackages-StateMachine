@@ -8,10 +8,10 @@ namespace SAS.StateMachineGraph
         public string Name { get; private set; }
 
         private StateMachine _stateMachine;
-        internal IStateAction[] _onEnter = default;
-        internal IStateAction[] _onExit = default;
-        internal IStateAction[] _onUpdate = default;
-        internal IStateAction[] _onFixedUpdate = default;
+        internal IStateEnterAction[] _onEnter = default;
+        internal IStateExitAction[] _onExit = default;
+        internal IStateUpdateAction[] _onUpdate = default;
+        internal IStateFixedUpdateAction[] _onFixedUpdate = default;
         internal TransitionState[] _transitionStates;
 
         internal State(StateMachine stateMachine, string name)
@@ -22,28 +22,26 @@ namespace SAS.StateMachineGraph
 
         internal void OnEnter()
         {
-            ExecuteActions(_onEnter);
+            for (int i = 0; i < _onEnter.Length; ++i)
+                _onEnter[i]?.OnStateEnter(_stateMachine.Actor);
         }
 
         internal void OnExit()
         {
-            ExecuteActions(_onExit);
+            for (int i = 0; i < _onExit.Length; ++i)
+                _onExit[i]?.OnStateExit(_stateMachine.Actor);
         }
 
         internal void OnUpdate()
         {
-            ExecuteActions(_onUpdate);
+            for (int i = 0; i < _onUpdate.Length; ++i)
+                _onUpdate[i]?.OnUpdate(_stateMachine.Actor);
         }
 
         internal void OnFixedUpdate()
         {
-            ExecuteActions(_onFixedUpdate);
-        }
-
-        private void ExecuteActions(IStateAction[] actions)
-        {
-            for (int i = 0; i < actions.Length; ++i)
-                actions[i]?.Execute(_stateMachine.Actor);
+            for (int i = 0; i < _onFixedUpdate.Length; ++i)
+                _onFixedUpdate[i]?.OnFixedUpdate(_stateMachine.Actor);
         }
 
         internal void TryTransition()

@@ -1,15 +1,11 @@
-﻿using SAS.StateMachineGraph;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEditor.Callbacks;
-using UnityEngine;
 
-namespace SAS.StateMachineGraphEditor
+namespace SAS.StateMachineGraph.Editor
 {
     public class StateMachineModelOpenAsset
     {
-        [OnOpenAssetAttribute(1)]
+        [OnOpenAsset(1)]
         public static bool step1(int instanceID, int line)
         {
             var stateMachineController = EditorUtility.InstanceIDToObject(instanceID);

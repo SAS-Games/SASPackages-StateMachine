@@ -1,9 +1,8 @@
-﻿using SAS.StateMachineGraph;
-using System;
+﻿using System;
 using UnityEditor;
 using UnityEngine;
 
-namespace SAS.StateMachineGraphEditor
+namespace SAS.StateMachineGraph.Editor
 {
     public class Port
     {

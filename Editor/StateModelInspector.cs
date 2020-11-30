@@ -1,20 +1,16 @@
-﻿using SAS.StateMachineGraph;
-using SAS.TagSystem;
+﻿using SAS.TagSystem;
 using System;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using ReorderableList = UnityEditorInternal.ReorderableList;
 
-namespace SAS.StateMachineGraphEditor
+namespace SAS.StateMachineGraph.Editor
 {
     [CustomEditor(typeof(StateModel))]
-    public class StateModelInspector : Editor
+    public class StateModelInspector : UnityEditor.Editor
     {
-        private ReorderableList _onStateEnterActions;
-        private ReorderableList _onStateExitActions;
-        private ReorderableList _stateUpdateActions;
-        private ReorderableList _stateFixedUpdateActions;
+        private ReorderableList _stateActions;
         private ReorderableList _transitionStates;
 
         private Type[] _allActionTypes;
@@ -27,15 +23,9 @@ namespace SAS.StateMachineGraphEditor
             _stateTransitionInspector = new StateTransitionInspector();
             SetupTransitions();
             _allActionTypes = AppDomain.CurrentDomain.GetAllDerivedTypes<IStateAction>().ToArray();
-            _onStateEnterActions = new ReorderableList(serializedObject, serializedObject.FindProperty("m_StateEnterActions"), true, true, true, true);
-            _onStateExitActions = new ReorderableList(serializedObject, serializedObject.FindProperty("m_StateExitActions"), true, true, true, true);
-            _stateUpdateActions = new ReorderableList(serializedObject, serializedObject.FindProperty("m_StateUpdateActions"), true, true, true, true);
-            _stateFixedUpdateActions = new ReorderableList(serializedObject, serializedObject.FindProperty("m_StateFixedUpdateActions"), true, true, true, true);
+            _stateActions = new ReorderableList(serializedObject, serializedObject.FindProperty("m_StateActions"), true, true, true, true);
 
-            HandleReorderableActionsList(_onStateEnterActions, "On State Enter Actions");
-            HandleReorderableActionsList(_stateFixedUpdateActions, "State FixedUpdate Actions");
-            HandleReorderableActionsList(_stateUpdateActions, "State Update Actions");
-            HandleReorderableActionsList(_onStateExitActions, "On State Exit Actions");
+            HandleReorderableActionsList(_stateActions, "State Actions");
         }
 
         protected override void OnHeaderGUI()
@@ -43,7 +33,10 @@ namespace SAS.StateMachineGraphEditor
             base.OnHeaderGUI();
             var curName = EditorGUI.DelayedTextField(new Rect(50, 30, EditorGUIUtility.currentViewWidth - 60, EditorGUIUtility.singleLineHeight), new GUIContent("State Name"), target.name);
             if (curName != target.name)
+            {
                 target.name = curName;
+                AssetDatabase.SaveAssets();
+            }
         }
 
         public override void OnInspectorGUI()
@@ -52,10 +45,7 @@ namespace SAS.StateMachineGraphEditor
 
             if (_stateTransitionInspector == null || !_stateTransitionInspector.OnInspectorGUI())
             {
-                _onStateEnterActions.DoLayoutList();
-                _stateFixedUpdateActions.DoLayoutList();
-                _stateUpdateActions.DoLayoutList();
-                _onStateExitActions.DoLayoutList();
+                _stateActions.DoLayoutList();
                 _transitionStates.DoLayoutList();
             }
 

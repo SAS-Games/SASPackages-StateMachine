@@ -9,7 +9,7 @@ namespace SAS.StateMachineGraph
         [SerializeField] private List<StateModel> _stateModels = new List<StateModel>();
         [SerializeField] private StateMachineParameter[] _parameters;
         [SerializeField] private StateModel _defaultStateModel;
-        [SerializeField] private StateModel _anyStateModel;
+       // [SerializeField] private StateModel _anyStateModel;
 
         internal StateMachine CreateStateMachine(Actor actor)
         {
@@ -24,7 +24,7 @@ namespace SAS.StateMachineGraph
             }
 
             stateMachine.CurrentState = stateMachine.DefaultState;
-            stateMachine.AnyState = _anyStateModel.GetState(stateMachine, cachedState, cachedActions);
+           // stateMachine.AnyState = _anyStateModel.GetState(stateMachine, cachedState, cachedActions);
 
             return stateMachine;
         }

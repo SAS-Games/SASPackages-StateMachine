@@ -1,11 +1,10 @@
-﻿using SAS.StateMachineGraph;
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEngine;
 
-namespace SAS.StateMachineGraphEditor
+namespace SAS.StateMachineGraph.Editor
 {
     [CustomEditor(typeof(StateMachineModel))]
-    public class StateMachineEditor : Editor
+    public class StateMachineEditor : UnityEditor.Editor
     {
         public override void OnInspectorGUI()
         {

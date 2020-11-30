@@ -1,19 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 namespace SAS.StateMachineGraph
 { 
 	public class StateModel : ScriptableObject
 	{
 		[SerializeField] private Vector3 position;
-		[SerializeField] private StateActionModel[] m_StateEnterActions = default;
-		[SerializeField] private StateActionModel[] m_StateUpdateActions = default;
-		[SerializeField] private StateActionModel[] m_StateFixedUpdateActions = default;
-		[SerializeField] private StateActionModel[] m_StateExitActions = default;
-
-
-
+		[SerializeField] private StateActionModel[] m_StateActions = default;
 		[SerializeField] private StateTransitionModel[] m_Transitions = null;
 
 		public override bool Equals(object other)
@@ -33,11 +28,11 @@ namespace SAS.StateMachineGraph
 
 			var state = new State(stateMachine, name);
 			cachedStates.Add(this, state);
-
-			state._onEnter = GetActions(m_StateEnterActions, stateMachine, cachedActions);
-			state._onExit = GetActions(m_StateExitActions, stateMachine, cachedActions);
-			state._onUpdate = GetActions(m_StateUpdateActions, stateMachine, cachedActions);
-			state._onFixedUpdate = GetActions(m_StateFixedUpdateActions, stateMachine, cachedActions);
+			var stateActions = GetActions(m_StateActions, stateMachine, cachedActions);
+			state._onEnter = stateActions.OfType<IStateEnterAction>().ToArray();
+			state._onFixedUpdate = stateActions.OfType<IStateFixedUpdateAction>().ToArray();
+			state._onUpdate = stateActions.OfType<IStateUpdateAction>().ToArray();
+			state._onExit = stateActions.OfType<IStateExitAction>().ToArray();
 			state._transitionStates = GetTransitions(m_Transitions, stateMachine, cachedStates, cachedActions);
 
 			return state;

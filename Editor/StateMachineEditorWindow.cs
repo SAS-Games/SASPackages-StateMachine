@@ -1,9 +1,8 @@
-﻿using SAS.StateMachineGraph;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-namespace SAS.StateMachineGraphEditor
+namespace SAS.StateMachineGraph.Editor
 {
     [ExecuteInEditMode]
     internal class StateMachineEditorWindow : GridEditorWindow
@@ -15,7 +14,7 @@ namespace SAS.StateMachineGraphEditor
 
         private List<Node> _nodes = new List<Node>();
         private HashSet<string> _usedStateNames = new HashSet<string>();
-        private static Actor Actor => Selection.activeGameObject?.GetComponent<Actor>();
+        private Actor Actor => Selection.activeGameObject?.GetComponent<Actor>();
 
         static StateMachineEditorWindow detailsWindow;
 
@@ -85,14 +84,16 @@ namespace SAS.StateMachineGraphEditor
             }
 
             var defaultState = _stateMachineModelSO.FindProperty("_defaultStateModel").objectReferenceValue;
-            var anyState = _stateMachineModelSO.FindProperty("_anyStateModel");
+
+            //TODO: Need to revisit. Need to find some better approach for Any State 
+           /* var anyState = _stateMachineModelSO.FindProperty("_anyStateModel");
             if (anyState.objectReferenceValue == null)
             {
                 anyState.objectReferenceValue = AddState("Any State");
                 MakeNode(anyState.objectReferenceValue as StateModel, new Vector2(200, 200));
                 anyState.serializedObject.ApplyModifiedProperties();
                 _stateMachineModelSO.ApplyModifiedProperties();
-            }
+            }*/
 
             foreach (Node node in _nodes)
             {
