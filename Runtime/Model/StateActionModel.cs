@@ -41,7 +41,7 @@ namespace SAS.StateMachineGraph
                 action = Activator.CreateInstance(ToType()) as IStateAction;
 
 			createdInstances.Add(this, action);
-            (action as IStateActionInit)?.Init(stateMachine.Actor);
+            (action as IStateActionInit)?.OnInitialize(stateMachine.Actor);
 			return action;
 		}
 	}

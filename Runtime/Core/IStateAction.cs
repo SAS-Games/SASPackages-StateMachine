@@ -1,13 +1,11 @@
 ﻿
 namespace SAS.StateMachineGraph
 {
-    public interface IStateAction
-    {
-    }
+    public interface IStateAction { }
 
     public interface IStateActionInit : IStateAction
     {
-        void Init(Actor actor);
+        void OnInitialize(Actor actor);
     }
 
     public interface IStateEnterAction : IStateAction

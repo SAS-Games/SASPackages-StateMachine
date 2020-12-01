@@ -1,5 +1,6 @@
 ﻿using SAS.TagSystem;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
@@ -34,8 +35,16 @@ namespace SAS.StateMachineGraph.Editor
             var curName = EditorGUI.DelayedTextField(new Rect(50, 30, EditorGUIUtility.currentViewWidth - 60, EditorGUIUtility.singleLineHeight), new GUIContent("State Name"), target.name);
             if (curName != target.name)
             {
+                var mainAsset = new SerializedObject(AssetDatabase.LoadMainAssetAtPath(AssetDatabase.GetAssetPath(target)));
+                var states = mainAsset.FindProperty("_stateModels");
+                var usedName = new HashSet<string>();
+                for (int i = 0; i < states.arraySize; ++i)
+                    usedName.Add(states.GetArrayElementAtIndex(i).objectReferenceValue.name);
+                curName = Util.MakeUniqueName(curName, usedName);
+
                 target.name = curName;
-                AssetDatabase.SaveAssets();
+                AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(target), ImportAssetOptions.ForceUpdate);
+                Selection.activeObject = AssetDatabase.LoadMainAssetAtPath(AssetDatabase.GetAssetPath(target));
             }
         }
 
