@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System;
 using System.Collections.Generic;
+using SAS.TagSystem;
 
 namespace SAS.StateMachineGraph
 { 
@@ -17,7 +18,7 @@ namespace SAS.StateMachineGraph
 
         public override int GetHashCode()
         {
-            return Name.GetHashCode();
+            return Name.GetHashCode() + tag.GetHashCode();
         }
 
         internal IStateAction GetAction(StateMachine stateMachine, Dictionary<StateActionModel, object> createdInstances)
@@ -28,7 +29,7 @@ namespace SAS.StateMachineGraph
             IStateAction action = null;
             if (type.IsSubclassOf(typeof(MonoBehaviour)))
             {
-                var component = stateMachine.Actor.GetComponentInChildren(type, true);
+                var component = stateMachine.Actor.GetComponentInChildren(type, tag, true);
                 if (component != null)
                     action = component as IStateAction;
                 else
