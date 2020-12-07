@@ -3,27 +3,27 @@ namespace SAS.StateMachineGraph
 {
     public interface IStateAction { }
 
-    public interface IStateActionInit : IStateAction
+    public interface IStateInitialize : IStateAction
     {
         void OnInitialize(Actor actor);
     }
 
-    public interface IStateEnterAction : IStateAction
+    public interface IStateEnter : IStateAction
     {
         void OnStateEnter(Actor actor);
     }
 
-    public interface IStateFixedUpdateAction : IStateAction
+    public interface IStateFixedUpdate : IStateAction
     {
         void OnFixedUpdate(Actor actor);
     }
 
-    public interface IStateUpdateAction : IStateAction
+    public interface IStateUpdate : IStateAction
     {
         void OnUpdate(Actor actor);
     }
 
-    public interface IStateExitAction : IStateAction
+    public interface IStateExit : IStateAction
     {
         void OnStateExit(Actor actor);
     }

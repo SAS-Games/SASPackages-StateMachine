@@ -29,10 +29,10 @@ namespace SAS.StateMachineGraph
 			var state = new State(stateMachine, name);
 			cachedStates.Add(this, state);
 			var stateActions = GetActions(m_StateActions, stateMachine, cachedActions);
-			state._onEnter = stateActions.OfType<IStateEnterAction>().ToArray();
-			state._onFixedUpdate = stateActions.OfType<IStateFixedUpdateAction>().ToArray();
-			state._onUpdate = stateActions.OfType<IStateUpdateAction>().ToArray();
-			state._onExit = stateActions.OfType<IStateExitAction>().ToArray();
+			state._onEnter = stateActions.OfType<IStateEnter>().ToArray();
+			state._onFixedUpdate = stateActions.OfType<IStateFixedUpdate>().ToArray();
+			state._onUpdate = stateActions.OfType<IStateUpdate>().ToArray();
+			state._onExit = stateActions.OfType<IStateExit>().ToArray();
 			state._transitionStates = GetTransitions(m_Transitions, stateMachine, cachedStates, cachedActions);
 
 			return state;

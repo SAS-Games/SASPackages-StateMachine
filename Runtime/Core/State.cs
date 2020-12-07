@@ -8,10 +8,10 @@ namespace SAS.StateMachineGraph
         public string Name { get; private set; }
 
         private StateMachine _stateMachine;
-        internal IStateEnterAction[] _onEnter = default;
-        internal IStateExitAction[] _onExit = default;
-        internal IStateUpdateAction[] _onUpdate = default;
-        internal IStateFixedUpdateAction[] _onFixedUpdate = default;
+        internal IStateEnter[] _onEnter = default;
+        internal IStateExit[] _onExit = default;
+        internal IStateUpdate[] _onUpdate = default;
+        internal IStateFixedUpdate[] _onFixedUpdate = default;
         internal TransitionState[] _transitionStates;
 
         internal State(StateMachine stateMachine, string name)
