@@ -6,5 +6,6 @@
   "hideInEditor": true,
   "dependencies": {
     "com.sas.tagsystem": "0.0.1"
+    "com.sas.servicelocator": "0.0.1"
   }
 }

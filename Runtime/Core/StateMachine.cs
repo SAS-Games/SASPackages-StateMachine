@@ -86,6 +86,18 @@ namespace SAS.StateMachineGraph
             }
         }
 
+        public void SetInt(string name, int value)
+        {
+            try
+            {
+                _parameters[name].IntValue = value;
+            }
+            catch (KeyNotFoundException e)
+            {
+                Debug.LogException(e);
+            }
+        }
+
         public void SetFloat(string name, float value)
         {
             try
