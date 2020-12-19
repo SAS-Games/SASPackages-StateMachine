@@ -15,7 +15,7 @@ namespace SAS.StateMachineGraph
         {
             StateMachine stateMachine = new StateMachine(actor, _parameters);
             var cachedState = new Dictionary<ScriptableObject, object>();
-            var cachedActions = new Dictionary<StateActionModel, object>();
+            var cachedActions = new Dictionary<StateActionModel, object[]>();
             foreach (StateModel stateModel in _stateModels)
             {
                 var state = stateModel.GetState(stateMachine, cachedState, cachedActions);

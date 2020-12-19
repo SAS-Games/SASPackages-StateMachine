@@ -21,29 +21,34 @@ namespace SAS.StateMachineGraph
             return Name.GetHashCode() + tag.GetHashCode();
         }
 
-        internal IStateAction GetAction(StateMachine stateMachine, Dictionary<StateActionModel, object> createdInstances)
-		{
-			if (createdInstances.TryGetValue(this, out var obj))
-				return (IStateAction)obj;
-			Type type = ToType();
-            IStateAction action = null;
+        internal IStateAction[] GetActions(StateMachine stateMachine, Dictionary<StateActionModel, object[]> createdInstances)
+        {
+            IStateAction[] stateActions;
+            if (createdInstances.TryGetValue(this, out var actions))
+                return actions as IStateAction[];
+            Type type = ToType();
             if (type.IsSubclassOf(typeof(MonoBehaviour)))
             {
-                var component = stateMachine.Actor.GetComponentInChildren(type, tag, true);
-                if (component != null)
-                    action = component as IStateAction;
+                actions = stateMachine.Actor.GetComponentsInChildren(type, tag, true);
+                if (actions != null)
+                {
+                    stateActions = new IStateAction[actions.Length];
+                    for (int i = 0; i < actions.Length; i++)
+                        stateActions[i] = actions[i] as IStateAction;
+                }
                 else
                 {
                     Debug.LogError($"Mono Action {type} with tag {tag}  is not found!  Try attaching it under Actor {stateMachine.Actor}");
-                    return action;
+                    return null;
                 }
             }
             else
-                action = Activator.CreateInstance(ToType()) as IStateAction;
+                stateActions = new IStateAction[] { Activator.CreateInstance(ToType()) as IStateAction };
 
-			createdInstances.Add(this, action);
-            (action as IStateInitialize)?.OnInitialize(stateMachine.Actor);
-			return action;
-		}
+            createdInstances.Add(this, stateActions);
+            foreach (var action in stateActions)
+                (action as IStateInitialize)?.OnInitialize(stateMachine.Actor);
+            return stateActions;
+        }
 	}
 }

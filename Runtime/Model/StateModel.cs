@@ -21,7 +21,7 @@ namespace SAS.StateMachineGraph
 			return name.GetHashCode();
 		}
 
-		internal State GetState(StateMachine stateMachine, Dictionary<ScriptableObject, object> cachedStates, Dictionary<StateActionModel, object> cachedActions)
+		internal State GetState(StateMachine stateMachine, Dictionary<ScriptableObject, object> cachedStates, Dictionary<StateActionModel, object[]> cachedActions)
 		{
 			if (cachedStates.TryGetValue(this, out var obj))
 				return (State)obj;
@@ -38,7 +38,7 @@ namespace SAS.StateMachineGraph
 			return state;
 		}
 
-		private TransitionState[] GetTransitions(StateTransitionModel[] transitionModels, StateMachine stateMachine, Dictionary<ScriptableObject, object> cachedStates, Dictionary<StateActionModel, object> cachedActions)
+		private TransitionState[] GetTransitions(StateTransitionModel[] transitionModels, StateMachine stateMachine, Dictionary<ScriptableObject, object> cachedStates, Dictionary<StateActionModel, object[]> cachedActions)
 		{
 			int count = transitionModels.Length;
 			var transitions = new TransitionState[count];
@@ -48,18 +48,18 @@ namespace SAS.StateMachineGraph
 			return transitions;
 		}
 
-		private IStateAction[] GetActions(StateActionModel[] scriptableActions, StateMachine stateMachine, Dictionary<StateActionModel, object> createdInstances)
+		private IStateAction[] GetActions(StateActionModel[] scriptableActions, StateMachine stateMachine, Dictionary<StateActionModel, object[]> createdInstances)
 		{
 			int count = scriptableActions.Length;
-			var actions = new IStateAction[count];
+			var stateActions = new List<IStateAction>();
 			for (int i = 0; i < count; i++)
 			{
-				var action = scriptableActions[i].GetAction(stateMachine, createdInstances);
-				if (action != null)
-					actions[i] = action;
+				var actions = scriptableActions[i].GetActions(stateMachine, createdInstances);
+				if (actions != null)
+					stateActions.AddRange(actions);
 			}
 
-			return actions;
+			return stateActions.ToArray();
 		}
 
 		public int GetTransitionStateIndex(StateModel state)

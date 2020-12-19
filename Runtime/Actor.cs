@@ -60,6 +60,16 @@ namespace SAS.StateMachineGraph
             return component != null;
         }
 
+        public bool TryGetAll<T>(string tag, out T[] components, bool includeInactive = false) where T : Component
+        {
+            // if (!_serviceLocator.TryGet<T>(out component, tag))
+            components = this.GetComponentsInChildren<T>(tag, includeInactive);
+          //  if (component != null)
+          //      _serviceLocator.Add<T>(component, tag);
+
+            return components != null;
+        }
+
         public void SetFloat(string name, float value)
         {
             StateMachineController?.SetFloat(name, value);

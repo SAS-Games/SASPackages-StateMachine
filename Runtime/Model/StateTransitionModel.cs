@@ -12,7 +12,7 @@ namespace SAS.StateMachineGraph
 
         public StateModel TargetState { get => m_TargetState; }
 
-        internal TransitionState GetTransition(StateMachine stateMachine, Dictionary<ScriptableObject, object> cachedStates, Dictionary<StateActionModel, object> cachedActions)
+        internal TransitionState GetTransition(StateMachine stateMachine, Dictionary<ScriptableObject, object> cachedStates, Dictionary<StateActionModel, object[]> cachedActions)
 		{
 			var state = m_TargetState.GetState(stateMachine, cachedStates, cachedActions);
 			var conditions = GetConditions();
