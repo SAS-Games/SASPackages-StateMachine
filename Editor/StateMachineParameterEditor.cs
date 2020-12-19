@@ -7,9 +7,25 @@ namespace SAS.StateMachineGraph.Editor
 {
     public class StateMachineParameterEditor
     {
-        public static HashSet<string> UsedParameterNames = new HashSet<string>();
         private ReorderableList _parametersList;
         public Rect rect;
+
+        public HashSet<string> UsedParameterNames
+        {
+            get
+            {
+                var parameters = _parametersList.serializedProperty.serializedObject?.FindProperty("_parameters");
+                HashSet<string> usedParameterNames = new HashSet<string>();
+                for (int i = 0; i < parameters.arraySize; ++i)
+                {
+                    var element = parameters.GetArrayElementAtIndex(i);
+                    var name = element.FindPropertyRelative("m_Name");
+                    usedParameterNames.Add(name.stringValue);
+                }
+                return usedParameterNames;
+            }
+        }
+
 
         public StateMachineParameterEditor(SerializedObject serializedObject)
         {
