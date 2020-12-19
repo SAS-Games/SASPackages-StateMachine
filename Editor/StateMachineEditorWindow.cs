@@ -126,7 +126,9 @@ namespace SAS.StateMachineGraph.Editor
             ProcessNodeEvents(Event.current);
             ProcessMouseEvent(Event.current);
 
-            BeginWindows(); 
+            BeginWindows();
+            if (Application.isPlaying)
+                _parameterEditor = new StateMachineParameterEditor(new SerializedObject(StateMachineModel));
             _parameterEditor.DrawRect(GUILayout.Window(1, new Rect(0, 1, Mathf.Max(200, position.width / 5), position.height), _parameterEditor.DrawParametersWindow, ""));
             EndWindows();
             
