@@ -201,7 +201,7 @@ namespace SAS.StateMachineGraph.Editor
             Node node = new Node(state, mousePosition, _transition.StartTransition, _transition.MakeTransion, RemoveNode, SetAsDefaultNode);
             _nodes.Add(node);
 
-            if (_stateMachineModelSO.FindProperty("_stateModels").arraySize == 1)
+            if (_stateMachineModelSO.FindProperty("_stateModels").arraySize == 2)
                 SetAsDefaultNode(node);
         }
 

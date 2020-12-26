@@ -40,5 +40,22 @@ namespace SAS.StateMachineGraph
 
             _defaultStateModel = model._defaultStateModel;
         }
+
+#if UNITY_EDITOR
+        private void OnValidate()
+        {
+            if (_stateModels.Count == 0)
+            {
+                var state = CreateInstance<StateModel>();
+                state.name = "Any State";
+                var stateModelSO = new UnityEditor.SerializedObject(state);
+                stateModelSO.FindProperty("position").vector3Value = new Vector2(300, 150);
+                stateModelSO.ApplyModifiedProperties();
+                _stateModels.Add(state);
+                UnityEditor.AssetDatabase.AddObjectToAsset(state, this);
+                UnityEditor.AssetDatabase.ImportAsset(UnityEditor.AssetDatabase.GetAssetPath(this));
+            }
+        }
+#endif
     }
 }
