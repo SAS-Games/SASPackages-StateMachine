@@ -8,6 +8,8 @@ namespace SAS.StateMachineGraph
 	internal class StateTransitionModel
 	{
 		[SerializeField] private StateModel m_TargetState = default;
+		[SerializeField] private bool m_HasExitTime = false;
+		[SerializeField] private float m_ExitTime = 0;
 		[SerializeField] private Condition[] m_Conditions = default;
 
         public StateModel TargetState { get => m_TargetState; }
@@ -16,7 +18,7 @@ namespace SAS.StateMachineGraph
 		{
 			var state = m_TargetState.GetState(stateMachine, cachedStates, cachedActions);
 			var conditions = GetConditions();
-			return new TransitionState(state, conditions);
+			return new TransitionState(state, conditions, m_HasExitTime, m_ExitTime);
 		}
 
 		private Condition[] GetConditions()

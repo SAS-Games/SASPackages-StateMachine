@@ -7,9 +7,6 @@ namespace SAS.StateMachineGraph.Editor
 {
     public class StateMachineParameterEditor
     {
-        private ReorderableList _parametersList;
-        public Rect rect;
-
         public HashSet<string> UsedParameterNames
         {
             get
@@ -26,6 +23,8 @@ namespace SAS.StateMachineGraph.Editor
             }
         }
 
+        private ReorderableList _parametersList;
+        public Rect rect;
 
         public StateMachineParameterEditor(SerializedObject serializedObject)
         {

@@ -46,39 +46,21 @@ namespace SAS.StateMachineGraph
 
         internal void TryTransition()
         {
-            State state;
             for (int i = 0; i < _transitionStates.Length; ++i)
             {
-                if (_transitionStates[i].TryGetTransiton(_stateMachine, out state))
+                if (_transitionStates[i].TryGetTransiton(_stateMachine, out var state))
                 {
+                    state.ResetExitTime();
                     _stateMachine.CurrentState = state;
                     return;
                 }
             }
         }
 
-       /* internal void AddTransitionState(State state)
+        internal void ResetExitTime()
         {
-            _transitionStates.Add(new TransitionState(state));
-        } 
-
-        internal void RemoveTransitionState(State state)
-        {
-            _transitionStates.Remove(_transitionStates.Find(ele => ele.State == state));
+            for (int i = 0; i < _transitionStates.Length; ++i)
+                _transitionStates[i].TimeElapsed = 0;
         }
-
-        internal void RemoveNullTransitions()
-        {
-            for (int i = 0; i < _transitionStates.Count; ++i)
-            {
-                if (_transitionStates[i].State == null)
-                    _transitionStates.RemoveAt(i);
-            }
-        }
-
-        internal int GetTransitionStateIndex(State state)
-        {
-            return _transitionStates.IndexOf(_transitionStates.Find(ele => ele.State == state));
-        }*/
     }
 }

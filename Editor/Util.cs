@@ -4,6 +4,7 @@ namespace SAS.StateMachineGraph.Editor
 {
     public static class Util
     {
+        public const string AnyStateModelName = "Any State";
         public static string MakeUniqueName(string nameBase, HashSet<string> usedNames)
         {
             string name = nameBase;

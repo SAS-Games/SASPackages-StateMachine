@@ -89,5 +89,20 @@ namespace SAS.StateMachineGraph
         {
             StateMachineController?.SetTrigger(name);
         }
+
+        public int GetInt(string name)
+        {
+            return StateMachineController.GetInt(name);
+        }
+
+        public float GetFloat(string name)
+        {
+            return StateMachineController.GetFloat(name);
+        }
+
+        public bool GetBool(string name)
+        {
+           return StateMachineController.GetBool(name);
+        }
     }
 }

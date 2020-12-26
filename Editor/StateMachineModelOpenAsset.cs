@@ -6,7 +6,7 @@ namespace SAS.StateMachineGraph.Editor
     public class StateMachineModelOpenAsset
     {
         [OnOpenAsset(1)]
-        public static bool step1(int instanceID, int line)
+        public static bool OpenStateMachineGraph(int instanceID, int line)
         {
             var stateMachineController = EditorUtility.InstanceIDToObject(instanceID);
             if(stateMachineController.GetType() == typeof(StateMachineModel))

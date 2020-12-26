@@ -54,6 +54,9 @@ namespace SAS.StateMachineGraph.Editor
         private System.Action<Node> _setAsDefaultNode;
         private System.Action<Node> _onMouseUp;
         private bool _swapped = false;
+
+        private bool IsAnyStateNode => state.name.Equals(Util.AnyStateModelName);
+
         public void SwapPort(bool swap)
         {
             if (swap && !_swapped)
@@ -163,8 +166,10 @@ namespace SAS.StateMachineGraph.Editor
         {
             GenericMenu genericMenu = new GenericMenu();
             genericMenu.AddItem(new GUIContent("Make Transition"), false, () => _startTransition?.Invoke(this));
-            genericMenu.AddItem(new GUIContent("Set as Default State"), false, () => _setAsDefaultNode?.Invoke(this));
-            genericMenu.AddItem(new GUIContent("Delete"), false, () => _removeNode?.Invoke(this));
+            if (!IsAnyStateNode)
+                genericMenu.AddItem(new GUIContent("Set as Default State"), false, () => _setAsDefaultNode?.Invoke(this));
+            if (!IsAnyStateNode)
+                genericMenu.AddItem(new GUIContent("Delete"), false, () => _removeNode?.Invoke(this));
             genericMenu.ShowAsContext();
         }
 

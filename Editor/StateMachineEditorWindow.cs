@@ -18,7 +18,6 @@ namespace SAS.StateMachineGraph.Editor
 
         static StateMachineEditorWindow detailsWindow;
 
-        [MenuItem("StateMachine/Editor")]
         public static void ShowBehaviourGraphEditor(StateMachineModel target)
         {
             StateMachineModel = target;

@@ -21,17 +21,19 @@ namespace SAS.StateMachineGraph.Editor
 
         private void OnEnable()
         {
+            var stateModel = target as StateModel;
             _stateTransitionInspector = new StateTransitionInspector();
             SetupTransitions();
             _allActionTypes = AppDomain.CurrentDomain.GetAllDerivedTypes<IStateAction>().ToArray();
             _stateActions = new ReorderableList(serializedObject, serializedObject.FindProperty("m_StateActions"), true, true, true, true);
-
             HandleReorderableActionsList(_stateActions, "State Actions");
         }
 
         protected override void OnHeaderGUI()
         {
             base.OnHeaderGUI();
+            if (target.name.Equals(Util.AnyStateModelName))
+                return;
             var curName = EditorGUI.DelayedTextField(new Rect(50, 30, EditorGUIUtility.currentViewWidth - 60, EditorGUIUtility.singleLineHeight), new GUIContent("State Name"), target.name);
             if (curName != target.name)
             {
@@ -54,7 +56,8 @@ namespace SAS.StateMachineGraph.Editor
 
             if (_stateTransitionInspector == null || !_stateTransitionInspector.OnInspectorGUI())
             {
-                _stateActions.DoLayoutList();
+                if (!target.name.Equals(Util.AnyStateModelName))
+                    _stateActions.DoLayoutList();
                 _transitionStates.DoLayoutList();
             }
 
