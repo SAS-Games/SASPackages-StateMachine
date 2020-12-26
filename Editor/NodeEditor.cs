@@ -55,7 +55,7 @@ namespace SAS.StateMachineGraph.Editor
         private System.Action<Node> _onMouseUp;
         private bool _swapped = false;
 
-        private bool IsAnyStateNode => state.name.Equals(Util.AnyStateModelName);
+        public bool IsAnyStateNode => state.name.Equals(Util.AnyStateModelName);
 
         public void SwapPort(bool swap)
         {
@@ -77,8 +77,8 @@ namespace SAS.StateMachineGraph.Editor
             rect = new Rect(position.x, position.y, 200, 50);
             endPort = new Port(this, 1);
             startPort = new Port(this, 2);
-            normalNodeStyle = Settings.GetNodeStyle();
-            selectedNodeStyle = Settings.GetNodeFocudeStyle();
+            normalNodeStyle = !IsAnyStateNode ? Settings.GetNodeStyle() : Settings.GetAnyStateNodeStyle();
+            selectedNodeStyle = !IsAnyStateNode ? Settings.GetNodeFocudeStyle() : Settings.GetAnyStateFocusedNodeStyle();
             defaultNormalNodeStyle = Settings.GetDefaultNodeStyle();
             defaultSelectedNodeStyle = Settings.GetDefaultFocusedNodeStyle();
             SetStyle(false);

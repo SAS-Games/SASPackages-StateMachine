@@ -39,17 +39,19 @@ namespace SAS.StateMachineGraph.Editor
                 return false;
 
             _allTranstionsToTargetState.DoLayoutList();
-            var stateTransitionProp = _allTranstionsToTargetState.list[SelectedTransitionIndex] as SerializedProperty;
-            var hasExitTime = stateTransitionProp.FindPropertyRelative("m_HasExitTime");
-            var exitTime = stateTransitionProp.FindPropertyRelative("m_ExitTime");
-            
-            hasExitTime.boolValue = EditorGUILayout.Toggle("Has Exit Time", hasExitTime.boolValue);
-            
-            EditorGUI.BeginDisabledGroup(hasExitTime.boolValue == false);
-            exitTime.floatValue = EditorGUILayout.FloatField("Exit Time", exitTime.floatValue);
-            EditorGUI.EndDisabledGroup();
-           
-            stateTransitionProp.serializedObject.ApplyModifiedProperties();
+            if (_allTranstionsToTargetState.list.Count > 0 && _allTranstionsToTargetState.list.Count > SelectedTransitionIndex)
+            {
+                var stateTransitionProp = _allTranstionsToTargetState.list[SelectedTransitionIndex] as SerializedProperty;
+                var hasExitTime = stateTransitionProp.FindPropertyRelative("m_HasExitTime");
+                var exitTime = stateTransitionProp.FindPropertyRelative("m_ExitTime");
+
+                hasExitTime.boolValue = EditorGUILayout.Toggle("Has Exit Time", hasExitTime.boolValue);
+
+                EditorGUI.BeginDisabledGroup(hasExitTime.boolValue == false);
+                exitTime.floatValue = EditorGUILayout.FloatField("Exit Time", exitTime.floatValue);
+                EditorGUI.EndDisabledGroup();
+                stateTransitionProp.serializedObject.ApplyModifiedProperties();
+            }
             EditorGUILayout.Space(10);
 
             for (int i = 0; i < _transitionsConditionList?.Length; ++i)
@@ -227,7 +229,6 @@ namespace SAS.StateMachineGraph.Editor
             _allTranstionsToTargetState.onSelectCallback = list =>
             {
                 SelectedTransitionIndex = list.index;
-                Debug.Log(list.index);
             };
 
             _allTranstionsToTargetState.onRemoveCallback = list =>

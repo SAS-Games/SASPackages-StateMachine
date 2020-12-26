@@ -10,7 +10,7 @@ namespace SAS.StateMachineGraph
     internal class StateActionModel : SerializedType
     {
         internal string Name => Sanitize(ToType().ToString());
-		[SerializeField] internal string tag;
+		[SerializeField] internal string tag = default;
         public override bool Equals(object obj)
         {
 			return Name.Equals((obj as StateActionModel).Name);

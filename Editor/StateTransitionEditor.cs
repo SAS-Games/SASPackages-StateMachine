@@ -50,7 +50,7 @@ namespace SAS.StateMachineGraph.Editor
             if (_startPort != null)
             {
                 _endPort = node.endPort;
-                if (_startPort.node != _endPort.node)
+                if (_startPort.node != _endPort.node && !_endPort.node.IsAnyStateNode)
                 {
                     AddTransition();
                     ClearConnectionSelection();
