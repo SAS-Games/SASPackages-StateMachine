@@ -30,6 +30,9 @@ namespace SAS.StateMachineGraph.Editor
 
         void OnSelectionChange()
         {
+            if (Selection.activeObject == null)
+                return;
+
             var stateMachineModel = Selection.activeObject as StateMachineModel;
             if (stateMachineModel == null)
             {
@@ -130,7 +133,6 @@ namespace SAS.StateMachineGraph.Editor
             switch (e.type)  
             {
                 case EventType.MouseDown:
-                    Selection.activeObject = null;
                     if (e.button == 1)
                         ProcessContextMenu(e.mousePosition);
                     break;
