@@ -13,7 +13,7 @@ namespace SAS.StateMachineGraph
         internal StateMachine StateMachineController { get; private set; }
         private readonly Dictionary<Type, Component> _cachedComponents = new Dictionary<Type, Component>();
         private readonly ServiceLocator _serviceLocator = new ServiceLocator();
-        public string CurrentStateName => StateMachineController?.CurrentState.Name;
+        public string CurrentStateName => StateMachineController?.CurrentState?.Name;
 
         private void Awake()
         {

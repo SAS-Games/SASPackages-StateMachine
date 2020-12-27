@@ -13,7 +13,7 @@ namespace SAS.StateMachineGraph
 
 		public override bool Equals(object other)
 		{
-			return name.Equals((other as StateModel).name);
+			return name.Equals((other as StateModel)?.name);
 		}
 
 		public override int GetHashCode()
