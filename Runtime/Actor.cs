@@ -11,7 +11,6 @@ namespace SAS.StateMachineGraph
         [SerializeField] private StateMachineModel m_Controller = default;
 
         internal StateMachine StateMachineController { get; private set; }
-        private readonly Dictionary<Type, Component> _cachedComponents = new Dictionary<Type, Component>();
         private readonly ServiceLocator _serviceLocator = new ServiceLocator();
         public string CurrentStateName => StateMachineController?.CurrentState?.Name;
 
@@ -45,29 +44,32 @@ namespace SAS.StateMachineGraph
             StateMachineController?.TryTransition();
         }
 
-        public bool TryGet<T>(out T component, bool includeInactive = false) where T : Component
+        public bool TryGet<T>(out T component, bool includeInactive = false)
         {
             return TryGet<T>(string.Empty, out component, includeInactive);
         }
 
-        public bool TryGet<T>(string tag, out T component, bool includeInactive = false) where T : Component
+        public bool TryGet<T>(string tag, out T component, bool includeInactive = false)
         {
-            if (!_serviceLocator.TryGet<T>(out component, tag))
-                component = this.GetComponentInChildren<T>(tag, includeInactive);
-            if (component != null)
-                _serviceLocator.Add<T>(component, tag);
-
+            component = (T)(object)Get(typeof(T), tag, includeInactive);
             return component != null;
         }
 
-        public bool TryGetAll<T>(string tag, out T[] components, bool includeInactive = false) where T : Component
+        public Component Get(Type type, bool includeInactive = false)
         {
-            // if (!_serviceLocator.TryGet<T>(out component, tag))
-            components = this.GetComponentsInChildren<T>(tag, includeInactive);
-          //  if (component != null)
-          //      _serviceLocator.Add<T>(component, tag);
+            return Get(type, string.Empty, includeInactive);
+        }
 
-            return components != null;
+        public Component Get(Type type, string tag, bool includeInactive = false)
+        {
+            if (!_serviceLocator.TryGet(type, out var obj, tag))
+            {
+                obj = this.GetComponentInChildren(type, tag, includeInactive);
+                if (obj != null)
+                    _serviceLocator.Add(type, obj, tag);
+            }
+
+            return obj as Component;
         }
 
         public void SetFloat(string name, float value)
@@ -102,7 +104,7 @@ namespace SAS.StateMachineGraph
 
         public bool GetBool(string name)
         {
-           return StateMachineController.GetBool(name);
+            return StateMachineController.GetBool(name);
         }
     }
 }
