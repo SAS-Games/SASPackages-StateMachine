@@ -6,10 +6,10 @@ namespace SAS.StateMachineGraph
     [CreateAssetMenu(fileName = "New State Machine Controller", menuName = "SAS/State Machine Controller")]
     public class StateMachineModel : ScriptableObject
     {
+        private const string AnyStateModelName = "Any State";
         [SerializeField] private List<StateModel> _stateModels = new List<StateModel>();
         [SerializeField] private StateMachineParameter[] _parameters;
         [SerializeField] private StateModel _defaultStateModel;
-       // [SerializeField] private StateModel _anyStateModel;
 
         internal StateMachine CreateStateMachine(Actor actor)
         {
@@ -21,11 +21,11 @@ namespace SAS.StateMachineGraph
                 var state = stateModel.GetState(stateMachine, cachedState, cachedActions);
                 if (stateModel == _defaultStateModel)
                     stateMachine.DefaultState = state;
+                else if (stateModel.name.Equals(AnyStateModelName))
+                    stateMachine.AnyState = state;
             }
 
             stateMachine.CurrentState = stateMachine.DefaultState;
-           // stateMachine.AnyState = _anyStateModel.GetState(stateMachine, cachedState, cachedActions);
-
             return stateMachine;
         }
 

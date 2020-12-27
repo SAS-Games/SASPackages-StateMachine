@@ -83,17 +83,7 @@ namespace SAS.StateMachineGraph.Editor
             }
 
             var defaultState = _stateMachineModelSO.FindProperty("_defaultStateModel").objectReferenceValue;
-
-            //TODO: Need to revisit. Need to find some better approach for Any State 
-           /* var anyState = _stateMachineModelSO.FindProperty("_anyStateModel");
-            if (anyState.objectReferenceValue == null)
-            {
-                anyState.objectReferenceValue = AddState("Any State");
-                MakeNode(anyState.objectReferenceValue as StateModel, new Vector2(200, 200));
-                anyState.serializedObject.ApplyModifiedProperties();
-                _stateMachineModelSO.ApplyModifiedProperties();
-            }*/
-
+    
             foreach (Node node in _nodes)
             {
                 if (node.stateModelSO.targetObject == defaultState)

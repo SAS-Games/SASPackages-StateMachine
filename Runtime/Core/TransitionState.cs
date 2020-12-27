@@ -16,7 +16,7 @@ namespace SAS.StateMachineGraph
         {
             var timeElapsed = !HasExitTime || TimeElapsed > ExitTime;
             TimeElapsed += Time.deltaTime;
-            state = ShouldTransition(stateMachine) && timeElapsed ? TargetState : null;
+            state = timeElapsed && ShouldTransition(stateMachine) ? TargetState : null;
             return state != null;
         }
 
