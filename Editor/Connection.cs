@@ -6,45 +6,63 @@ namespace SAS.StateMachineGraph.Editor
 {
     public class Connection
     {
-        public Port endPort;
-        public Port startPort;
+        public Node StartNode { get; }
+        public Node EndNode { get; }
         private Action<Connection> OnClickRemoveConnection;
         private SerializedObject _stateMachineSO;
 
-        public Connection(SerializedObject stateMachineSO, Port start, Port end, Action<Connection> onClickRemoveConnection)
+        public Connection(SerializedObject stateMachineSO, Node start, Node end, Action<Connection> onClickRemoveConnection)
         {
-            endPort = end;
-            startPort = start;
+            StartNode = start;
+            EndNode = end;
             _stateMachineSO = stateMachineSO;
             OnClickRemoveConnection = onClickRemoveConnection;
         }
 
-        public void Draw()
+        void DrwaConnection()
         {
-            Vector2 pos = startPort.rect.center + (endPort.rect.center -startPort.rect.center).normalized * Vector2.Distance(endPort.rect.center, startPort.rect.center) * 0.5f;
-            
-            Handles.DrawAAPolyLine(EditorGUIUtility.whiteTexture, 3, new Vector3[] { endPort.rect.center, startPort.rect.center });
+            Vector2 startPos;
+            Vector2 endPos;
+            if (StartNode.GetPosition().y < EndNode.GetPosition().y)
+            {
+                startPos = StartNode.startPort.rect.center;
+                endPos = EndNode.startPort.rect.center;
+                Handles.DrawAAPolyLine(EditorGUIUtility.whiteTexture, 3, new Vector3[] { startPos, endPos });
+            }
+            else
+            {
+                startPos = EndNode.endPort.rect.center;
+                endPos = StartNode.endPort.rect.center;
+                Handles.DrawAAPolyLine(EditorGUIUtility.whiteTexture, 3, new Vector3[] { startPos, endPos });
+            }
+            DrawArrow(startPos, endPos);
+        }
+
+        private void DrawArrow(Vector2 startPos, Vector2 endPos)
+        {
+            Vector2 pos = startPos + (endPos - startPos).normalized * Vector2.Distance(startPos, endPos) * 0.5f;
+
             Matrix4x4 matrixBackup = GUI.matrix;
-            GUIUtility.RotateAroundPivot(Angle(startPort.rect.center, endPort.rect.center), pos);
+            GUIUtility.RotateAroundPivot(Angle(StartNode.GetPosition(), EndNode.GetPosition()), pos);
             if (GUI.Button(new Rect(new Vector2(pos.x - 12, pos.y - 12), Vector2.one * 24), Settings.GetArrowTexture(), GUIStyle.none))
             {
                 Selection.activeObject = null;
-                Selection.activeObject = startPort.node.stateModelSO.targetObject;
-                startPort.node.SetActvieStyle(false);
-                int index = startPort.node.state.GetTransitionStateIndex(endPort.node.state);
-                StateTransitionInspector.Show(index, _stateMachineSO, startPort.node.stateModelSO);
+                Selection.activeObject = StartNode.stateModelSO.targetObject;
+                StartNode.SetActvieStyle(false);
+                int index = StartNode.state.GetTransitionStateIndex(EndNode.state);
+                StateTransitionInspector.Show(index, _stateMachineSO, StartNode.stateModelSO);
             }
             GUI.matrix = matrixBackup;
+        }
 
-            //OnClickRemoveConnection?.Invoke(this);
+        public void Draw()
+        {
+            DrwaConnection();
         }
 
         public static float Angle(Vector2 from, Vector2 to)
         {
-            Vector2 direction = to - from;
-            float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-            if (angle < 0f) angle += 360f;
-            return angle;
+            return Mathf.Atan2(to.y - from.y, to.x - from.x) * 180f / Mathf.PI;
         }
     }
 }

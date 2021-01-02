@@ -99,7 +99,7 @@ namespace SAS.StateMachineGraph.Editor
                     var targetState = element.FindPropertyRelative("m_TargetState").objectReferenceValue;
                     Node endNode = _nodes.Find(ele => ele.stateModelSO.targetObject == targetState);
                     if (endNode != null)
-                        _transition.Add(node.startPort, endNode.endPort);
+                        _transition.Add(node, endNode);
                 }
             }
 

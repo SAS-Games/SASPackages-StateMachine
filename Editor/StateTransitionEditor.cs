@@ -60,19 +60,15 @@ namespace SAS.StateMachineGraph.Editor
             }
         }
 
-        public void Add(Port start, Port end)
+        public void Add(Node start, Node end)
         {
             _transitions.Add(new Connection(_stateMachineSO, start, end, RemoveTransition));
-            start.node.SwapPort(false);
-            end.node.SwapPort(true);
         }
 
         private void AddTransition()
         {
-            _transitions.Add(new Connection(_stateMachineSO, _startPort, _endPort, RemoveTransition));
+            _transitions.Add(new Connection(_stateMachineSO, _startPort.node, _endPort.node, RemoveTransition));
             AddStateTransition(_startPort.node, _endPort.node);
-            _startPort.node.SwapPort(false);
-            _endPort.node.SwapPort(true);
         }
 
         private void RemoveTransition(Connection connection)
@@ -89,7 +85,7 @@ namespace SAS.StateMachineGraph.Editor
 
                 for (int i = 0; i < _transitions.Count; i++)
                 {
-                    if (_transitions[i].endPort == node.endPort || _transitions[i].startPort == node.startPort)
+                    if (_transitions[i].EndNode == node || _transitions[i].StartNode == node)
                         connectionsToRemove.Add(_transitions[i]);
                 }
 

@@ -53,21 +53,8 @@ namespace SAS.StateMachineGraph.Editor
         private System.Action<Node> _startTransition;
         private System.Action<Node> _setAsDefaultNode;
         private System.Action<Node> _onMouseUp;
-        private bool _swapped = false;
-
+     
         public bool IsAnyStateNode => state.name.Equals(Util.AnyStateModelName);
-
-        public void SwapPort(bool swap)
-        {
-            if (swap && !_swapped)
-            {
-                var temp = startPort.id;
-                startPort.id = endPort.id;
-                endPort.id = temp;
-            }
-            else
-                _swapped = true;
-        }
 
         public Node(StateModel state, Vector2 position, Action<Node> startTransition, Action<Node> makeTransition, Action<Node> removeNode, Action<Node> setAsDefaultNode)
         {
@@ -92,6 +79,11 @@ namespace SAS.StateMachineGraph.Editor
         {
             rect.position += delta;
             SetPosition(rect.position);
+        }
+
+        public Vector2 GetPosition()
+        {
+           return stateModelSO.FindProperty("position").vector3Value;
         }
 
         private void SetPosition(Vector3 position)
