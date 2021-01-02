@@ -60,7 +60,7 @@ namespace SAS.StateMachineGraph.Editor
             DrwaConnection();
         }
 
-        public static float Angle(Vector2 from, Vector2 to)
+        private float Angle(Vector2 from, Vector2 to)
         {
             return Mathf.Atan2(to.y - from.y, to.x - from.x) * 180f / Mathf.PI;
         }
