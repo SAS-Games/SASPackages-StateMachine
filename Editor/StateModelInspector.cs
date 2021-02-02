@@ -116,7 +116,7 @@ namespace SAS.StateMachineGraph.Editor
 
         private void SetupTransitions()
         {
-            _transitionStates = new ReorderableList(serializedObject, serializedObject.FindProperty("m_Transitions"), false, true, false, false);
+            _transitionStates = new ReorderableList(serializedObject, serializedObject.FindProperty("m_Transitions"), true, true, false, false);
 
             _transitionStates.drawHeaderCallback = (Rect rect) =>
             {
