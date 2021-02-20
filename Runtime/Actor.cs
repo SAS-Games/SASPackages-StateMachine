@@ -1,12 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using UnityEngine;
 using SAS.TagSystem;
 using SAS.Locator;
+using SAS.StateMachineGraph.Utilities;
 
 namespace SAS.StateMachineGraph
 {
-    public class Actor : MonoBehaviour
+    public sealed class Actor : MonoBehaviour, IActivatable
     {
         [SerializeField] private StateMachineModel m_Controller = default;
 
@@ -53,6 +53,24 @@ namespace SAS.StateMachineGraph
         {
             component = (T)(object)Get(typeof(T), tag, includeInactive);
             return component != null;
+        }
+
+        public bool TryGetAll<T>(string tag, out T[] components, bool includeInactive = false)
+        {
+            var results = this.GetComponentsInChildren(typeof(T), tag, includeInactive);
+            try
+            {
+                components = new T[results.Length];
+                for (int i = 0; i < results.Length; ++i)
+                    components[i] = (T)(object)results[i];
+            }
+            catch (Exception)
+            {
+                components = null;
+                return false;
+            }
+
+            return true;
         }
 
         public Component Get(Type type, bool includeInactive = false)
@@ -105,6 +123,16 @@ namespace SAS.StateMachineGraph
         public bool GetBool(string name)
         {
             return StateMachineController.GetBool(name);
+        }
+
+        void IActivatable.Activate()
+        {
+            enabled = true;
+        }
+
+        void IActivatable.Deactivate()
+        {
+            enabled = false;
         }
     }
 }
