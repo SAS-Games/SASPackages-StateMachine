@@ -47,7 +47,9 @@ namespace SAS.StateMachineGraph
 
             createdInstances.Add(this, stateActions);
             foreach (var action in stateActions)
-                (action as IStateInitialize)?.OnInitialize(stateMachine.Actor);
+            {
+               (action as IStateInitialize)?.OnInitialize(stateMachine.Actor, tag);
+            }
             return stateActions;
         }
 	}
