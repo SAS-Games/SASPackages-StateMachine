@@ -80,20 +80,20 @@ namespace SAS.StateMachineGraph.Editor
             };
             reorderableList.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
             {
-                _tagList = (TagList)EditorGUI.ObjectField(new Rect(rect.width - 80, rect.y - 2, 120, rect.height), _tagList, typeof(TagList), false);
+                _tagList = (TagList)EditorGUI.ObjectField(new Rect(rect.width - 60, rect.y - 2, 100, rect.height), _tagList, typeof(TagList), false);
                 var fullName = reorderableList.serializedProperty.GetArrayElementAtIndex(index).FindPropertyRelative("fullName");
                 var tag = reorderableList.serializedProperty.GetArrayElementAtIndex(index).FindPropertyRelative("tag");
                 rect.y += 2;
                 var curActionIndex = Array.FindIndex(_allActionTypes, type => type.Name == fullName.stringValue);
-                var newActionIndex = EditorGUI.Popup(new Rect(rect.x, rect.y, rect.width - 260, EditorGUIUtility.singleLineHeight), curActionIndex, _allActionTypes.Select(type => SerializedType.Sanitize(type.ToString())).ToArray());
+                var newActionIndex = EditorGUI.Popup(new Rect(rect.x, rect.y, rect.width - 200, EditorGUIUtility.singleLineHeight), curActionIndex, _allActionTypes.Select(type => SerializedType.Sanitize(type.ToString())).ToArray());
                 if (newActionIndex != curActionIndex)
                     fullName.stringValue = _allActionTypes[newActionIndex].AssemblyQualifiedName;
 
-                EditorGUI.LabelField(new Rect(rect.x + 5, rect.y - 2, rect.width -260, rect.height), SerializedType.Sanitize(fullName.stringValue));
+                EditorGUI.LabelField(new Rect(rect.x + 5, rect.y - 2, rect.width -220, rect.height), SerializedType.Sanitize(fullName.stringValue));
 
                 if (_tagList == null)
                 {
-                    var curTag = EditorGUI.DelayedTextField(new Rect(rect.width - 210, rect.y - 2, 120, rect.height), tag.stringValue);
+                    var curTag = EditorGUI.DelayedTextField(new Rect(rect.width - 150, rect.y - 2, 80, rect.height), tag.stringValue);
                     if (curTag != tag.stringValue)
                         tag.stringValue = curTag;
                 }

@@ -8,7 +8,15 @@ namespace SAS.StateMachineGraph
 {
     public sealed class Actor : MonoBehaviour, IActivatable
     {
+        [Serializable]
+        private struct Config
+        {
+            public string tag;
+            public ScriptableObject data;
+        }
+
         [SerializeField] private StateMachineModel m_Controller = default;
+        [SerializeField] private Config[] m_Configs;
 
         internal StateMachine StateMachineController { get; private set; }
         private readonly ServiceLocator _serviceLocator = new ServiceLocator();
@@ -16,6 +24,8 @@ namespace SAS.StateMachineGraph
 
         private void Awake()
         {
+            foreach (var config in m_Configs)
+                _serviceLocator.Add(config.data.GetType(), config.data, config.tag);
             Initialize();
         }
 
