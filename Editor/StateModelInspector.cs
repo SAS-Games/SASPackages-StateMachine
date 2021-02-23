@@ -21,7 +21,6 @@ namespace SAS.StateMachineGraph.Editor
 
         private void OnEnable()
         {
-            var stateModel = target as StateModel;
             _stateTransitionInspector = new StateTransitionInspector();
             SetupTransitions();
             _allActionTypes = AppDomain.CurrentDomain.GetAllDerivedTypes<IStateAction>().ToArray();
@@ -99,7 +98,7 @@ namespace SAS.StateMachineGraph.Editor
                 }
                 else
                 {
-                    var tagIndex = EditorGUI.Popup(new Rect(rect.width - 210, rect.y - 2, 120, rect.height), Array.IndexOf(_tagList.tags, tag.stringValue), _tagList.tags);
+                    var tagIndex = EditorGUI.Popup(new Rect(rect.width - 150, rect.y - 2, 80, rect.height), Array.IndexOf(_tagList.tags, tag.stringValue), _tagList.tags);
                     if (tagIndex != -1)
                         tag.stringValue = _tagList.tags[tagIndex];
 
