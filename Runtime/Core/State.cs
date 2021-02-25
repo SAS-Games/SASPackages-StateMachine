@@ -12,7 +12,10 @@ namespace SAS.StateMachineGraph
         internal IStateExit[] _onExit = default;
         internal IStateUpdate[] _onUpdate = default;
         internal IStateFixedUpdate[] _onFixedUpdate = default;
+        internal IAwaitableStateAction[] _awaitableStateAction = default;
         internal TransitionState[] _transitionStates;
+
+        private State _nextState;
 
         internal State(StateMachine stateMachine, string name)
         {
@@ -44,16 +47,31 @@ namespace SAS.StateMachineGraph
                 _onFixedUpdate[i]?.OnFixedUpdate(_stateMachine.Actor);
         }
 
+        internal void AwaitableStateAction()
+        {
+            for (int i = 0; i < _awaitableStateAction.Length; ++i)
+                _awaitableStateAction[i]?.Execute(_stateMachine.Actor);
+        }
+
         internal void TryTransition()
         {
-            for (int i = 0; i < _transitionStates.Length; ++i)
+            if (_nextState == null)
             {
-                if (_transitionStates[i].TryGetTransiton(_stateMachine, out var state))
+                for (int i = 0; i < _transitionStates.Length; ++i)
                 {
-                    state.ResetExitTime();
-                    _stateMachine.CurrentState = state;
-                    return;
+                    if (_transitionStates[i].TryGetTransiton(_stateMachine, out _nextState))
+                    {
+                        ResetExitTime();
+                        return;
+                    }
                 }
+                return;
+            }
+
+            if (IsAllAwaitableActionCompleted())
+            {
+                _stateMachine.CurrentState = _nextState;
+                _nextState = null;
             }
         }
 
@@ -62,5 +80,17 @@ namespace SAS.StateMachineGraph
             for (int i = 0; i < _transitionStates.Length; ++i)
                 _transitionStates[i].TimeElapsed = 0;
         }
+
+
+        private bool IsAllAwaitableActionCompleted()
+        {
+            for (int i = 0; i < _awaitableStateAction.Length; ++i)
+            {
+                if (!_awaitableStateAction[i].IsCompleted)
+                    return false;
+            }
+            return true;
+        }
+
     }
 }

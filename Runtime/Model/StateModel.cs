@@ -30,6 +30,7 @@ namespace SAS.StateMachineGraph
 			cachedStates.Add(this, state);
 			var stateActions = GetActions(m_StateActions, stateMachine, cachedActions);
 			state._onEnter = stateActions.OfType<IStateEnter>().ToArray();
+			state._awaitableStateAction = stateActions.OfType<IAwaitableStateAction>().ToArray();
 			state._onFixedUpdate = stateActions.OfType<IStateFixedUpdate>().ToArray();
 			state._onUpdate = stateActions.OfType<IStateUpdate>().ToArray();
 			state._onExit = stateActions.OfType<IStateExit>().ToArray();

@@ -27,4 +27,10 @@ namespace SAS.StateMachineGraph
     {
         void OnStateExit(Actor actor);
     }
+
+    public interface IAwaitableStateAction : IStateAction
+    {
+        bool IsCompleted { get; set; }
+        void Execute(Actor actor);
+    }
 }

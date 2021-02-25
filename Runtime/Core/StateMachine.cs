@@ -26,6 +26,7 @@ namespace SAS.StateMachineGraph
                 _currentState?.OnExit();
                 _currentState = value;
                 _currentState?.OnEnter();
+                _currentState?.AwaitableStateAction();
             }
         }
 
@@ -39,6 +40,11 @@ namespace SAS.StateMachineGraph
         internal void OnFixedUpdate()
         {
             CurrentState?.OnFixedUpdate();
+        }
+
+        internal void AwaitableStateAction()
+        {
+            CurrentState?.AwaitableStateAction();
         }
 
         internal void TryTransition()
