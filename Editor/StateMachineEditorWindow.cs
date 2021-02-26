@@ -201,7 +201,7 @@ namespace SAS.StateMachineGraph.Editor
         {
             var state = CreateInstance<StateModel>();
             state.name = name;
-            //state.hideFlags = HideFlags.HideInHierarchy;
+            state.hideFlags = HideFlags.HideInHierarchy;
 
             if (StateMachineModel != null)
             {
