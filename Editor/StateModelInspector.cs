@@ -82,23 +82,27 @@ namespace SAS.StateMachineGraph.Editor
                 _tagList = (TagList)EditorGUI.ObjectField(new Rect(rect.width - 60, rect.y - 2, 100, rect.height), _tagList, typeof(TagList), false);
                 var fullName = reorderableList.serializedProperty.GetArrayElementAtIndex(index).FindPropertyRelative("fullName");
                 var tag = reorderableList.serializedProperty.GetArrayElementAtIndex(index).FindPropertyRelative("tag");
+                var key = reorderableList.serializedProperty.GetArrayElementAtIndex(index).FindPropertyRelative("key");
                 rect.y += 2;
                 var curActionIndex = Array.FindIndex(_allActionTypes, type => type.Name == fullName.stringValue);
-                var newActionIndex = EditorGUI.Popup(new Rect(rect.x, rect.y, rect.width - 200, EditorGUIUtility.singleLineHeight), curActionIndex, _allActionTypes.Select(type => SerializedType.Sanitize(type.ToString())).ToArray());
+                var newActionIndex = EditorGUI.Popup(new Rect(rect.x, rect.y, rect.width - 280, EditorGUIUtility.singleLineHeight), curActionIndex, _allActionTypes.Select(type => SerializedType.Sanitize(type.ToString())).ToArray());
                 if (newActionIndex != curActionIndex)
                     fullName.stringValue = _allActionTypes[newActionIndex].AssemblyQualifiedName;
 
-                EditorGUI.LabelField(new Rect(rect.x + 5, rect.y - 2, rect.width -220, rect.height), SerializedType.Sanitize(fullName.stringValue));
-
+                EditorGUI.LabelField(new Rect(rect.x + 5, rect.y, rect.width -260, rect.height), SerializedType.Sanitize(fullName.stringValue));
+                var curKey = TextField(new Rect(rect.width - 130, rect.y - 2, 60, rect.height - 2), key.stringValue, "Key");
+                if (curKey != key.stringValue)
+                    key.stringValue = curKey;
+                
                 if (_tagList == null)
                 {
-                    var curTag = EditorGUI.DelayedTextField(new Rect(rect.width - 150, rect.y - 2, 80, rect.height), tag.stringValue);
+                    var curTag = TextField(new Rect(rect.width - 230, rect.y -2, 90, rect.height -2 ), tag.stringValue, "Tag");
                     if (curTag != tag.stringValue)
                         tag.stringValue = curTag;
                 }
                 else
                 {
-                    var tagIndex = EditorGUI.Popup(new Rect(rect.width - 150, rect.y - 2, 80, rect.height), Array.IndexOf(_tagList.tags, tag.stringValue), _tagList.tags);
+                    var tagIndex = EditorGUI.Popup(new Rect(rect.width - 230, rect.y - 2, 90, rect.height -2), Array.IndexOf(_tagList.tags, tag.stringValue), _tagList.tags);
                     if (tagIndex != -1)
                         tag.stringValue = _tagList.tags[tagIndex];
 
@@ -133,6 +137,19 @@ namespace SAS.StateMachineGraph.Editor
                 else
                     EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight), val + "None");
             };
+        }
+
+        string TextField(Rect rect, string text, string placeholder)
+        {
+            var newText = EditorGUI.TextField(rect, text);
+            if (string.IsNullOrEmpty(text))
+            {
+                var guiColor = GUI.color;
+                GUI.color = Color.grey;
+                EditorGUI.LabelField(rect, placeholder);
+                GUI.color = guiColor;
+            }
+            return newText;
         }
     }
 }

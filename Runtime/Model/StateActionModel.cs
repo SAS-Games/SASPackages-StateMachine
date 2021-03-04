@@ -11,6 +11,7 @@ namespace SAS.StateMachineGraph
     {
         internal string Name => Sanitize(ToType().ToString());
 		[SerializeField] internal string tag = default;
+        [SerializeField] internal string key = default;
         public override bool Equals(object obj)
         {
 			return Name.Equals((obj as StateActionModel).Name);
@@ -30,7 +31,7 @@ namespace SAS.StateMachineGraph
             if (type.IsSubclassOf(typeof(MonoBehaviour)))
             {
                 actions = stateMachine.Actor.GetComponentsInChildren(type, tag, true);
-                if (actions != null)
+                if (actions?.Length > 0)
                 {
                     stateActions = new IStateAction[actions.Length];
                     for (int i = 0; i < actions.Length; i++)
@@ -47,9 +48,8 @@ namespace SAS.StateMachineGraph
 
             createdInstances.Add(this, stateActions);
             foreach (var action in stateActions)
-            {
-               (action as IStateInitialize)?.OnInitialize(stateMachine.Actor, tag);
-            }
+               (action as IStateInitialize)?.OnInitialize(stateMachine.Actor, tag, key);
+
             return stateActions;
         }
 	}

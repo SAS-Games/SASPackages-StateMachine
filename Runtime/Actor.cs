@@ -11,7 +11,7 @@ namespace SAS.StateMachineGraph
         [Serializable]
         private struct Config
         {
-            public string tag;
+            public string name;
             public ScriptableObject data;
         }
 
@@ -25,7 +25,7 @@ namespace SAS.StateMachineGraph
         private void Awake()
         {
             foreach (var config in m_Configs)
-                _serviceLocator.Add(config.data.GetType(), config.data, config.tag);
+                _serviceLocator.Add(config.data.GetType(), config.data, config.name);
             Initialize();
         }
 
@@ -54,6 +54,10 @@ namespace SAS.StateMachineGraph
             StateMachineController?.TryTransition();
         }
 
+        public T Get<T>(string tag = "")
+        {
+            return _serviceLocator.Get<T>(tag);
+        }
         public bool TryGet<T>(out T component, bool includeInactive = false)
         {
             return TryGet<T>(string.Empty, out component, includeInactive);
@@ -105,7 +109,7 @@ namespace SAS.StateMachineGraph
             StateMachineController?.SetFloat(name, value);
         }
 
-        public void SetInt(string name, int value)
+        public void SetIntger(string name, int value)
         {
             StateMachineController?.SetInt(name, value);
         }
@@ -143,6 +147,25 @@ namespace SAS.StateMachineGraph
         void IActivatable.Deactivate()
         {
             enabled = false;
+        }
+
+        public void Apply(in Parameter parameter)
+        {
+            switch (parameter.Type)
+            {
+                case StateMachineParameter.ParameterType.Bool:
+                    SetBool(parameter.Name, parameter.BoolValue);
+                    break;
+                case StateMachineParameter.ParameterType.Int:
+                    SetIntger(parameter.Name, parameter.IntValue);
+                    break;
+                case StateMachineParameter.ParameterType.Float:
+                    SetFloat(parameter.Name, parameter.FloatValue);
+                    break;
+                case StateMachineParameter.ParameterType.Trigger:
+                    SetTrigger(parameter.Name);
+                    break;
+            }
         }
     }
 }

@@ -5,7 +5,7 @@ namespace SAS.StateMachineGraph
 
     public interface IStateInitialize : IStateAction
     {
-        void OnInitialize(Actor actor, string tag = "");
+        void OnInitialize(Actor actor, string tag, string key);
     }
 
     public interface IStateEnter : IStateAction
