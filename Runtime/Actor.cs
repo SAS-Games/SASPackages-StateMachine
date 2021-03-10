@@ -109,7 +109,7 @@ namespace SAS.StateMachineGraph
             StateMachineController?.SetFloat(name, value);
         }
 
-        public void SetIntger(string name, int value)
+        public void SetInteger(string name, int value)
         {
             StateMachineController?.SetInt(name, value);
         }
@@ -157,7 +157,7 @@ namespace SAS.StateMachineGraph
                     SetBool(parameter.Name, parameter.BoolValue);
                     break;
                 case StateMachineParameter.ParameterType.Int:
-                    SetIntger(parameter.Name, parameter.IntValue);
+                    SetInteger(parameter.Name, parameter.IntValue);
                     break;
                 case StateMachineParameter.ParameterType.Float:
                     SetFloat(parameter.Name, parameter.FloatValue);
