@@ -19,7 +19,7 @@ namespace SAS.StateMachineGraph
 
         public override int GetHashCode()
         {
-            return Name.GetHashCode() + tag.GetHashCode();
+            return (Name + tag + key).GetHashCode();
         }
 
         internal IStateAction[] GetActions(StateMachine stateMachine, Dictionary<StateActionModel, object[]> createdInstances)
