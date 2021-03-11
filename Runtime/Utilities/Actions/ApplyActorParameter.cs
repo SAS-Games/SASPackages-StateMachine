@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using SAS.ScriptableTypes;
 
 namespace SAS.StateMachineGraph.Utilities
 {
@@ -16,7 +17,7 @@ namespace SAS.StateMachineGraph.Utilities
         public void OnStateEnter(Actor actor)
         {
             foreach (var cActor in _actors)
-                cActor.Apply(cActor.Get<ScriptableStateMachineParameter>(_parameterKey).runtimeValue);
+                cActor.Apply(cActor.Get<ScriptableParameter>(_parameterKey).runtimeValue);
         }
     }
 }

@@ -3,6 +3,7 @@ using UnityEngine;
 using SAS.TagSystem;
 using SAS.Locator;
 using SAS.StateMachineGraph.Utilities;
+using SAS.Utilities;
 
 namespace SAS.StateMachineGraph
 {
@@ -153,16 +154,16 @@ namespace SAS.StateMachineGraph
         {
             switch (parameter.Type)
             {
-                case StateMachineParameter.ParameterType.Bool:
+                case ParameterType.Bool:
                     SetBool(parameter.Name, parameter.BoolValue);
                     break;
-                case StateMachineParameter.ParameterType.Int:
+                case ParameterType.Int:
                     SetInteger(parameter.Name, parameter.IntValue);
                     break;
-                case StateMachineParameter.ParameterType.Float:
+                case ParameterType.Float:
                     SetFloat(parameter.Name, parameter.FloatValue);
                     break;
-                case StateMachineParameter.ParameterType.Trigger:
+                case ParameterType.Trigger:
                     SetTrigger(parameter.Name);
                     break;
             }
