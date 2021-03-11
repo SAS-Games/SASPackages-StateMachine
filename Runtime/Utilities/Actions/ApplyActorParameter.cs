@@ -3,7 +3,7 @@ using SAS.ScriptableTypes;
 
 namespace SAS.StateMachineGraph.Utilities
 {
-    public struct ApplyActorParameter : IStateInitialize, IStateEnter
+    public class ApplyActorParameter : IStateInitialize, IStateEnter
     {
         private Actor[] _actors;
         private string _parameterKey;
