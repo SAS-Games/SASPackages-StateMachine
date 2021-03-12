@@ -9,6 +9,7 @@ namespace SAS.StateMachineGraph
 {
     public sealed class Actor : MonoBehaviour, IActivatable
     {
+        public Action<string> OnStateEnter;
         [Serializable]
         private struct Config
         {
@@ -52,7 +53,7 @@ namespace SAS.StateMachineGraph
 
         private void LateUpdate()
         {
-            StateMachineController?.TryTransition();
+            StateMachineController?.TryTransition(OnStateEnter);
         }
 
         public T Get<T>(string tag = "")
