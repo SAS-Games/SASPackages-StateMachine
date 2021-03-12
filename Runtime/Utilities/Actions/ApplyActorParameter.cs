@@ -11,7 +11,7 @@ namespace SAS.StateMachineGraph.Utilities
         {
             _parameterKey = key;
             if (!actor.TryGetAll(tag, out _actors, true))
-                Debug.LogError($"No Actor with tag {tag} is found usder {actor}. Try assigning the Tag");
+                Debug.LogError($"No Actor with tag {tag} is found under {actor.name} attached on the object {actor.gameObject.name}. Try assigning the Tag");
         }
 
         public void OnStateEnter(Actor actor)

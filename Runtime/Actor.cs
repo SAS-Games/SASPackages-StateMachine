@@ -76,6 +76,9 @@ namespace SAS.StateMachineGraph
             var results = this.GetComponentsInChildren(typeof(T), tag, includeInactive);
             try
             {
+                if (results.Length == 0)
+                    results = null;
+
                 components = new T[results.Length];
                 for (int i = 0; i < results.Length; ++i)
                     components[i] = (T)(object)results[i];
@@ -83,6 +86,7 @@ namespace SAS.StateMachineGraph
             catch (Exception)
             {
                 components = null;
+                Debug.LogError($"No comonents if type {components.GetType()} with tag {tag} is found under actor {this} attached on the object {gameObject.name}. Try assigning the component with the right Tag");
                 return false;
             }
 
