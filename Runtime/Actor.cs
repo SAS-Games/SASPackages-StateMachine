@@ -9,7 +9,12 @@ namespace SAS.StateMachineGraph
 {
     public sealed class Actor : MonoBehaviour, IActivatable
     {
+        internal delegate void StateChanged(string stateName, bool entered);
+        private StateChanged OnStateChanged;
+
         public Action<string> OnStateEnter;
+        public Action<string> OnStateExit;
+
         [Serializable]
         private struct Config
         {
@@ -26,6 +31,8 @@ namespace SAS.StateMachineGraph
 
         private void Awake()
         {
+            OnStateChanged = InvokeEvent;
+
             foreach (var config in m_Configs)
                 _serviceLocator.Add(config.data.GetType(), config.data, config.name);
             Initialize();
@@ -53,7 +60,7 @@ namespace SAS.StateMachineGraph
 
         private void LateUpdate()
         {
-            StateMachineController?.TryTransition(OnStateEnter);
+            StateMachineController?.TryTransition(OnStateChanged);
         }
 
         public T Get<T>(string tag = "")
@@ -172,6 +179,14 @@ namespace SAS.StateMachineGraph
                     SetTrigger(parameter.Name);
                     break;
             }
+        }
+
+        private void InvokeEvent(string name, bool isStateEntered)
+        {
+            if (isStateEntered)
+                OnStateEnter?.Invoke(name);
+            else
+                OnStateExit?.Invoke(name);
         }
     }
 }

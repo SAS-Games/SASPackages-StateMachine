@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System;
+using static SAS.StateMachineGraph.Actor;
 
 namespace SAS.StateMachineGraph
 {
@@ -48,7 +49,7 @@ namespace SAS.StateMachineGraph
             CurrentState?.AwaitableStateAction();
         }
 
-        internal void TryTransition(Action<string> stateChanged)
+        internal void TryTransition(StateChanged stateChanged)
         {
             CurrentState?.TryTransition(stateChanged);
             AnyState?.TryTransition(stateChanged);
