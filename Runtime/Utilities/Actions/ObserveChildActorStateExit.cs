@@ -22,11 +22,14 @@ namespace SAS.StateMachineGraph.Utilities
             IsCompleted = false;
             _onStateExit = (state) =>
             {
-                IsCompleted = state.Equals(_stateName);
-                _childActor.OnStateEnter -= _onStateExit;
+                if (state.Equals(_stateName))
+                {
+                    IsCompleted = true;
+                    _childActor.OnStateExit -= _onStateExit;
+                }
             };
 
-            _childActor.OnStateEnter += _onStateExit;
+            _childActor.OnStateExit += _onStateExit;
         }
     }
 }

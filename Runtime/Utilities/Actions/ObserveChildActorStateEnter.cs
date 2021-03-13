@@ -22,8 +22,11 @@ namespace SAS.StateMachineGraph.Utilities
             IsCompleted = false;
             _onStateEnter = (state) =>
             {
-                IsCompleted = state.Equals(_stateName);
-                _childActor.OnStateEnter -= _onStateEnter;
+                if (state.Equals(_stateName))
+                {
+                    IsCompleted = true;
+                    _childActor.OnStateEnter -= _onStateEnter;
+                }
             };
 
             _childActor.OnStateEnter += _onStateEnter;
