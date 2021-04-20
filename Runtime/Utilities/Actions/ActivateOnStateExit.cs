@@ -8,7 +8,7 @@ namespace SAS.StateMachineGraph.Utilities
         private IActivatable[] _activatables;
         void IStateInitialize.OnInitialize(Actor actor, string tag, string key)
         {
-            if (!actor.TryGetAll(tag, out _activatables, true))
+            if (!actor.TryGetComponents(tag, out _activatables, true))
                 Debug.LogError($"No GameObject with tag {tag} is found usder {actor}. Try assigning the Tag");
         }
 

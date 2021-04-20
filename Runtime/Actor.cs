@@ -63,22 +63,31 @@ namespace SAS.StateMachineGraph
             StateMachineController?.TryTransition(OnStateChanged);
         }
 
-        public T Get<T>(string tag = "")
+        public T Get<T>(string tag = "", bool includeInactive = false)
         {
-            return _serviceLocator.Get<T>(tag);
-        }
-        public bool TryGet<T>(out T component, bool includeInactive = false)
-        {
-            return TryGet<T>(string.Empty, out component, includeInactive);
+            if (TryGet<T>(out var service, tag, includeInactive))
+                return service;
+            return default(T);
         }
 
-        public bool TryGet<T>(string tag, out T component, bool includeInactive = false)
+
+        public bool TryGet<T>(out T service, string tag = "", bool includeInactive = false)
         {
-            component = (T)(object)Get(typeof(T), tag, includeInactive);
+            if (!_serviceLocator.TryGet<T>(out service, tag))
+            {
+                if (typeof(T).IsSubclassOf(typeof(Component)))
+                    return TryGetComponent(out service, tag, includeInactive);
+            }
+            return true;
+        }
+
+        private bool TryGetComponent<T>(out T component, string tag, bool includeInactive)
+        {
+            component = (T)(object)GetComponent(typeof(T), tag, includeInactive);
             return component != null;
         }
 
-        public bool TryGetAll<T>(string tag, out T[] components, bool includeInactive = false)
+        public bool TryGetComponents<T>(string tag, out T[] components, bool includeInactive = false)
         {
             var results = this.GetComponentsInChildren(typeof(T), tag, includeInactive);
             try
@@ -93,25 +102,28 @@ namespace SAS.StateMachineGraph
             catch (Exception)
             {
                 components = null;
-                Debug.LogError($"No comonents if type {components.GetType()} with tag {tag} is found under actor {this} attached on the object {gameObject.name}. Try assigning the component with the right Tag");
+                Debug.LogError($"No component of type {components.GetType()} with tag {tag} is found under actor {this}, attached on the game object {gameObject.name}. Try assigning the component with the right Tag");
                 return false;
             }
 
             return true;
         }
 
-        public Component Get(Type type, bool includeInactive = false)
-        {
-            return Get(type, string.Empty, includeInactive);
-        }
-
-        public Component Get(Type type, string tag, bool includeInactive = false)
+        private Component GetComponent(Type type, string tag, bool includeInactive)
         {
             if (!_serviceLocator.TryGet(type, out var obj, tag))
             {
                 obj = this.GetComponentInChildren(type, tag, includeInactive);
                 if (obj != null)
                     _serviceLocator.Add(type, obj, tag);
+                else
+                    Debug.LogError($"No component of type {type.GetType()} with tag {tag} is found under actor {this}, attached on the game object {gameObject.name}. Try assigning the component with the right Tag");
+            }
+
+            if (!includeInactive && !(obj as Behaviour).isActiveAndEnabled)
+            {
+                obj = null;
+                Debug.LogError($"No active component of type {type.GetType()} with tag {tag} is found under actor {this}, attached on the game object {gameObject.name}. Try assigning the component with the right Tag and Make sure that the component is active");
             }
 
             return obj as Component;

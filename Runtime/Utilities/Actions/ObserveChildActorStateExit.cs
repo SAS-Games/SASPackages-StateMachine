@@ -13,8 +13,7 @@ namespace SAS.StateMachineGraph.Utilities
         public void OnInitialize(Actor actor, string tag, string key)
         {
             _stateName = key;
-            if (!actor.TryGet(tag, out _childActor, true))
-                Debug.LogError($"No Actor with tag {tag} is found under {actor.name} attached on the object {actor.gameObject.name}. Try assigning the Tag");
+            actor.TryGet(out _childActor, tag, true);
         }
 
         public void Execute(Actor actor)
