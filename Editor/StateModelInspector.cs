@@ -77,7 +77,12 @@ namespace SAS.StateMachineGraph.Editor
         {
             reorderableList.drawHeaderCallback = (Rect rect) =>
             {
+                var style = new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleCenter, fontStyle = FontStyle.Bold };
                 EditorGUI.LabelField(rect, name);
+                var pos = new Rect(rect.width - Mathf.Min(140, rect.width / 2) -20, rect.y, Mathf.Min(90, rect.width / 3), rect.height);
+                EditorGUI.LabelField(pos, "Tag", style);
+                pos = new Rect(rect.width - Mathf.Min(70, rect.width / 3 - 20), rect.y, Mathf.Min(90, rect.width / 3), rect.height);
+                EditorGUI.LabelField(pos, "Key", style);
             };
             reorderableList.onAddCallback = list =>
             {
@@ -117,8 +122,7 @@ namespace SAS.StateMachineGraph.Editor
 
         private void SetSerializedProperty(SerializedProperty sp, int index)
         {
-            if (index != -1)
-                sp.stringValue = _tagList.tags[index];
+            sp.stringValue = index != -1 ? _tagList.tags[index] : string.Empty;
             serializedObject.ApplyModifiedProperties();
         }
 
