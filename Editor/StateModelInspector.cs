@@ -5,7 +5,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using ReorderableList = UnityEditorInternal.ReorderableList;
-
+using EditorUtility = SAS.Utilities.Editor.EditorUtility;
 namespace SAS.StateMachineGraph.Editor
 {
     [CustomEditor(typeof(StateModel))]
@@ -19,6 +19,15 @@ namespace SAS.StateMachineGraph.Editor
         private StateTransitionInspector _stateTransitionInspector;
         private static TagList _tagList;
 
+        private static TagList TagList
+        {
+            get
+            {
+                if (_tagList == null)
+                    _tagList = Resources.Load("Tag List", typeof(TagList)) as TagList;
+                return _tagList;
+            }
+        }
         private void OnEnable()
         {
             _stateTransitionInspector = new StateTransitionInspector();
@@ -79,36 +88,38 @@ namespace SAS.StateMachineGraph.Editor
             };
             reorderableList.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
             {
-                _tagList = (TagList)EditorGUI.ObjectField(new Rect(rect.width - 60, rect.y - 2, 100, rect.height), _tagList, typeof(TagList), false);
-                var fullName = reorderableList.serializedProperty.GetArrayElementAtIndex(index).FindPropertyRelative("fullName");
+                var actionFullName = reorderableList.serializedProperty.GetArrayElementAtIndex(index).FindPropertyRelative("fullName");
+                Debug.Log(actionFullName.stringValue);
                 var tag = reorderableList.serializedProperty.GetArrayElementAtIndex(index).FindPropertyRelative("tag");
                 var key = reorderableList.serializedProperty.GetArrayElementAtIndex(index).FindPropertyRelative("key");
                 rect.y += 2;
-                var curActionIndex = Array.FindIndex(_allActionTypes, type => type.Name == fullName.stringValue);
-                var newActionIndex = EditorGUI.Popup(new Rect(rect.x, rect.y, rect.width - 280, EditorGUIUtility.singleLineHeight), curActionIndex, _allActionTypes.Select(type => SerializedType.Sanitize(type.ToString())).ToArray());
-                if (newActionIndex != curActionIndex)
-                    fullName.stringValue = _allActionTypes[newActionIndex].AssemblyQualifiedName;
+                var curActionIndex = Array.FindIndex(_allActionTypes, type => type.AssemblyQualifiedName == actionFullName.stringValue);
+                var pos = new Rect(rect.x, rect.y - 2, Mathf.Max(rect.width - 180, 70), rect.height - 2);
+                int id = GUIUtility.GetControlID("actionFullName".GetHashCode(), FocusType.Keyboard, pos);
+                EditorUtility.DropDown(id, pos, _allActionTypes.Select(type => SerializedType.Sanitize(type.ToString())).ToArray(), curActionIndex, selectedIndex => SetSelectedAction(actionFullName, selectedIndex));
 
-                EditorGUI.LabelField(new Rect(rect.x + 5, rect.y, rect.width -260, rect.height), SerializedType.Sanitize(fullName.stringValue));
-                var curKey = TextField(new Rect(rect.width - 130, rect.y - 2, 60, rect.height - 2), key.stringValue, "Key");
-                if (curKey != key.stringValue)
-                    key.stringValue = curKey;
-                
-                if (_tagList == null)
-                {
-                    var curTag = TextField(new Rect(rect.width - 230, rect.y -2, 90, rect.height -2 ), tag.stringValue, "Tag");
-                    if (curTag != tag.stringValue)
-                        tag.stringValue = curTag;
-                }
-                else
-                {
-                    var tagIndex = EditorGUI.Popup(new Rect(rect.width - 230, rect.y - 2, 90, rect.height -2), Array.IndexOf(_tagList.tags, tag.stringValue), _tagList.tags);
-                    if (tagIndex != -1)
-                        tag.stringValue = _tagList.tags[tagIndex];
+                pos = new Rect(rect.width - Mathf.Min(140, rect.width / 2), rect.y - 2, Mathf.Min(90, rect.width / 3), rect.height - 2);
+                id = GUIUtility.GetControlID("Tag".GetHashCode(), FocusType.Keyboard, pos);
+                EditorUtility.DropDown(id, pos, TagList.tags, Array.IndexOf(TagList.tags, tag.stringValue), selectedIndex => SetSerializedProperty(tag, selectedIndex));
 
-                    reorderableList.serializedProperty.serializedObject.ApplyModifiedProperties();
-                }
+                pos = new Rect(rect.width - Mathf.Min(50, rect.width / 3 - 40), rect.y - 2, Mathf.Min(90, rect.width / 3), rect.height);
+                id = GUIUtility.GetControlID("Key".GetHashCode(), FocusType.Keyboard, pos);
+                EditorUtility.DropDown(id, pos, TagList.tags, Array.IndexOf(TagList.tags, key.stringValue), selectedIndex => SetSerializedProperty(key, selectedIndex));
             };
+        }
+
+        private void SetSelectedAction(SerializedProperty sp, int index)
+        {
+            if (index != -1)
+                sp.stringValue = _allActionTypes[index].AssemblyQualifiedName;
+            serializedObject.ApplyModifiedProperties();
+        }
+
+        private void SetSerializedProperty(SerializedProperty sp, int index)
+        {
+            if (index != -1)
+                sp.stringValue = _tagList.tags[index];
+            serializedObject.ApplyModifiedProperties();
         }
 
         public static void NormalView()
