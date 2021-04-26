@@ -16,10 +16,10 @@ namespace SAS.StateMachineGraph
         public Action<string> OnStateExit;
 
         [Serializable]
-        private struct Config
+        public struct Config
         {
-            public string name;
             public ScriptableObject data;
+            public string name;
         }
 
         [SerializeField] private StateMachineModel m_Controller = default;

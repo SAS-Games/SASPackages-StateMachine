@@ -1,11 +1,12 @@
-﻿using SAS.TagSystem;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using ReorderableList = UnityEditorInternal.ReorderableList;
 using EditorUtility = SAS.Utilities.Editor.EditorUtility;
+using SAS.TagSystem.Editor;
+
 namespace SAS.StateMachineGraph.Editor
 {
     [CustomEditor(typeof(StateModel))]
@@ -13,21 +14,11 @@ namespace SAS.StateMachineGraph.Editor
     {
         private ReorderableList _stateActions;
         private ReorderableList _transitionStates;
-
         private Type[] _allActionTypes;
-
         private StateTransitionInspector _stateTransitionInspector;
-        private static TagList _tagList;
 
-        private static TagList TagList
-        {
-            get
-            {
-                if (_tagList == null)
-                    _tagList = Resources.Load("Tag List", typeof(TagList)) as TagList;
-                return _tagList;
-            }
-        }
+        private static string[] TagList => TaggerEditor.TagList;
+
         private void OnEnable()
         {
             _stateTransitionInspector = new StateTransitionInspector();
@@ -94,7 +85,6 @@ namespace SAS.StateMachineGraph.Editor
             reorderableList.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
             {
                 var actionFullName = reorderableList.serializedProperty.GetArrayElementAtIndex(index).FindPropertyRelative("fullName");
-                Debug.Log(actionFullName.stringValue);
                 var tag = reorderableList.serializedProperty.GetArrayElementAtIndex(index).FindPropertyRelative("tag");
                 var key = reorderableList.serializedProperty.GetArrayElementAtIndex(index).FindPropertyRelative("key");
                 rect.y += 2;
@@ -105,11 +95,11 @@ namespace SAS.StateMachineGraph.Editor
 
                 pos = new Rect(rect.width - Mathf.Min(140, rect.width / 2), rect.y - 2, Mathf.Min(90, rect.width / 3), rect.height - 2);
                 id = GUIUtility.GetControlID("Tag".GetHashCode(), FocusType.Keyboard, pos);
-                EditorUtility.DropDown(id, pos, TagList.tags, Array.IndexOf(TagList.tags, tag.stringValue), selectedIndex => SetSerializedProperty(tag, selectedIndex));
+                EditorUtility.DropDown(id, pos, TagList, Array.IndexOf(TagList, tag.stringValue), selectedIndex => SetSerializedProperty(tag, selectedIndex));
 
                 pos = new Rect(rect.width - Mathf.Min(50, rect.width / 3 - 40), rect.y - 2, Mathf.Min(90, rect.width / 3), rect.height);
                 id = GUIUtility.GetControlID("Key".GetHashCode(), FocusType.Keyboard, pos);
-                EditorUtility.DropDown(id, pos, TagList.tags, Array.IndexOf(TagList.tags, key.stringValue), selectedIndex => SetSerializedProperty(key, selectedIndex));
+                EditorUtility.DropDown(id, pos, TagList, Array.IndexOf(TagList, key.stringValue), selectedIndex => SetSerializedProperty(key, selectedIndex));
             };
         }
 
@@ -122,7 +112,7 @@ namespace SAS.StateMachineGraph.Editor
 
         private void SetSerializedProperty(SerializedProperty sp, int index)
         {
-            sp.stringValue = index != -1 ? _tagList.tags[index] : string.Empty;
+            sp.stringValue = index != -1 ? TagList[index] : string.Empty;
             serializedObject.ApplyModifiedProperties();
         }
 
