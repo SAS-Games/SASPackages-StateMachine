@@ -4,6 +4,7 @@ using UnityEditorInternal;
 using System;
 using SAS.TagSystem.Editor;
 using EditorUtility = SAS.Utilities.Editor.EditorUtility;
+using SAS.TagSystem;
 
 namespace SAS.StateMachineGraph.Editor
 {
@@ -11,6 +12,9 @@ namespace SAS.StateMachineGraph.Editor
     public class ActorInspector : UnityEditor.Editor
     {
         private ReorderableList _configsList;
+        private static string[] Keys => TagList.GetList("Key List");
+        private static TagList Instance => TagList.Instance("Key List");
+
         private void OnEnable()
         {
             _configsList = new ReorderableList(serializedObject, serializedObject.FindProperty("m_Configs"), true, true, true, true);
@@ -30,7 +34,7 @@ namespace SAS.StateMachineGraph.Editor
                     EditorGUI.ObjectField(position, data, new GUIContent());
                     position.x = position.xMax + 10;
                     position.width -= 10;
-                    EditorUtility.DropDown("ConfigDrawer".GetHashCode(), position, TaggerEditor.TagList, Array.IndexOf(TaggerEditor.TagList, tag.stringValue), selectedIndex => OnTagSelected(tag, selectedIndex));
+                    EditorUtility.DropDown("ConfigDrawer".GetHashCode(), position, Keys, Array.IndexOf(Keys, tag.stringValue), selectedIndex => OnKeySelected(tag, selectedIndex), ShowKeysList);
                 }
             };
             _configsList.onAddCallback = list =>
@@ -56,10 +60,15 @@ namespace SAS.StateMachineGraph.Editor
             _configsList.DoLayoutList();
         }
 
-        private void OnTagSelected(SerializedProperty serializedProperty, int index)
+        private void OnKeySelected(SerializedProperty serializedProperty, int index)
         {
-            serializedProperty.stringValue = index != -1 ? TaggerEditor.TagList[index] : string.Empty;
+            serializedProperty.stringValue = index != -1 ? Keys[index] : string.Empty;
             serializedProperty.serializedObject.ApplyModifiedProperties();
+        }
+
+        private void ShowKeysList()
+        {
+            Selection.activeObject = Instance;
         }
     }
 }

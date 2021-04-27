@@ -6,7 +6,7 @@ using System;
 
 namespace SAS.StateMachineGraph.Editor
 {
-    [CustomPropertyDrawer(typeof(Actor.Config))]
+   /* [CustomPropertyDrawer(typeof(Actor.Config))]
     public class ConfigDrawer : PropertyDrawer
     {
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
@@ -25,5 +25,5 @@ namespace SAS.StateMachineGraph.Editor
             serializedProperty.stringValue = index != -1 ? TaggerEditor.TagList[index] : string.Empty;
             serializedProperty.serializedObject.ApplyModifiedProperties();
         }
-    }
+    }*/
 }

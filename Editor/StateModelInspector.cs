@@ -6,6 +6,7 @@ using UnityEngine;
 using ReorderableList = UnityEditorInternal.ReorderableList;
 using EditorUtility = SAS.Utilities.Editor.EditorUtility;
 using SAS.TagSystem.Editor;
+using SAS.TagSystem;
 
 namespace SAS.StateMachineGraph.Editor
 {
@@ -17,7 +18,8 @@ namespace SAS.StateMachineGraph.Editor
         private Type[] _allActionTypes;
         private StateTransitionInspector _stateTransitionInspector;
 
-        private static string[] TagList => TaggerEditor.TagList;
+        private static string[] Tags => TagList.GetList();
+        private static string[] Keys => TagList.GetList("Key List");
 
         private void OnEnable()
         {
@@ -95,11 +97,11 @@ namespace SAS.StateMachineGraph.Editor
 
                 pos = new Rect(rect.width - Mathf.Min(140, rect.width / 2), rect.y - 2, Mathf.Min(90, rect.width / 3), rect.height - 2);
                 id = GUIUtility.GetControlID("Tag".GetHashCode(), FocusType.Keyboard, pos);
-                EditorUtility.DropDown(id, pos, TagList, Array.IndexOf(TagList, tag.stringValue), selectedIndex => SetSerializedProperty(tag, selectedIndex));
+                EditorUtility.DropDown(id, pos, Tags, Array.IndexOf(Tags, tag.stringValue), selectedIndex => SetTagSerializedProperty(tag, selectedIndex));
 
                 pos = new Rect(rect.width - Mathf.Min(50, rect.width / 3 - 40), rect.y - 2, Mathf.Min(90, rect.width / 3), rect.height);
                 id = GUIUtility.GetControlID("Key".GetHashCode(), FocusType.Keyboard, pos);
-                EditorUtility.DropDown(id, pos, TagList, Array.IndexOf(TagList, key.stringValue), selectedIndex => SetSerializedProperty(key, selectedIndex));
+                EditorUtility.DropDown(id, pos, Keys, Array.IndexOf(Keys, key.stringValue), selectedIndex => SetKeySerializedProperty(key, selectedIndex));
             };
         }
 
@@ -110,9 +112,15 @@ namespace SAS.StateMachineGraph.Editor
             serializedObject.ApplyModifiedProperties();
         }
 
-        private void SetSerializedProperty(SerializedProperty sp, int index)
+        private void SetTagSerializedProperty(SerializedProperty sp, int index)
         {
-            sp.stringValue = index != -1 ? TagList[index] : string.Empty;
+            sp.stringValue = index != -1 ? Tags[index] : string.Empty;
+            serializedObject.ApplyModifiedProperties();
+        }
+
+        private void SetKeySerializedProperty(SerializedProperty sp, int index)
+        {
+            sp.stringValue = index != -1 ? Keys[index] : string.Empty;
             serializedObject.ApplyModifiedProperties();
         }
 
