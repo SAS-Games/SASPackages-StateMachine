@@ -23,7 +23,7 @@ namespace SAS.StateMachineGraph
         }
 
         [SerializeField] private StateMachineModel m_Controller = default;
-        [SerializeField] private Config[] m_Configs;
+        [SerializeField] private Config[] m_Configs = default;
 
         internal StateMachine StateMachineController { get; private set; }
         private readonly ServiceLocator _serviceLocator = new ServiceLocator();

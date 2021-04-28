@@ -21,6 +21,10 @@ namespace SAS.StateMachineGraph.Editor
             _configsList.drawHeaderCallback = (Rect rect) =>
             {
                 EditorGUI.LabelField(rect, "Configuration List");
+                var style = new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleCenter, fontStyle = FontStyle.Bold };
+                EditorGUI.LabelField(rect, name);
+                var pos = new Rect(rect.width / 2 + 20, rect.y, rect.width / 2, rect.height);
+                EditorGUI.LabelField(pos, "Key", style);
             };
             _configsList.drawElementCallback = (Rect position, int index, bool active, bool focused) =>
             {
