@@ -60,7 +60,7 @@ namespace SAS.StateMachineGraph.Editor
         
         public override void OnInspectorGUI()
         {
-            serializedObject.FindProperty("m_Controller").objectReferenceValue = EditorGUILayout.ObjectField("Controller", serializedObject.FindProperty("m_Controller").objectReferenceValue, typeof(StateMachineModel), false);
+            serializedObject.FindProperty("m_Controller").objectReferenceValue = EditorGUILayout.ObjectField("Controller", serializedObject.FindProperty("m_Controller").objectReferenceValue, typeof(UnityEditor.Animations.AnimatorStateMachine), false);
             _configsList.DoLayoutList();
         }
 

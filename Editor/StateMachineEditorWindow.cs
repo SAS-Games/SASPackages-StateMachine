@@ -52,9 +52,14 @@ namespace SAS.StateMachineGraph.Editor
             }
         }
 
+        private GUIStyle _topBar;
+
         protected override void OnEnable()
         {
             base.OnEnable();
+            _topBar = new GUIStyle();
+            _topBar.normal.background = EditorGUIUtility.whiteTexture;
+            _topBar.fixedHeight = 21;
 
             if (StateMachineModel == null)
             {
@@ -64,6 +69,14 @@ namespace SAS.StateMachineGraph.Editor
                     return;
             }
             Initialize();
+        }
+
+        private void DrawTopBar(Rect rect, Color color)
+        {
+            var c = GUI.color;
+            GUI.color = color;
+            GUI.Box(rect, GUIContent.none, _topBar);
+            GUI.color = c;
         }
 
         private void Initialize()
@@ -81,7 +94,7 @@ namespace SAS.StateMachineGraph.Editor
             {
                 var element = states.GetArrayElementAtIndex(i);
                 var state = element.objectReferenceValue as StateModel;
-                MakeNode(state, new SerializedObject(state).FindProperty("position").vector3Value);
+                AddState(state, new SerializedObject(state).FindProperty("position").vector3Value);
                 _usedStateNames.Add(state.name);
             }
 
@@ -106,6 +119,7 @@ namespace SAS.StateMachineGraph.Editor
             Repaint();
         }
 
+
         protected override void OnGUI()
         {
             base.OnGUI();
@@ -115,15 +129,16 @@ namespace SAS.StateMachineGraph.Editor
             _transition.DrawConnectionLine(Event.current);
             _transition.DrawConnections();
             DrawNodes();
+            EditorUtilities.HorizontalLine(new Rect(0, .5f, position.width, 21), 20, new Color(0.2196079f, 0.2196079f, 0.2196079f));
             ProcessNodeEvents(Event.current);
             ProcessMouseEvent(Event.current);
 
-            BeginWindows();
             if (Application.isPlaying)
                 _parameterEditor = new StateMachineParameterEditor(new SerializedObject(StateMachineModel));
-            _parameterEditor.DrawRect(GUILayout.Window(1, new Rect(0, 1, Mathf.Max(200, position.width / 5), position.height), _parameterEditor.DrawParametersWindow, ""));
-            EndWindows();
-            
+            _parameterEditor.DrawRect(new Rect(0, 1, Mathf.Max(200, position.width / 5), position.height));
+            _parameterEditor.DrawParametersWindow();
+            EditorUtilities.VerticalLine(new Rect(Mathf.Max(200, position.width / 5) - 2, 1, position.width, position.height), 2, Color.black);
+
             Repaint();
         }
 
@@ -178,17 +193,17 @@ namespace SAS.StateMachineGraph.Editor
         private void ProcessContextMenu(Vector2 mousePosition)
         {
             GenericMenu genericMenu = new GenericMenu();
-            genericMenu.AddItem(new GUIContent("Create State"), false, () => MakeNode(mousePosition));
+            genericMenu.AddItem(new GUIContent("Create State"), false, () => AddState(mousePosition));
             genericMenu.ShowAsContext();
         }
 
-        private void MakeNode(Vector2 mousePosition)
+        private void AddState(Vector2 mousePosition)
         {
             string title = Util.MakeUniqueName("New State", _usedStateNames);
-            MakeNode(AddState(title), mousePosition);
+            AddState(AddState(title), mousePosition);
         }
 
-        private void MakeNode(StateModel state, Vector2 mousePosition)
+        private void AddState(StateModel state, Vector2 mousePosition)
         {
             Node node = new Node(state, mousePosition, _transition.StartTransition, _transition.MakeTransion, RemoveNode, SetAsDefaultNode);
             _nodes.Add(node);

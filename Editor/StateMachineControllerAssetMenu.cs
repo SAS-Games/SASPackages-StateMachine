@@ -27,6 +27,7 @@ namespace SAS.StateMachineGraph.Editor
 
             filePath = AssetDatabase.GenerateUniqueAssetPath(filePath);
 
+          //  StateMachineController.CreateAnimatorControllerAtPath(filePath);
             // Copy Asset
             AssetDatabase.CopyAsset(AssetDatabase.GetAssetPath(Resources.Load<StateMachineModel>("State Machine Controller")), filePath);
             var stateMachineModal = AssetDatabase.LoadAssetAtPath<StateMachineModel>(filePath);

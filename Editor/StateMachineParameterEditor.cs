@@ -25,9 +25,14 @@ namespace SAS.StateMachineGraph.Editor
 
         private ReorderableList _parametersList;
         public Rect rect;
+        private Texture2D _texture;
 
         public StateMachineParameterEditor(SerializedObject serializedObject)
         {
+            _texture = new Texture2D(1, 1, TextureFormat.RGBA32, false);
+            _texture.SetPixel(0, 0, new Color(0.2196079f, 0.2196079f, 0.2196079f));
+            _texture.Apply();
+
             var parameters = serializedObject?.FindProperty("_parameters");
             _parametersList = new ReorderableList(serializedObject, parameters, true, true, false, true);
 
@@ -44,6 +49,8 @@ namespace SAS.StateMachineGraph.Editor
         public void DrawRect(Rect rect)
         {
             this.rect = rect;
+          
+            GUI.DrawTexture(new Rect(0, 0, rect.xMax, rect.yMax), _texture, ScaleMode.StretchToFill);
         }
 
         public bool ProcessEvents(Event e)
@@ -54,7 +61,6 @@ namespace SAS.StateMachineGraph.Editor
 
                     if (rect.Contains(e.mousePosition))
                     {
-
                         if (e.button == 0)
                             GUI.changed = true;
                         if (e.button == 1)
@@ -69,10 +75,10 @@ namespace SAS.StateMachineGraph.Editor
             return false;
         }
 
-        public void DrawParametersWindow(int windowId)
+        public void DrawParametersWindow()
         {
             ProcessEvents(Event.current);
-            _parametersList.DoLayoutList();
+            _parametersList.DoList(rect);
             _parametersList?.serializedProperty?.serializedObject?.ApplyModifiedProperties();
         }
 

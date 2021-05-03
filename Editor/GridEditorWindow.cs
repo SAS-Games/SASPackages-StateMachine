@@ -12,15 +12,20 @@ namespace SAS.StateMachineGraph.Editor
 
         protected Vector2 offset;
         private Vector2 drag;
+        private Color _gridColor = Color.black;
+        private Texture2D _texture;
 
         protected virtual void OnEnable()
         {
+            _texture = new Texture2D(1, 1, TextureFormat.RGBA32, false);
+            _texture.SetPixel(0, 0, new Color(0.1647059f, 0.1647059f, 0.1647059f));
+            _texture.Apply();
         }
         protected virtual void OnGUI()
         {
-            //DrawGrid(position, 1, offset);
-            DrawGrid(20, 0.2f, Color.gray);
-            DrawGrid(100, 0.4f, Color.gray);
+            GUI.DrawTexture(new Rect(0, 0, position.xMax, position.yMax), _texture, ScaleMode.StretchToFill);
+            DrawGrid(10, 0.25f, _gridColor);
+            DrawGrid(100, 0.5f, _gridColor);
         }
 
         bool altKeyHeld;
@@ -50,25 +55,6 @@ namespace SAS.StateMachineGraph.Editor
             drag = delta;
         }
 
-        public void DrawGrid(Rect rect, float zoom, Vector2 panOffset)
-        {
-            rect.position = Vector2.zero;
-            Vector2 center = rect.size / 2f;
-            Texture2D gridTex = null;//graphEditor.GetGridTexture(); 
-            Texture2D crossTex = null;//graphEditor.GetSecondaryGridTexture();
-            // Offset from origin in tile units            
-            float xOffset = -(center.x * zoom + panOffset.x) / 64;//gridTex.width;
-            float yOffset = ((center.y - rect.size.y) * zoom + panOffset.y) / 64;// gridTex.height;
-            Vector2 tileOffset = new Vector2(xOffset, yOffset);
-            // Amount of tiles            
-            float tileAmountX = Mathf.Round(rect.size.x * zoom) / 64;//gridTex.width;
-            float tileAmountY = Mathf.Round(rect.size.y * zoom) / 64;//gridTex.height;
-            Vector2 tileAmount = new Vector2(tileAmountX, tileAmountY);
-            // Draw tiled background            
-            GUI.DrawTextureWithTexCoords(rect, gridTex, new Rect(tileOffset, tileAmount));
-            GUI.DrawTextureWithTexCoords(rect, crossTex, new Rect(tileOffset + new Vector2(0.5f, 0.5f), tileAmount));
-        }
-
         private void DrawGrid(float gridSpacing, float gridOpacity, Color gridColor)
         {
             int widthDivs = Mathf.CeilToInt(position.width / gridSpacing);
@@ -89,14 +75,5 @@ namespace SAS.StateMachineGraph.Editor
             Handles.color = Color.white;
             Handles.EndGUI();
         }
-
-        //====================================================================//
-       /* [MenuItem("StateMachine/Editor")]
-        public static GridEditorWindow Open()
-        {
-            GridEditorWindow w = GetWindow(typeof(GridEditorWindow), false, "StateMachineEditorWindow", true) as GridEditorWindow;
-            w.wantsMouseMove = true;
-            return w;
-        }*/
     }
 }
