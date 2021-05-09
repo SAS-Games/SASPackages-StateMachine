@@ -22,7 +22,7 @@ namespace SAS.StateMachineGraph
             public string name;
         }
 
-        [SerializeField] private StateMachineModel m_Controller = default;
+        [SerializeField] private RuntimeStateMachineController m_Controller = default;
         [SerializeField] private Config[] m_Configs = default;
 
         internal StateMachine StateMachineController { get; private set; }
@@ -40,7 +40,7 @@ namespace SAS.StateMachineGraph
 
         private void Initialize()
         {
-            var controller = ScriptableObject.CreateInstance<StateMachineModel>();
+            var controller = ScriptableObject.CreateInstance<RuntimeStateMachineController>();
             if (m_Controller == null)
                 return;
             controller.Initialize(m_Controller);

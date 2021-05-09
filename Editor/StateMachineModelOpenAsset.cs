@@ -9,8 +9,8 @@ namespace SAS.StateMachineGraph.Editor
         public static bool OpenStateMachineGraph(int instanceID, int line)
         {
             var stateMachineController = EditorUtility.InstanceIDToObject(instanceID);
-            if(stateMachineController.GetType() == typeof(StateMachineModel))
-                StateMachineEditorWindow.ShowBehaviourGraphEditor(stateMachineController as StateMachineModel);
+            if(stateMachineController.GetType() == typeof(RuntimeStateMachineController))
+                StateMachineEditorWindow.ShowBehaviourGraphEditor(stateMachineController as RuntimeStateMachineController);
             return false;
         }
     }

@@ -27,10 +27,11 @@ namespace SAS.StateMachineGraph.Editor
 
             filePath = AssetDatabase.GenerateUniqueAssetPath(filePath);
 
-          //  StateMachineController.CreateAnimatorControllerAtPath(filePath);
+            StateMachineControllerExtensions.CreateControllerAtPath(filePath);
+            return;
             // Copy Asset
-            AssetDatabase.CopyAsset(AssetDatabase.GetAssetPath(Resources.Load<StateMachineModel>("State Machine Controller")), filePath);
-            var stateMachineModal = AssetDatabase.LoadAssetAtPath<StateMachineModel>(filePath);
+            AssetDatabase.CopyAsset(AssetDatabase.GetAssetPath(Resources.Load<RuntimeStateMachineController>("State Machine Controller")), filePath);
+            var stateMachineModal = AssetDatabase.LoadAssetAtPath<RuntimeStateMachineController>(filePath);
             AssetDatabase.SaveAssets();
             AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(stateMachineModal));
             

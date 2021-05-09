@@ -13,6 +13,7 @@ namespace SAS.StateMachineGraph.Editor
         [NonSerialized] private GUIStyle defaultFocusedStyle;
         [NonSerialized] private GUIStyle anyStateNormalStyle;
         [NonSerialized] private GUIStyle anyStateFocusedStyle;
+        [NonSerialized] private GUIStyle _childStateMachinestoolBarStyle;
 
         public static implicit operator Settings(EditorSettings v)
         {
@@ -28,6 +29,26 @@ namespace SAS.StateMachineGraph.Editor
                 if (mInstance == null)
                     mInstance = Resources.Load("Settings", typeof(Settings)) as Settings;
                 return mInstance;
+            }
+        }
+
+        public static GUIStyle ChildStateMachinestoolBarStyle
+        {
+            get
+            {
+                if (Instance._childStateMachinestoolBarStyle == null)
+                {
+                    Instance._childStateMachinestoolBarStyle = new GUIStyle();
+                    var texture = new Texture2D(1, 1, TextureFormat.RGBA32, false);
+                    texture.SetPixel(0, 0, new Color(0.1647059f, 0.1647059f, 0.1647059f));
+                    texture.Apply();
+                    Instance._childStateMachinestoolBarStyle.normal.background = texture;
+                    Instance._childStateMachinestoolBarStyle.alignment = TextAnchor.MiddleCenter;
+                    Instance._childStateMachinestoolBarStyle.normal.textColor = Color.cyan;
+                    Instance._childStateMachinestoolBarStyle.fixedWidth = 120;
+                    Instance._childStateMachinestoolBarStyle.margin = new RectOffset(1, 0, 0, 0);
+                }
+                return Instance._childStateMachinestoolBarStyle;
             }
         }
 
