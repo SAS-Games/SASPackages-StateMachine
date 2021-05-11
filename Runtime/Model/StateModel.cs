@@ -7,7 +7,7 @@ namespace SAS.StateMachineGraph
 { 
 	public class StateModel : ScriptableObject
 	{
-		[SerializeField] private Vector3 position;
+		[SerializeField] private Vector3 m_Position;
 		[SerializeField] private StateActionModel[] m_StateActions = default;
 		[SerializeField] private StateTransitionModel[] m_Transitions = null;
 

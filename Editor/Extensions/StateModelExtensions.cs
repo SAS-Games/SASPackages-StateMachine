@@ -10,14 +10,14 @@ namespace SAS.StateMachineGraph.Editor
         public static void SetPosition(this StateModel stateModel, Vector3 position)
         {
             var stateModelSO = new SerializedObject(stateModel);
-            stateModelSO.FindProperty("position").vector3Value = position;
+            stateModelSO.FindProperty("m_Position").vector3Value = position;
             stateModelSO.ApplyModifiedProperties();
         }
 
         public static Vector3 GetPosition(this StateModel stateModel)
         {
             var stateModelSO = new SerializedObject(stateModel);
-            return stateModelSO.FindProperty("position").vector3Value;
+            return stateModelSO.FindProperty("m_Position").vector3Value;
         }
     }
 }

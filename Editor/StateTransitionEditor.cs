@@ -39,28 +39,29 @@ namespace SAS.StateMachineGraph.Editor
             }
         }
 
-        public void StartTransition(Node node)
+        public void StartTransition(BaseNode node)
         {
             ClearConnectionSelection();
             _startPort = node.startPort;
         }
 
-        public void MakeTransion(Node node)
+        public void MakeTransion(BaseNode node)
         {
             if (_startPort != null)
             {
                 _endPort = node.endPort;
-                if (_startPort.node != _endPort.node && !_endPort.node.IsAnyStateNode)
-                {
-                    AddTransition();
-                    ClearConnectionSelection();
-                }
-                else
-                    ClearConnectionSelection();
+                //ToDo: will visit it later
+                /* if (_startPort.node != _endPort.node && !_endPort.node.IsAnyStateNode)
+                 {
+                     AddTransition();
+                     ClearConnectionSelection();
+                 }
+                 else
+                     ClearConnectionSelection();*/
             }
         }
 
-        public void Add(Node start, Node end)
+        public void Add(BaseNode start, BaseNode end)
         {
             _transitions.Add(new Connection(_stateMachineSO, start, end, RemoveTransition));
         }
@@ -77,7 +78,7 @@ namespace SAS.StateMachineGraph.Editor
             _transitions.Remove(connection);
         }
 
-        public void ClearNodeConnection(Node node)
+        public void ClearNodeConnection(BaseNode node)
         {
             if (_transitions != null)
             {
@@ -100,14 +101,14 @@ namespace SAS.StateMachineGraph.Editor
             _startPort = null;
         }
 
-        private void AddStateTransition(Node sourceStateNode, Node targerStateNode)
+        private void AddStateTransition(BaseNode sourceStateNode, BaseNode targerStateNode)
         {
-            var stateModelSO = sourceStateNode.stateModelSO;
+            var stateModelSO = sourceStateNode.serializedObject;
             var stateTranstionsList = stateModelSO.FindProperty("m_Transitions");
             stateTranstionsList.InsertArrayElementAtIndex(stateTranstionsList.arraySize);
             var transitionState = stateTranstionsList.GetArrayElementAtIndex(stateTranstionsList.arraySize-1);
             var targetState = transitionState.FindPropertyRelative("m_TargetState");
-            targetState.objectReferenceValue = targerStateNode.stateModelSO.targetObject;
+            targetState.objectReferenceValue = targerStateNode.serializedObject.targetObject;
             var conditions = transitionState.FindPropertyRelative("m_Conditions");
             conditions.arraySize = 0;
             stateTranstionsList.serializedObject.ApplyModifiedProperties();

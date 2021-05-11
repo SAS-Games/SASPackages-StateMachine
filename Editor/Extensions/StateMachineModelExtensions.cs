@@ -13,17 +13,18 @@ namespace SAS.StateMachineGraph.Editor
         const string ChildStateMachinesVar = "m_ChildStateMachines";
         const string StateModelsVar = "m_StateModels";
 
-        public static void AddChildStateMachine(this RuntimeStateMachineController runtimeStateMachineController, StateMachineModel stateMachine, string name, Vector3 position)
+        public static void AddChildStateMachine(this RuntimeStateMachineController runtimeStateMachineController, StateMachineModel stateMachineModel, string name, Vector3 position)
         {
             StateMachineModel childStateMachine = ScriptableObject.CreateInstance<StateMachineModel>();
-            childStateMachine.name = stateMachine.MakeUniqueStateMachineName(name);
+            childStateMachine.name = stateMachineModel.MakeUniqueStateMachineName(name);
 
             // subStateMachine.hideFlags = HideFlags.HideInHierarchy;
             childStateMachine.SetPosition(position);
             if (AssetDatabase.GetAssetPath(runtimeStateMachineController) != "")
                 AssetDatabase.AddObjectToAsset(childStateMachine, AssetDatabase.GetAssetPath(runtimeStateMachineController));
-            
-            stateMachine.AddChildStateMachine(childStateMachine);
+
+            childStateMachine.SetAnyStatePosition(new Vector3(300, 50, 0));
+            stateMachineModel.AddChildStateMachine(childStateMachine);
         }
 
         private static void AddChildStateMachine(this StateMachineModel stateMachineModel, StateMachineModel childStateMachine)
@@ -37,14 +38,24 @@ namespace SAS.StateMachineGraph.Editor
             childStateMachine.SetParent(stateMachineModel);
         }
 
-        public static void RemoveChildStateMachine(this StateMachineModel stateMachine, StateMachineModel childStateMachine)
+        internal static void RemoveStateMachineInternal(this StateMachineModel stateMachineModel)
         {
+            var stateMachineModelSO = new SerializedObject(stateMachineModel);
+            var parentStateMachineModel = new SerializedObject(stateMachineModelSO.FindProperty(ParentStateMachineVar).objectReferenceValue);
+            var childStateMachineModels = parentStateMachineModel.FindProperty(ChildStateMachinesVar);
 
-        }
+            for (int i = 0; i < childStateMachineModels.arraySize; ++i)
+            {
+                if ((childStateMachineModels.GetArrayElementAtIndex(i).objectReferenceValue as StateMachineModel) == stateMachineModel)
+                {
+                    childStateMachineModels.DeleteArrayElementAtIndex(i);
+                    if (childStateMachineModels.GetArrayElementAtIndex(i) != null)
+                        childStateMachineModels.DeleteArrayElementAtIndex(i);
+                    break;
+                }
+            }
 
-        public static void RemoveChildStateMachine(this StateMachineModel stateMachine, string name)
-        {
-
+            parentStateMachineModel.ApplyModifiedProperties();
         }
 
         internal static void AddState(this StateMachineModel stateMachineModel, StateModel state)
@@ -77,6 +88,12 @@ namespace SAS.StateMachineGraph.Editor
             }
         }
 
+        internal static void RemoveAllState(this StateMachineModel stateMachineModel, List<StateModel> stateModels)
+        {
+            foreach (var stateModel in stateModels)
+                stateMachineModel.RemoveState(stateModel);
+        }
+
         public static void SetParent(this StateMachineModel childStateMachineModel, StateMachineModel parentStateMachineModel)
         {
             var childStateMachineModelSO = new SerializedObject(childStateMachineModel);
@@ -84,11 +101,17 @@ namespace SAS.StateMachineGraph.Editor
             childStateMachineModelSO.ApplyModifiedProperties();
         }
 
-        public static void SetAnyStatePosition(this StateMachineModel stateMachineModel, Vector3 position)
+        internal static void SetAnyStatePosition(this StateMachineModel stateMachineModel, Vector3 position)
         {
             var stateMachineModelSO = new SerializedObject(stateMachineModel);
             stateMachineModelSO.FindProperty(AnyStatePositionVar).vector3Value = position;
             stateMachineModelSO.ApplyModifiedProperties();
+        }
+
+        internal static Vector3 GetAnyStatePosition(this StateMachineModel stateMachineModel)
+        {
+            var stateMachineModelSO = new SerializedObject(stateMachineModel);
+            return stateMachineModelSO.FindProperty(AnyStatePositionVar).vector3Value;
         }
 
         public static void SetPosition(this StateMachineModel stateMachineModel, Vector3 position)

@@ -52,76 +52,94 @@ namespace SAS.StateMachineGraph.Editor
             }
         }
 
-        public static GUIStyle GetNodeStyle()
+        public static GUIStyle NodeNormalStyle
         {
-            if (Instance.normalStyle == null)
+            get
             {
-                Instance.normalStyle = new GUIStyle();
-                Instance.normalStyle.normal.background = EditorGUIUtility.Load("builtin skins/darkskin/images/node1.png") as Texture2D;
-                Instance.normalStyle.border = new RectOffset(12, 12, 12, 12);
-                Instance.normalStyle.alignment = TextAnchor.MiddleCenter;
+                if (Instance.normalStyle == null)
+                {
+                    Instance.normalStyle = new GUIStyle();
+                    Instance.normalStyle.normal.background = EditorGUIUtility.Load("builtin skins/darkskin/images/node1.png") as Texture2D;
+                    Instance.normalStyle.border = new RectOffset(12, 12, 12, 12);
+                    Instance.normalStyle.alignment = TextAnchor.MiddleCenter;
+                }
+                return Instance.normalStyle;
             }
-            return Instance.normalStyle;
-         }
-
-        public static GUIStyle GetNodeFocudeStyle()
-        {
-            if (Instance.focusedStyle == null)
-            {
-                Instance.focusedStyle = new GUIStyle();
-                Instance.focusedStyle.normal.background = EditorGUIUtility.Load("builtin skins/darkskin/images/node1 on.png") as Texture2D;
-                Instance.focusedStyle.border = new RectOffset(12, 12, 12, 12);
-                Instance.focusedStyle.alignment = TextAnchor.MiddleCenter;
-            }
-            return Instance.focusedStyle;
         }
 
-        public static GUIStyle GetDefaultNodeStyle()
+        public static GUIStyle NodeFocudeStyle
         {
-            if (Instance.defaultNormalStyle == null)
+            get
             {
-                Instance.defaultNormalStyle = new GUIStyle();
-                Instance.defaultNormalStyle.normal.background = EditorGUIUtility.Load("builtin skins/darkskin/images/node5.png") as Texture2D;
-                Instance.defaultNormalStyle.border = new RectOffset(12, 12, 12, 12);
-                Instance.defaultNormalStyle.alignment = TextAnchor.MiddleCenter;
+                if (Instance.focusedStyle == null)
+                {
+                    Instance.focusedStyle = new GUIStyle();
+                    Instance.focusedStyle.normal.background = EditorGUIUtility.Load("builtin skins/darkskin/images/node1 on.png") as Texture2D;
+                    Instance.focusedStyle.border = new RectOffset(12, 12, 12, 12);
+                    Instance.focusedStyle.alignment = TextAnchor.MiddleCenter;
+                }
+                return Instance.focusedStyle;
             }
-            return Instance.defaultNormalStyle;
         }
 
-        public static GUIStyle GetDefaultFocusedNodeStyle()
+        public static GUIStyle DefaultNormalNodeStyle
         {
-            if (Instance.defaultFocusedStyle == null)
+            get
             {
-                Instance.defaultFocusedStyle = new GUIStyle();
-                Instance.defaultFocusedStyle.normal.background = EditorGUIUtility.Load("builtin skins/darkskin/images/node5 on.png") as Texture2D;
-                Instance.defaultFocusedStyle.border = new RectOffset(12, 12, 12, 12);
-                Instance.defaultFocusedStyle.alignment = TextAnchor.MiddleCenter;
+                if (Instance.defaultNormalStyle == null)
+                {
+                    Instance.defaultNormalStyle = new GUIStyle();
+                    Instance.defaultNormalStyle.normal.background = EditorGUIUtility.Load("builtin skins/darkskin/images/node5.png") as Texture2D;
+                    Instance.defaultNormalStyle.border = new RectOffset(12, 12, 12, 12);
+                    Instance.defaultNormalStyle.alignment = TextAnchor.MiddleCenter;
+                }
+                return Instance.defaultNormalStyle;
             }
-            return Instance.defaultFocusedStyle;
         }
 
-        public static GUIStyle GetAnyStateNodeStyle()
+        public static GUIStyle DefaultFocusedNodeStyle
         {
-            if (Instance.anyStateNormalStyle == null)
+            get
             {
-                Instance.anyStateNormalStyle = new GUIStyle();
-                Instance.anyStateNormalStyle.normal.background = EditorGUIUtility.Load("builtin skins/darkskin/images/node2.png") as Texture2D;
-                Instance.anyStateNormalStyle.border = new RectOffset(12, 12, 12, 12);
-                Instance.anyStateNormalStyle.alignment = TextAnchor.MiddleCenter;
+                if (Instance.defaultFocusedStyle == null)
+                {
+                    Instance.defaultFocusedStyle = new GUIStyle();
+                    Instance.defaultFocusedStyle.normal.background = EditorGUIUtility.Load("builtin skins/darkskin/images/node5 on.png") as Texture2D;
+                    Instance.defaultFocusedStyle.border = new RectOffset(12, 12, 12, 12);
+                    Instance.defaultFocusedStyle.alignment = TextAnchor.MiddleCenter;
+                }
+                return Instance.defaultFocusedStyle;
             }
-            return Instance.anyStateNormalStyle;
         }
 
-        public static GUIStyle GetAnyStateFocusedNodeStyle()
+        public static GUIStyle AnyStateNodeStyle
         {
-            if (Instance.anyStateFocusedStyle == null)
+            get
             {
-                Instance.anyStateFocusedStyle = new GUIStyle();
-                Instance.anyStateFocusedStyle.normal.background = EditorGUIUtility.Load("builtin skins/darkskin/images/node2 on.png") as Texture2D;
-                Instance.anyStateFocusedStyle.border = new RectOffset(12, 12, 12, 12);
-                Instance.anyStateFocusedStyle.alignment = TextAnchor.MiddleCenter;
+                if (Instance.anyStateNormalStyle == null)
+                {
+                    Instance.anyStateNormalStyle = new GUIStyle();
+                    Instance.anyStateNormalStyle.normal.background = EditorGUIUtility.Load("builtin skins/darkskin/images/node2.png") as Texture2D;
+                    Instance.anyStateNormalStyle.border = new RectOffset(12, 12, 12, 12);
+                    Instance.anyStateNormalStyle.alignment = TextAnchor.MiddleCenter;
+                }
+                return Instance.anyStateNormalStyle;
             }
-            return Instance.anyStateFocusedStyle;
+        }
+
+        public static GUIStyle AnyStateFocusedNodeStyle
+        {
+            get
+            {
+                if (Instance.anyStateFocusedStyle == null)
+                {
+                    Instance.anyStateFocusedStyle = new GUIStyle();
+                    Instance.anyStateFocusedStyle.normal.background = EditorGUIUtility.Load("builtin skins/darkskin/images/node2 on.png") as Texture2D;
+                    Instance.anyStateFocusedStyle.border = new RectOffset(12, 12, 12, 12);
+                    Instance.anyStateFocusedStyle.alignment = TextAnchor.MiddleCenter;
+                }
+                return Instance.anyStateFocusedStyle;
+            }
         }
 
 

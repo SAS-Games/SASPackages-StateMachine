@@ -11,6 +11,7 @@ namespace SAS.StateMachineGraph.Editor
     {
         const string BaseStateMachineModelVar = "m_BaseStateMachineModel";
         const string AnyStateModelVar = "m_AnyStateModel";
+        const string DefaultStateModelVar = "m_DefaultStateModel";
         public static RuntimeStateMachineController CreateControllerAtPath(string path)
         {
             var controller = ScriptableObject.CreateInstance<RuntimeStateMachineController>();
@@ -52,7 +53,7 @@ namespace SAS.StateMachineGraph.Editor
             if (AssetDatabase.GetAssetPath(runtimeStateMachineController) != "")
                 AssetDatabase.AddObjectToAsset(stateModel, AssetDatabase.GetAssetPath(runtimeStateMachineController));
 
-            stateMachineModel.SetAnyStatePosition(new Vector3(200, 0, 0));
+            stateMachineModel.SetAnyStatePosition(new Vector3(300, 50, 0));
             runtimeStateMachineController.AddAnyState(stateModel);
         }
 
@@ -158,10 +159,39 @@ namespace SAS.StateMachineGraph.Editor
 
         internal static void RemoveState(this RuntimeStateMachineController runtimeStateMachineController, StateMachineModel stateMachineModel, StateModel stateModel)
         {
-            stateMachineModel.RemoveState(stateModel);
-            runtimeStateMachineController.ClearAllTransition(stateModel);
-            MonoBehaviour.DestroyImmediate(stateModel, true);
+            runtimeStateMachineController.RemoveStateInternal(stateMachineModel, stateModel);
             AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(runtimeStateMachineController));
+        }
+
+        internal static void RemoveAllState(this RuntimeStateMachineController runtimeStateMachineController, StateMachineModel stateMachineModel)
+        {
+            var stateModels = stateMachineModel.GetStates();
+            foreach (var stateModel in stateModels)
+                runtimeStateMachineController.RemoveStateInternal(stateMachineModel, stateModel);
+        }
+
+        private static void RemoveStateInternal(this RuntimeStateMachineController runtimeStateMachineController, StateMachineModel stateMachineModel, StateModel stateModel)
+        {
+            runtimeStateMachineController.ClearAllTransition(stateModel);
+            stateMachineModel.RemoveState(stateModel);
+            MonoBehaviour.DestroyImmediate(stateModel, true);
+        }
+
+        internal static void RemoveStateMachine(this RuntimeStateMachineController runtimeStateMachineController, StateMachineModel stateMachineModel)
+        {
+            var childStateMachineModels = stateMachineModel.GetChildStateMachines();
+            foreach (var smm in childStateMachineModels)
+                runtimeStateMachineController.RemoveStateMachineInternal(smm);
+
+            runtimeStateMachineController.RemoveStateMachineInternal(stateMachineModel);
+            AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(runtimeStateMachineController));
+        }
+
+        private static void RemoveStateMachineInternal(this RuntimeStateMachineController runtimeStateMachineController, StateMachineModel stateMachineModel)
+        {
+            runtimeStateMachineController.RemoveAllState(stateMachineModel);
+            stateMachineModel.RemoveStateMachineInternal();
+            MonoBehaviour.DestroyImmediate(stateMachineModel, true);
         }
 
         internal static void ClearAllTransition(this RuntimeStateMachineController runtimeStateMachineController, StateModel stateModel)
@@ -180,6 +210,25 @@ namespace SAS.StateMachineGraph.Editor
 
                 stateTransitions.serializedObject.ApplyModifiedProperties();
             }
+        }
+
+        internal static SerializedObject AnyStateModelSO(this RuntimeStateMachineController runtimeStateMachineController)
+        {
+            var runtimeStateMachineControllerSO = new SerializedObject(runtimeStateMachineController);
+            return new SerializedObject(runtimeStateMachineControllerSO.FindProperty(AnyStateModelVar).objectReferenceValue);
+        }
+
+        internal static StateModel GetDefaultState(this RuntimeStateMachineController runtimeStateMachineController)
+        {
+            var runtimeStateMachineControllerSO = new SerializedObject(runtimeStateMachineController);
+            return runtimeStateMachineControllerSO.FindProperty(DefaultStateModelVar).objectReferenceValue as StateModel;
+        }
+
+        internal static void SetDefaultNode(this RuntimeStateMachineController runtimeStateMachineController, StateModel stateModel)
+        {
+            var runtimeStateMachineControllerSO = new SerializedObject(runtimeStateMachineController);
+            runtimeStateMachineControllerSO.FindProperty(DefaultStateModelVar).objectReferenceValue = stateModel;
+            runtimeStateMachineControllerSO.ApplyModifiedProperties();
         }
     }
 }

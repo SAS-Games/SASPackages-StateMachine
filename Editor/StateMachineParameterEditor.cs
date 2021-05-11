@@ -75,7 +75,7 @@ namespace SAS.StateMachineGraph.Editor
             return false;
         }
 
-        public void DrawParametersWindow()
+        public void DrawParametersWindow(int windowId)
         {
             ProcessEvents(Event.current);
             _parametersList.DoList(rect);

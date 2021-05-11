@@ -6,12 +6,12 @@ namespace SAS.StateMachineGraph.Editor
 {
     public class Connection
     {
-        public Node StartNode { get; }
-        public Node EndNode { get; }
+        public BaseNode StartNode { get; }
+        public BaseNode EndNode { get; }
         private Action<Connection> OnClickRemoveConnection;
         private SerializedObject _stateMachineSO;
 
-        public Connection(SerializedObject stateMachineSO, Node start, Node end, Action<Connection> onClickRemoveConnection)
+        public Connection(SerializedObject stateMachineSO, BaseNode start, BaseNode end, Action<Connection> onClickRemoveConnection)
         {
             StartNode = start;
             EndNode = end;
@@ -23,7 +23,7 @@ namespace SAS.StateMachineGraph.Editor
         {
             Vector2 startPos;
             Vector2 endPos;
-            if (StartNode.GetPosition().y < EndNode.GetPosition().y)
+            if (StartNode.Position.y < EndNode.Position.y)
             {
                 startPos = StartNode.startPort.rect.center;
                 endPos = EndNode.startPort.rect.center;
@@ -43,14 +43,14 @@ namespace SAS.StateMachineGraph.Editor
             Vector2 pos = startPos + (endPos - startPos).normalized * Vector2.Distance(startPos, endPos) * 0.5f;
 
             Matrix4x4 matrixBackup = GUI.matrix;
-            GUIUtility.RotateAroundPivot(Angle(StartNode.GetPosition(), EndNode.GetPosition()), pos);
+            GUIUtility.RotateAroundPivot(Angle(StartNode.Position, EndNode.Position), pos);
             if (GUI.Button(new Rect(new Vector2(pos.x - 12, pos.y - 12), Vector2.one * 24), Settings.GetArrowTexture(), GUIStyle.none))
             {
                 Selection.activeObject = null;
-                Selection.activeObject = StartNode.stateModelSO.targetObject;
-                StartNode.SetActvieStyle(false);
-                int index = StartNode.state.GetTransitionStateIndex(EndNode.state);
-                StateTransitionInspector.Show(index, _stateMachineSO, StartNode.stateModelSO);
+                Selection.activeObject = StartNode.serializedObject.targetObject;
+                StartNode.IsFocused = false;
+               // int index = StartNode.state.GetTransitionStateIndex(EndNode.state); //ToDo: will visit it later
+              //  StateTransitionInspector.Show(index, _stateMachineSO, StartNode.serializedObject);
             }
             GUI.matrix = matrixBackup;
         }

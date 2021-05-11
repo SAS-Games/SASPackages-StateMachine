@@ -9,7 +9,7 @@ namespace SAS.StateMachineGraph
         [SerializeField] private StateMachineModel m_BaseStateMachineModel;
         [SerializeField] private List<StateModel> _stateModels = new List<StateModel>();
         [SerializeField] private StateMachineParameter[] _parameters;
-        [SerializeField] private StateModel _defaultStateModel;
+        [SerializeField] private StateModel m_DefaultStateModel;
         [SerializeField] private StateModel m_AnyStateModel;
 
         internal StateMachine CreateStateMachine(Actor actor)
@@ -20,7 +20,7 @@ namespace SAS.StateMachineGraph
             foreach (StateModel stateModel in _stateModels)
             {
                 var state = stateModel.GetState(stateMachine, cachedState, cachedActions);
-                if (stateModel == _defaultStateModel)
+                if (stateModel == m_DefaultStateModel)
                     stateMachine.DefaultState = state;
                 else if (stateModel.name.Equals(AnyStateModelName))
                     stateMachine.AnyState = state;
@@ -39,7 +39,7 @@ namespace SAS.StateMachineGraph
             for(int i =0; i < _parameters.Length; ++i)
                 _parameters[i] = new StateMachineParameter(model._parameters[i]);
 
-            _defaultStateModel = model._defaultStateModel;
+            m_DefaultStateModel = model.m_DefaultStateModel;
         }
     }
 }

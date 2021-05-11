@@ -7,9 +7,9 @@ namespace SAS.StateMachineGraph.Editor
     public class Port
     {
         public Rect rect;
-        public Node node;
+        public BaseNode node;
         public int id;
-        public Port(Node node, int id)
+        public Port(BaseNode node, int id)
         {
             this.node = node;
             this.id = id;
@@ -33,7 +33,7 @@ namespace SAS.StateMachineGraph.Editor
         }
     }
 
-    public class Node
+   /* public class BaseNode
     {
         public StateModel state;
         public SerializedObject stateModelSO;
@@ -49,14 +49,14 @@ namespace SAS.StateMachineGraph.Editor
         public Port endPort;
         public Port startPort;
 
-        private System.Action<Node> _removeNode;
-        private System.Action<Node> _startTransition;
-        private System.Action<Node> _setAsDefaultNode;
-        private System.Action<Node> _onMouseUp;
+        private System.Action<BaseNode> _removeNode;
+        private System.Action<BaseNode> _startTransition;
+        private System.Action<BaseNode> _setAsDefaultNode;
+        private System.Action<BaseNode> _onMouseUp;
      
         public bool IsAnyStateNode => state.name.Equals(Util.AnyStateModelName);
 
-        public Node(StateModel state, Vector2 position, Action<Node> startTransition, Action<Node> makeTransition, Action<Node> removeNode, Action<Node> setAsDefaultNode)
+        public BaseNode(StateModel state, Vector2 position, Action<BaseNode> startTransition, Action<BaseNode> makeTransition, Action<BaseNode> removeNode, Action<BaseNode> setAsDefaultNode)
         {
             this.state = state;
             stateModelSO = new SerializedObject(state);
@@ -64,10 +64,10 @@ namespace SAS.StateMachineGraph.Editor
             rect = new Rect(position.x, position.y, 200, 50);
             endPort = new Port(this, 1);
             startPort = new Port(this, 2);
-            normalNodeStyle = !IsAnyStateNode ? Settings.GetNodeStyle() : Settings.GetAnyStateNodeStyle();
-            selectedNodeStyle = !IsAnyStateNode ? Settings.GetNodeFocudeStyle() : Settings.GetAnyStateFocusedNodeStyle();
-            defaultNormalNodeStyle = Settings.GetDefaultNodeStyle();
-            defaultSelectedNodeStyle = Settings.GetDefaultFocusedNodeStyle();
+           // normalNodeStyle = !IsAnyStateNode ? Settings.NodeNormalStyle() : Settings.AnyStateNodeStyle();
+          //  selectedNodeStyle = !IsAnyStateNode ? Settings.NodeFocudeStyle() : Settings.AnyStateFocusedNodeStyle();
+          //  defaultNormalNodeStyle = Settings.DefaultNodeStyle();
+          //  defaultSelectedNodeStyle = Settings.DefaultFocusedNodeStyle();
             SetStyle(false);
             _removeNode = removeNode;
             _startTransition = startTransition;
@@ -177,5 +177,5 @@ namespace SAS.StateMachineGraph.Editor
         {
             SetStyle(isActive);
         }
-    }
+    }*/
 }
