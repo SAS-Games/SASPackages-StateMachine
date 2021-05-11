@@ -157,6 +157,13 @@ namespace SAS.StateMachineGraph.Editor
             stateMachineModel.AddState(stateModel);
         }
 
+        internal static void RemoveDefaultState(this RuntimeStateMachineController runtimeStateMachineController, StateMachineModel stateMachineModel, StateModel stateModel)
+        {
+            runtimeStateMachineController.RemoveStateInternal(stateMachineModel, stateModel);
+            runtimeStateMachineController.SetDefaultNode(null);
+            AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(runtimeStateMachineController));
+        }
+
         internal static void RemoveState(this RuntimeStateMachineController runtimeStateMachineController, StateMachineModel stateMachineModel, StateModel stateModel)
         {
             runtimeStateMachineController.RemoveStateInternal(stateMachineModel, stateModel);
@@ -179,12 +186,20 @@ namespace SAS.StateMachineGraph.Editor
 
         internal static void RemoveStateMachine(this RuntimeStateMachineController runtimeStateMachineController, StateMachineModel stateMachineModel)
         {
-            var childStateMachineModels = stateMachineModel.GetChildStateMachines();
-            foreach (var smm in childStateMachineModels)
-                runtimeStateMachineController.RemoveStateMachineInternal(smm);
-
+            runtimeStateMachineController.RemoveStateMachineRecursively(stateMachineModel);
+            
             runtimeStateMachineController.RemoveStateMachineInternal(stateMachineModel);
             AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(runtimeStateMachineController));
+        }
+
+        private static void RemoveStateMachineRecursively(this RuntimeStateMachineController runtimeStateMachineController, StateMachineModel stateMachineModel)
+        {
+            var childStateMachineModels = stateMachineModel.GetChildStateMachines();
+            foreach (var smm in childStateMachineModels)
+            {
+                runtimeStateMachineController.RemoveStateMachineRecursively(smm);
+                runtimeStateMachineController.RemoveStateMachineInternal(smm);
+            }
         }
 
         private static void RemoveStateMachineInternal(this RuntimeStateMachineController runtimeStateMachineController, StateMachineModel stateMachineModel)

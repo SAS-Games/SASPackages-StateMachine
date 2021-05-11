@@ -72,9 +72,7 @@ namespace SAS.StateMachineGraph.Editor
                         if (e.button == 0)
                         {
                             _isDoubleClicked = e.clickCount == 2;
-                            if (_isDoubleClicked)
-                                return false;
-                            _isDragged = true;
+                            _isDragged = !_isDoubleClicked;
                         }
                         if (e.button == 1)
                         {
@@ -95,9 +93,12 @@ namespace SAS.StateMachineGraph.Editor
                         if (e.button == 0)
                         {
                             if (_isDoubleClicked)
+                            {
                                 ProcessOnDoubleClicked(this);
-                            else
-                                ProcessMouseUp(this);
+                                return false;
+                            }
+                            
+                            ProcessMouseUp(this);
                             return true;
                         }
                         else if (e.button == 1)

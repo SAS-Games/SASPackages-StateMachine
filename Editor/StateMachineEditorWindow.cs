@@ -85,7 +85,7 @@ namespace SAS.StateMachineGraph.Editor
             _parameterEditor = new StateMachineParameterEditor(_stateMachineModelSO);
             _transition = new StateTransitionEditor(_stateMachineModelSO);
 
-            InitializeCurrentSelectedStateMachineWindow();
+            CreateSelectedStateMachineNodes();
 
             /* foreach (BaseNode node in _nodes)
              {
@@ -103,14 +103,10 @@ namespace SAS.StateMachineGraph.Editor
             Repaint();
         }
 
-        private void InitializeCurrentSelectedStateMachineWindow()
-        {
-            _nodes.Clear();
-            CreateSelectedStateMachineNodes();
-        }
-
         private void CreateSelectedStateMachineNodes()
         {
+            _nodes.Clear();
+
             var anyStateNode = new AnyStateNode(SelectedStateMachineModel, RuntimeStateMachineController.AnyStateModelSO(), SelectedStateMachineModel.GetAnyStatePosition(), null);
             _nodes.Add(anyStateNode);
 
@@ -175,7 +171,7 @@ namespace SAS.StateMachineGraph.Editor
             if (selectedIndex != _selectedChildStateMachines.Count - 1)
             {
                 _selectedChildStateMachines.RemoveRange(selectedIndex + 1, (_selectedChildStateMachines.Count - selectedIndex) - 1);
-                InitializeCurrentSelectedStateMachineWindow();
+                CreateSelectedStateMachineNodes();
             }
         }
 
@@ -199,12 +195,11 @@ namespace SAS.StateMachineGraph.Editor
         {
             if (_nodes != null)
             {
-                for (int i = _nodes.Count - 1; i >= 0; i--)
+                for (int i = _nodes.Count - 1; i >= 0 && i < _nodes.Count; i--)
                 {
                     if (_nodes[i].ProcessEvents(e))
                     {
-                        if (i < _nodes.Count)
-                            Selection.activeObject = _nodes[i].serializedObject.targetObject;
+                        Selection.activeObject = _nodes[i].serializedObject.targetObject;
                         GUI.changed = true;
                     }
                 }
@@ -243,7 +238,7 @@ namespace SAS.StateMachineGraph.Editor
             StateNode node;
             if (stateModel == RuntimeStateMachineController.GetDefaultState() || RuntimeStateMachineController.GetAllStateModels().Count == 1)
             {
-                node = new DefaultStateNode(new SerializedObject(stateModel), stateModel.GetPosition(), _transition.StartTransition, _transition.MakeTransion, RemoveStateModelNode);
+                node = new DefaultStateNode(new SerializedObject(stateModel), stateModel.GetPosition(), _transition.StartTransition, _transition.MakeTransion, RemoveDefaultStateModelNode);
                 SetAsDefaultNode(node, false);
             }
             else
@@ -261,13 +256,20 @@ namespace SAS.StateMachineGraph.Editor
         private void RemoveStateMachineNode(StateMachineNode stateMachineNode)
         {
             RuntimeStateMachineController.RemoveStateMachine(stateMachineNode.Value);
-            InitializeCurrentSelectedStateMachineWindow();
+            _selectedChildStateMachines.RemoveAll(ele => ele == null);
+            CreateSelectedStateMachineNodes();
         }
 
         private void SelectStateMachineNode(StateMachineNode stateMachineNode)
         {
             _selectedChildStateMachines.Add(stateMachineNode.Value);
-            InitializeCurrentSelectedStateMachineWindow();
+            CreateSelectedStateMachineNodes();
+        }
+
+        private void RemoveDefaultStateModelNode(StateNode node)
+        {
+            RuntimeStateMachineController.RemoveDefaultState(SelectedStateMachineModel, node.Value);
+            RemoveStateModelNode(node);
         }
 
         private void RemoveStateModelNode(StateNode node)
@@ -280,7 +282,6 @@ namespace SAS.StateMachineGraph.Editor
         private void SetAsDefaultNode(StateNode stateModelNode, bool isFocused)
         {
             RuntimeStateMachineController.SetDefaultNode(stateModelNode.Value);
-           // InitializeCurrentSelectedStateMachineWindow();
             stateModelNode.IsFocused = isFocused;
             EditorUtility.SetDirty(RuntimeStateMachineController);
         }
