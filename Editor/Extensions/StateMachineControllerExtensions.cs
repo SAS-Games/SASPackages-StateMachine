@@ -239,6 +239,12 @@ namespace SAS.StateMachineGraph.Editor
             return runtimeStateMachineControllerSO.FindProperty(DefaultStateModelVar).objectReferenceValue as StateModel;
         }
 
+        public static void Rename(this StateModel stateModel, RuntimeStateMachineController runtimeStateMachineController, string name)
+        {
+            var uniqueName = runtimeStateMachineController.MakeUniqueStateName(name);
+            stateModel.name = uniqueName;
+        }
+
         internal static void SetDefaultNode(this RuntimeStateMachineController runtimeStateMachineController, StateModel stateModel)
         {
             var runtimeStateMachineControllerSO = new SerializedObject(runtimeStateMachineController);

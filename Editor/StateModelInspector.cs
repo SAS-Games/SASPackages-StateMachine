@@ -33,20 +33,12 @@ namespace SAS.StateMachineGraph.Editor
         protected override void OnHeaderGUI()
         {
             base.OnHeaderGUI();
-            if (target.name.Equals(Util.AnyStateModelName))
-                return;
+
             var curName = EditorGUI.DelayedTextField(new Rect(50, 30, EditorGUIUtility.currentViewWidth - 60, EditorGUIUtility.singleLineHeight), new GUIContent("State Name"), target.name);
             if (curName != target.name)
             {
-                var mainAsset = new SerializedObject(AssetDatabase.LoadMainAssetAtPath(AssetDatabase.GetAssetPath(target)));
-                var states = mainAsset.FindProperty("_stateModels");
-                var usedName = new HashSet<string>();
-                for (int i = 0; i < states.arraySize; ++i)
-                    usedName.Add(states.GetArrayElementAtIndex(i).objectReferenceValue.name);
-                curName = Util.MakeUniqueName(curName, usedName);
-
-                target.name = curName;
-                AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(target), ImportAssetOptions.ForceUpdate);
+                var runtimeStateMachineController = AssetDatabase.LoadMainAssetAtPath(AssetDatabase.GetAssetPath(target)) as RuntimeStateMachineController;
+                ((StateModel)target).Rename(runtimeStateMachineController, curName);
                 Selection.activeObject = AssetDatabase.LoadMainAssetAtPath(AssetDatabase.GetAssetPath(target));
             }
         }

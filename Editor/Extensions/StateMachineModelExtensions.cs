@@ -127,6 +127,13 @@ namespace SAS.StateMachineGraph.Editor
             return stateMachineModelSO.FindProperty(PositionVar).vector3Value;
         }
 
+        public static void Rename(this StateMachineModel stateMachineModel, string name)
+        {
+            var parentStateMachineModel = new SerializedObject(stateMachineModel).FindProperty(ParentStateMachineVar).objectReferenceValue as StateMachineModel;
+            var uniqueName = parentStateMachineModel.UsedStateMachineName().MakeUniqueName(name);
+            stateMachineModel.name = uniqueName;
+        }
+
         public static string MakeUniqueStateMachineName(this StateMachineModel stateMachineModel, string name)
         {
             return stateMachineModel.UsedStateMachineName().MakeUniqueName(name);

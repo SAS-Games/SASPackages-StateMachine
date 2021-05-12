@@ -12,6 +12,15 @@ namespace SAS.StateMachineGraph
         [SerializeField] private StateModel m_DefaultStateModel;
         [SerializeField] private StateModel m_AnyStateModel;
 
+        private void Awake()
+        {
+#if UNITY_EDITOR
+            var assetPath = UnityEditor.AssetDatabase.GetAssetPath(this);
+            var fileName = System.IO.Path.GetFileNameWithoutExtension(assetPath);
+            name = fileName;
+#endif
+        }
+
         internal StateMachine CreateStateMachine(Actor actor)
         {
             StateMachine stateMachine = new StateMachine(actor, _parameters);
