@@ -143,7 +143,7 @@ namespace SAS.StateMachineGraph.Editor
                 runtimeStateMachineController.AddState(stateMachineModel, name, new Vector3(200, 0, 0));
         }*/
 
-        public static void AddState(this RuntimeStateMachineController runtimeStateMachineController, StateMachineModel stateMachineModel, string name, Vector3 position)
+        public static StateModel AddState(this RuntimeStateMachineController runtimeStateMachineController, StateMachineModel stateMachineModel, string name, Vector3 position)
         {
             var stateModel = ScriptableObject.CreateInstance<StateModel>();
             stateModel.name = runtimeStateMachineController.MakeUniqueStateName(name);
@@ -155,6 +155,7 @@ namespace SAS.StateMachineGraph.Editor
 
             stateModel.SetPosition(position);
             stateMachineModel.AddState(stateModel);
+            return stateModel;
         }
 
         internal static void RemoveDefaultState(this RuntimeStateMachineController runtimeStateMachineController, StateMachineModel stateMachineModel, StateModel stateModel)

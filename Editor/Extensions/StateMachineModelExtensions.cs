@@ -13,7 +13,7 @@ namespace SAS.StateMachineGraph.Editor
         const string ChildStateMachinesVar = "m_ChildStateMachines";
         const string StateModelsVar = "m_StateModels";
 
-        public static void AddChildStateMachine(this RuntimeStateMachineController runtimeStateMachineController, StateMachineModel stateMachineModel, string name, Vector3 position)
+        public static StateMachineModel AddChildStateMachine(this RuntimeStateMachineController runtimeStateMachineController, StateMachineModel stateMachineModel, string name, Vector3 position)
         {
             StateMachineModel childStateMachine = ScriptableObject.CreateInstance<StateMachineModel>();
             childStateMachine.name = stateMachineModel.MakeUniqueStateMachineName(name);
@@ -25,6 +25,7 @@ namespace SAS.StateMachineGraph.Editor
 
             childStateMachine.SetAnyStatePosition(new Vector3(300, 50, 0));
             stateMachineModel.AddChildStateMachine(childStateMachine);
+            return childStateMachine;
         }
 
         private static void AddChildStateMachine(this StateMachineModel stateMachineModel, StateMachineModel childStateMachine)

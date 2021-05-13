@@ -27,8 +27,8 @@ namespace SAS.StateMachineGraph.Editor
             this.serializedObject = serializedObject;
             Position = position;
             rect = new Rect(position.x, position.y, width, height);
-            //endPort = new Port(this, 1);
-            //startPort = new Port(this, 2);
+            endPort = new Port(this, 1);
+            startPort = new Port(this, 2);
             _normalNodeStyle = normal;
             _selectedNodeStyle = selected;
             _style = _normalNodeStyle;
@@ -38,8 +38,8 @@ namespace SAS.StateMachineGraph.Editor
 
         public void Draw()
         {
-           // endPort.Draw();
-           // startPort.Draw();
+            endPort.Draw();
+            startPort.Draw();
             GUI.Box(rect, serializedObject.targetObject.name, _style);
         }
 

@@ -226,11 +226,23 @@ namespace SAS.StateMachineGraph.Editor
         private void ProcessContextMenu(Vector2 mousePosition)
         {
             GenericMenu genericMenu = new GenericMenu();
-            genericMenu.AddItem(new GUIContent("Create State"), false, () => RuntimeStateMachineController.AddState(SelectedStateMachineModel, "New State", mousePosition));
+            genericMenu.AddItem(new GUIContent("Create State"), false, () => AddState(mousePosition));
             genericMenu.ShowAsContext();
 
-            genericMenu.AddItem(new GUIContent("Create Sub-State Machine"), false, () => RuntimeStateMachineController.AddChildStateMachine(SelectedStateMachineModel, "New StateMachine", mousePosition));
+            genericMenu.AddItem(new GUIContent("Create Sub-State Machine"), false, () => AddChildStateMachine(mousePosition));
             genericMenu.ShowAsContext();
+        }
+
+        private void AddState(Vector2 mousePosition)
+        {
+            var stateModel = RuntimeStateMachineController.AddState(SelectedStateMachineModel, "New State", mousePosition);
+            CreateStateModelNode(stateModel);
+        }
+
+        private void AddChildStateMachine(Vector2 mousePosition)
+        {
+            var stateMachineModel = RuntimeStateMachineController.AddChildStateMachine(SelectedStateMachineModel, "New StateMachine", mousePosition);
+            CreateChildMachinelNode(stateMachineModel);
         }
 
         private void CreateStateModelNode(StateModel stateModel)
