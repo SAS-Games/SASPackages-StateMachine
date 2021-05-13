@@ -122,10 +122,18 @@ namespace SAS.StateMachineGraph.Editor
 
         protected override void OnGUI()
         {
+            var rect = position;
+            rect.x -= position.x; 
+            rect.y -= position.y;
+            rect.height -= 2;
+            
+            EditorZoomArea.Begin(Zoom, rect);
             base.OnGUI();
-
             DrawStateMachineWindow();
+            EditorZoomArea.End();
+            
             DrawParameterWindow();
+            DrawToolBar();
             EditorUtilities.VerticalLine(new Rect(Mathf.Max(200, position.width / 5) - 2, 1, position.width, position.height), 2, Color.black);
 
             Repaint();
@@ -140,11 +148,15 @@ namespace SAS.StateMachineGraph.Editor
             // _transition.DrawConnectionLine(Event.current);
             //  _transition.DrawConnections();
             DrawNodes();
-            EditorUtilities.HorizontalLine(new Rect(0, 0, position.width, 21), 20, new Color(0.2196079f, 0.2196079f, 0.2196079f));
-            DrawStateMachineToolBar(new Rect(0, 0, position.width, 20));
-            EditorUtilities.HorizontalLine(new Rect(0, 20, position.width, 21), 1, Color.black);
             ProcessNodeEvents(Event.current);
             ProcessMouseEvent(Event.current);
+        }
+
+        private void DrawToolBar()
+        {
+            EditorUtilities.HorizontalLine(new Rect(0, -2, position.width, 21), 22, new Color(0.2196079f, 0.2196079f, 0.2196079f));
+            DrawStateMachineToolBar(new Rect(0, 0, position.width, 20));
+            EditorUtilities.HorizontalLine(new Rect(0, 20, position.width, 21), 1, Color.black);
         }
 
         private void DrawParameterWindow()
@@ -154,7 +166,7 @@ namespace SAS.StateMachineGraph.Editor
             if (Application.isPlaying && RuntimeStateMachineController != null)
                 _parameterEditor = new StateMachineParameterEditor(new SerializedObject(RuntimeStateMachineController));
 
-            var windowRect = GUI.Window(1, new Rect(0, 0, Mathf.Max(200, position.width / 5), position.height), _parameterEditor.DrawParametersWindow, "");
+            var windowRect = GUI.Window(1, new Rect(0, 0, Mathf.Max(200, position.width / 5), position.height - 2), _parameterEditor.DrawParametersWindow, "");
             GUI.UnfocusWindow();
             _parameterEditor.DrawRect(windowRect);
             EndWindows();
