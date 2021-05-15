@@ -135,6 +135,24 @@ namespace SAS.StateMachineGraph.Editor
             stateMachineModel.name = uniqueName;
         }
 
+        public static string MakeUniqueStateName(this StateMachineModel stateMachineModel, string name)
+        {
+            return MakeUniqueName(stateMachineModel.UsedStateName(), name);
+        }
+
+        public static string MakeUniqueName(this List<string> usedNames, string nameBase)
+        {
+            string name = nameBase;
+            int counter = 1;
+            while (usedNames.Contains(name.Trim()))
+            {
+                name = nameBase + " " + counter;
+                counter++;
+            }
+            usedNames.Add(name);
+            return name;
+        }
+
         public static string MakeUniqueStateMachineName(this StateMachineModel stateMachineModel, string name)
         {
             return stateMachineModel.UsedStateMachineName().MakeUniqueName(name);

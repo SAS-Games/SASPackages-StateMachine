@@ -11,16 +11,6 @@ namespace SAS.StateMachineGraph
 		[SerializeField] private StateActionModel[] m_StateActions = default;
 		[SerializeField] private StateTransitionModel[] m_Transitions = null;
 
-		public override bool Equals(object other)
-		{
-			return name.Equals((other as StateModel)?.name, StringComparison.OrdinalIgnoreCase);
-		}
-
-		public override int GetHashCode()
-		{
-			return name.GetHashCode();
-		}
-
 		internal State GetState(StateMachine stateMachine, Dictionary<ScriptableObject, object> cachedStates, Dictionary<StateActionModel, object[]> cachedActions)
 		{
 			if (cachedStates.TryGetValue(this, out var obj))

@@ -46,7 +46,7 @@ namespace SAS.StateMachineGraph.Editor
         private static void AddAnyState(this RuntimeStateMachineController runtimeStateMachineController, StateMachineModel stateMachineModel)
         {
             var stateModel = ScriptableObject.CreateInstance<StateModel>();
-            stateModel.name = runtimeStateMachineController.MakeUniqueStateName("Any State");
+            stateModel.name = stateMachineModel.MakeUniqueStateName("Any State");
 
             // stateModel.hideFlags = HideFlags.HideInHierarchy;
 
@@ -65,38 +65,17 @@ namespace SAS.StateMachineGraph.Editor
             runtimeStateMachineControllerSO.ApplyModifiedProperties();
         }
 
-
-        public static string MakeUniqueStateName(this RuntimeStateMachineController runtimeStateMachineController, string name)
-        {
-            return MakeUniqueName(runtimeStateMachineController.UsedStateName(), name);
-        }
-
-        public static string MakeUniqueName(this List<string> usedNames, string nameBase)
-        {
-            string name = nameBase;
-            int counter = 1;
-            while (usedNames.Contains(name.Trim()))
-            {
-                name = nameBase + " " + counter;
-                counter++;
-            }
-            usedNames.Add(name);
-            return name;
-        }
-
-        public static List<string> UsedStateName(this RuntimeStateMachineController runtimeStateMachineController)
+        internal static List<string> UsedStateName(this StateMachineModel stateMachineModel)
         {
             var usedNames = new List<string>();
-            var stateMachineModels = runtimeStateMachineController.GetAllStateMachines();
-            for (int i = 0; i < stateMachineModels.Count; ++i)
-            {
-                var stateModels = stateMachineModels[i].GetStates();
-                for (int j = 0; j < stateModels.Count; ++j)
-                    usedNames.Add(stateModels[j].name);
-            }
+
+            var stateModels = stateMachineModel.GetStates();
+            for (int j = 0; j < stateModels.Count; ++j)
+                usedNames.Add(stateModels[j].name);
 
             return usedNames;
         }
+       
 
         internal static List<StateModel> GetAllStateModels(this RuntimeStateMachineController runtimeStateMachineController)
         {
@@ -146,7 +125,7 @@ namespace SAS.StateMachineGraph.Editor
         public static StateModel AddState(this RuntimeStateMachineController runtimeStateMachineController, StateMachineModel stateMachineModel, string name, Vector3 position)
         {
             var stateModel = ScriptableObject.CreateInstance<StateModel>();
-            stateModel.name = runtimeStateMachineController.MakeUniqueStateName(name);
+            stateModel.name = stateMachineModel.MakeUniqueStateName(name);
 
             // stateModel.hideFlags = HideFlags.HideInHierarchy;
 
@@ -242,8 +221,20 @@ namespace SAS.StateMachineGraph.Editor
 
         public static void Rename(this StateModel stateModel, RuntimeStateMachineController runtimeStateMachineController, string name)
         {
-            var uniqueName = runtimeStateMachineController.MakeUniqueStateName(name);
-            stateModel.name = uniqueName;
+            var allStateMachineModel = runtimeStateMachineController.GetAllStateMachines();
+            foreach (var stateMachineModel in allStateMachineModel)
+            {
+                var allStateModel = stateMachineModel.GetStates();
+                foreach(var sm in allStateModel)
+                {
+                    if (sm == stateModel)
+                    {
+                        var uniqueName = stateMachineModel.MakeUniqueStateName(name);
+                        stateModel.name = uniqueName;
+                        return;
+                    }
+                }
+            }
         }
 
         internal static void SetDefaultNode(this RuntimeStateMachineController runtimeStateMachineController, StateModel stateModel)
