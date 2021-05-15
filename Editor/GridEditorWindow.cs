@@ -50,7 +50,6 @@ namespace SAS.StateMachineGraph.Editor
                     break;
                 case EventType.ScrollWheel:
                     Zoom += 0.025f * Mathf.Sign(e.delta.y);
-                    Debug.Log(e.delta);
                     break;
             }
         }

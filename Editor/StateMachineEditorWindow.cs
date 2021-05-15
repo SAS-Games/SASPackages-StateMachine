@@ -136,7 +136,7 @@ namespace SAS.StateMachineGraph.Editor
             DrawToolBar();
             EditorUtilities.VerticalLine(new Rect(Mathf.Max(200, position.width / 5) - 2, 1, position.width, position.height), 2, Color.black);
 
-            Repaint();
+           // Repaint();
         }
 
         private void DrawStateMachineWindow()
@@ -273,7 +273,7 @@ namespace SAS.StateMachineGraph.Editor
 
         private void CreateChildMachinelNode(StateMachineModel stateMachineModel)
         {
-            var node = new StateMachineNode(new SerializedObject(stateMachineModel), stateMachineModel.GetPosition(), _transition.StartTransition, _transition.MakeTransion, RemoveStateMachineNode, SelectStateMachineNode);
+            var node = new StateMachineNode(new SerializedObject(stateMachineModel), stateMachineModel.GetPosition(), _transition.StartTransition, null, RemoveStateMachineNode, SelectStateMachineNode);
             _nodes.Add(node);
         }
 
@@ -288,6 +288,7 @@ namespace SAS.StateMachineGraph.Editor
         {
             _selectedChildStateMachines.Add(stateMachineNode.Value);
             CreateSelectedStateMachineNodes();
+            Repaint();
         }
 
         private void RemoveDefaultStateModelNode(StateNode node)
