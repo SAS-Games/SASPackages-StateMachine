@@ -23,6 +23,7 @@ namespace SAS.StateMachineGraph.Editor
         {
             Vector2 startPos;
             Vector2 endPos;
+            bool inverted = false;
             if (StartNode.Position.y < EndNode.Position.y)
             {
                 startPos = StartNode.startPort.rect.center;
@@ -32,9 +33,11 @@ namespace SAS.StateMachineGraph.Editor
             {
                 startPos = EndNode.endPort.rect.center;
                 endPos = StartNode.endPort.rect.center;
+                inverted = true;
             }
 
-            EditorUtilities.DrawArrowLine(startPos, endPos);
+            EditorUtilities.DrawLine(startPos, endPos);
+            EditorUtilities.DrawArrow(startPos, endPos, inverted);
         }
 
         public static float DistanceToPolyLine(params Vector3[] points)

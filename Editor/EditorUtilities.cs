@@ -33,8 +33,28 @@ namespace SAS.StateMachineGraph.Editor
 
         public static void DrawArrowLine(Vector3 start, Vector3 end)
         {
-            var arrowHead = new Vector3[3];
+            DrawLine(start, end);
+            DrawArrow(start, end, false);
+        }
+
+        public static void DrawLine(Vector3 start, Vector3 end)
+        {
             var arrowLine = new Vector3[2];
+            arrowLine[0] = start;
+            arrowLine[1] = end;
+            Handles.color = Color.grey;
+            Handles.DrawAAPolyLine(5, arrowLine);
+        }
+
+        public static void DrawArrow(Vector3 start, Vector3 end, bool inverted)
+        {
+            if (inverted)
+            {
+                var temp = start;
+                start = end;
+                end = temp;
+            }
+            var arrowHead = new Vector3[3];
 
             var right = (end - start).normalized;
             var up = Vector3.Cross(Vector3.forward, right).normalized;
@@ -46,11 +66,6 @@ namespace SAS.StateMachineGraph.Editor
             arrowHead[1] = mid - right * height + up * width;
             arrowHead[2] = mid - right * height - up * width;
 
-            arrowLine[0] = start;
-            arrowLine[1] = end - right * height;
-
-            Handles.color = Color.grey;
-            Handles.DrawAAPolyLine(5, arrowLine);
             Handles.color = Color.white;
             Handles.DrawAAConvexPolygon(arrowHead);
         }
