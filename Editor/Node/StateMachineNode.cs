@@ -5,23 +5,24 @@ using System.Text;
 using UnityEditor;
 using UnityEngine;
 using System.Linq;
+using Object = UnityEngine.Object;
 
 namespace SAS.StateMachineGraph.Editor
 {
     public class StateMachineNode : BaseNode
     {
-        private Action<BaseNode> _startTransition;
-        private Action<StateModel> _createConnection;
+        private Action<StateMachineNode, StateModel> _createConnection;
+        private Action<StateMachineNode> _mouseup;
         private Action<StateMachineNode> _removeNode;
         private Action<StateMachineNode> _selectStateMachine;
-        public StateMachineModel Value { get; }
 
-        public StateMachineNode(SerializedObject serializedObject, Vector2 position, Action<BaseNode> startTransition, Action<StateModel> makeTransition, Action<StateMachineNode> removeNode, Action<StateMachineNode> selectStateMachine) :
-            base(serializedObject, position, 150, 100, Settings.NodeNormalStyle, Settings.NodeFocudeStyle)
+        public StateMachineModel Value => TargetObject as StateMachineModel;
+
+        public StateMachineNode(Object targetObject, Vector2 position, Action<StateMachineNode, StateModel> makeTransition, Action<StateMachineNode> mouseup,  Action<StateMachineNode> removeNode, Action<StateMachineNode> selectStateMachine) :
+            base(targetObject, position, 150, 100, Settings.NodeNormalStyle, Settings.NodeFocudeStyle)
         {
-            Value = serializedObject.targetObject as StateMachineModel;
             _removeNode = removeNode;
-            _startTransition = startTransition;
+            _mouseup = mouseup;
             _createConnection = makeTransition;
             _selectStateMachine = selectStateMachine;
         }
@@ -29,14 +30,14 @@ namespace SAS.StateMachineGraph.Editor
         protected override void ProcessContextMenu()
         {
              GenericMenu genericMenu = new GenericMenu();
-             genericMenu.AddItem(new GUIContent("Make Transition"), false, () => _startTransition.Invoke(this));
              genericMenu.AddItem(new GUIContent("Delete"), false, () => _removeNode.Invoke(this));
              genericMenu.ShowAsContext();
         }
 
-        protected override void ProcessMouseUp(BaseNode baseNode)
+        protected override void ProcessMouseUp(BaseNode baseNode, Event e)
         {
-
+            e.Use();
+             _mouseup.Invoke(this);
         }
 
         protected override void ProcessOnDoubleClicked(BaseNode baseNode)
@@ -44,18 +45,19 @@ namespace SAS.StateMachineGraph.Editor
             _selectStateMachine.Invoke(this);
         }
 
-        private void CreateContextMenu()
+        public bool CreateAvailableStatesGenericMenu()
         {
             GenericMenu genericMenu = new GenericMenu();
             CreateGenericMenuItems(genericMenu);
             genericMenu.ShowAsContext();
+            return genericMenu.GetItemCount() > 0;
         }
 
         private void CreateGenericMenuItems(GenericMenu genericMenu)
         {
             Queue<string> traversedPath = new Queue<string>();
             Queue<StateMachineModel> stateMachineModels = new Queue<StateMachineModel>();
-            stateMachineModels.Enqueue(Value);
+            stateMachineModels.Enqueue(TargetObject as StateMachineModel);
             traversedPath.Enqueue("States");
 
             while (stateMachineModels.Count != 0)
@@ -77,7 +79,7 @@ namespace SAS.StateMachineGraph.Editor
 
         private void OnConnectEndStateSelected(object stateModel)
         {
-            _createConnection((StateModel)stateModel);
+            _createConnection(this, (StateModel)stateModel);
         }
     }
 }

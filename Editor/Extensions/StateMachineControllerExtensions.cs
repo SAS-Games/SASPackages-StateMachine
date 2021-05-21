@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace SAS.StateMachineGraph.Editor
 {
@@ -207,10 +208,10 @@ namespace SAS.StateMachineGraph.Editor
             }
         }
 
-        internal static SerializedObject AnyStateModelSO(this RuntimeStateMachineController runtimeStateMachineController)
+        internal static Object AnyStateModel(this RuntimeStateMachineController runtimeStateMachineController)
         {
             var runtimeStateMachineControllerSO = new SerializedObject(runtimeStateMachineController);
-            return new SerializedObject(runtimeStateMachineControllerSO.FindProperty(AnyStateModelVar).objectReferenceValue);
+            return runtimeStateMachineControllerSO.FindProperty(AnyStateModelVar).objectReferenceValue;
         }
 
         internal static StateModel GetDefaultState(this RuntimeStateMachineController runtimeStateMachineController)

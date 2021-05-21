@@ -9,10 +9,13 @@ namespace SAS.StateMachineGraph.Editor
         private List<Connection> _transitions = new List<Connection>();
         private Port _endPort;
         private Port _startPort;
-        SerializedObject _stateMachineSO;
-        public StateTransitionEditor(SerializedObject stateMachineSO)
+
+        public StateModel SourceStateModel { get; private set; }
+        public StateModel TargetStateModel { get; private set; }
+        RuntimeStateMachineController _runtimeStateMachineController;
+        public StateTransitionEditor(RuntimeStateMachineController runtimeStateMachineController)
         {
-            _stateMachineSO = stateMachineSO;
+            _runtimeStateMachineController = runtimeStateMachineController;
         }
 
         public void DrawConnections()
@@ -28,48 +31,45 @@ namespace SAS.StateMachineGraph.Editor
         {
             if (_endPort != null && _startPort == null)
             {
-                Handles.DrawAAPolyLine(EditorGUIUtility.whiteTexture, 3, new Vector3[] { _endPort.rect.center, e.mousePosition });
+                EditorUtilities.DrawArrowLine(_endPort.rect.center, e.mousePosition);
                 GUI.changed = true;
             }
 
             if (_startPort != null && _endPort == null)
             {
-                Handles.DrawAAPolyLine(EditorGUIUtility.whiteTexture, 3, new Vector3[] { _startPort.rect.center, e.mousePosition });
+                EditorUtilities.DrawArrowLine(_startPort.rect.center, e.mousePosition);
                 GUI.changed = true;
             }
         }
 
-        public void StartTransition(BaseNode node)
+        public void Start(BaseNode node, StateModel sourceStateModel)
         {
             ClearConnectionSelection();
             _startPort = node.startPort;
+            SourceStateModel = sourceStateModel;
         }
 
-        public void MakeTransion(BaseNode node)
+        public void Make(BaseNode node, StateModel targetStateModel)
         {
+            TargetStateModel = targetStateModel;
             if (_startPort != null)
             {
                 _endPort = node.endPort;
-                //ToDo: will visit it later
-                /* if (_startPort.node != _endPort.node && !_endPort.node.IsAnyStateNode)
-                 {
-                     AddTransition();
-                     ClearConnectionSelection();
-                 }
-                 else
-                     ClearConnectionSelection();*/
+                AddTransition();
             }
+
+            ClearConnectionSelection();
         }
 
         public void Add(BaseNode start, BaseNode end)
         {
-            _transitions.Add(new Connection(_stateMachineSO, start, end, RemoveTransition));
+            _transitions.Add(new Connection(_runtimeStateMachineController, start, end, RemoveTransition));
         }
 
         private void AddTransition()
         {
-            _transitions.Add(new Connection(_stateMachineSO, _startPort.node, _endPort.node, RemoveTransition));
-            AddStateTransition(_startPort.node, _endPort.node);
+            _transitions.Add(new Connection(_runtimeStateMachineController, _startPort.node, _endPort.node, RemoveTransition));
+            SourceStateModel.AddStateTransition(TargetStateModel);
         }
 
         private void RemoveTransition(Connection connection)
@@ -99,20 +99,8 @@ namespace SAS.StateMachineGraph.Editor
         {
             _endPort = null;
             _startPort = null;
-        }
-
-        private void AddStateTransition(BaseNode sourceStateNode, BaseNode targerStateNode)
-        {
-            var stateModelSO = sourceStateNode.serializedObject;
-            var stateTranstionsList = stateModelSO.FindProperty("m_Transitions");
-            stateTranstionsList.InsertArrayElementAtIndex(stateTranstionsList.arraySize);
-            var transitionState = stateTranstionsList.GetArrayElementAtIndex(stateTranstionsList.arraySize-1);
-            var targetState = transitionState.FindPropertyRelative("m_TargetState");
-            targetState.objectReferenceValue = targerStateNode.serializedObject.targetObject;
-            var conditions = transitionState.FindPropertyRelative("m_Conditions");
-            conditions.arraySize = 0;
-            stateTranstionsList.serializedObject.ApplyModifiedProperties();
-            stateModelSO.ApplyModifiedProperties();
+            SourceStateModel = null;
+            TargetStateModel = null;
         }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace SAS.StateMachineGraph.Editor
 {
@@ -12,18 +13,17 @@ namespace SAS.StateMachineGraph.Editor
         protected Action<BaseNode> _createConnection;
         private Action<StateNode, bool> _setAsDefaultNode;
         protected Action<StateNode> _removeNode;
-       
-        public StateModel Value { get; }
 
-        public StateNode(SerializedObject serializedObject, Vector2 position, Action<BaseNode> startTransition, Action<BaseNode> makeTransition, Action<StateNode> removeNode, Action<StateNode, bool> setAsDefaultNode) : 
-            this(serializedObject, position, startTransition,  makeTransition,  removeNode,  setAsDefaultNode, Settings.NodeNormalStyle, Settings.NodeFocudeStyle)
+        internal StateModel Value => TargetObject as StateModel;
+       
+        public StateNode(Object targetObject, Vector2 position, Action<BaseNode> startTransition, Action<BaseNode> makeTransition, Action<StateNode> removeNode, Action<StateNode, bool> setAsDefaultNode) : 
+            this(targetObject, position, startTransition,  makeTransition,  removeNode,  setAsDefaultNode, Settings.NodeNormalStyle, Settings.NodeFocudeStyle)
         {
         }
 
-        protected StateNode(SerializedObject serializedObject, Vector2 position, Action<BaseNode> startTransition, Action<BaseNode> makeTransition, Action<StateNode> removeNode, Action<StateNode, bool> setAsDefaultNode, GUIStyle normal, GUIStyle focussed) :
-              base(serializedObject, position, normal, focussed)
+        protected StateNode(Object targetObject, Vector2 position, Action<BaseNode> startTransition, Action<BaseNode> makeTransition, Action<StateNode> removeNode, Action<StateNode, bool> setAsDefaultNode, GUIStyle normal, GUIStyle focussed) :
+              base(targetObject, position, normal, focussed)
         {
-            Value = serializedObject.targetObject as StateModel;
             _removeNode = removeNode;
             _startTransition = startTransition;
             _setAsDefaultNode = setAsDefaultNode;
@@ -39,7 +39,7 @@ namespace SAS.StateMachineGraph.Editor
             genericMenu.ShowAsContext();
         }
 
-        protected override void ProcessMouseUp(BaseNode baseNode)
+        protected override void ProcessMouseUp(BaseNode baseNode, Event e)
         {
             _createConnection.Invoke(this);
         }

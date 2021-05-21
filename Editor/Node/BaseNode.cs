@@ -1,15 +1,17 @@
 ﻿using System;
 using UnityEditor;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace SAS.StateMachineGraph.Editor
 {
     public abstract class BaseNode
     {
-        public SerializedObject serializedObject;
-        public Rect rect;
+        protected SerializedObject SerializedObject { get; }
+        internal Object TargetObject { get; }
+        internal Rect rect;
         private bool _isDragged;
-        
+
         private GUIStyle _style;
         private GUIStyle _normalNodeStyle;
         private GUIStyle _selectedNodeStyle;
@@ -18,13 +20,15 @@ namespace SAS.StateMachineGraph.Editor
         public Port startPort;
 
         protected abstract void ProcessContextMenu();
-        protected abstract void ProcessMouseUp(BaseNode baseNode);
+        protected abstract void ProcessMouseUp(BaseNode baseNode, Event e);
         protected virtual void ProcessOnDoubleClicked(BaseNode baseNode) { }
         private bool _isDoubleClicked = false;
 
-        public BaseNode(SerializedObject serializedObject, Vector2 position, float width, float height, GUIStyle normal, GUIStyle selected)
+        public BaseNode(Object targetObject, Vector2 position, float width, float height, GUIStyle normal, GUIStyle selected)
         {
-            this.serializedObject = serializedObject;
+            TargetObject = targetObject;
+            SerializedObject = new SerializedObject(targetObject);
+
             Position = position;
             rect = new Rect(position.x, position.y, width, height);
             endPort = new Port(this, 1);
@@ -34,13 +38,13 @@ namespace SAS.StateMachineGraph.Editor
             _style = _normalNodeStyle;
         }
 
-        public BaseNode(SerializedObject serializedObject, Vector2 position, GUIStyle normal, GUIStyle selected) : this(serializedObject, position, 180, 50, normal, selected) { }
+        public BaseNode(Object targetObject, Vector2 position, GUIStyle normal, GUIStyle selected) : this(targetObject, position, 180, 50, normal, selected) { }
 
         public void Draw()
         {
             endPort.Draw();
             startPort.Draw();
-            GUI.Box(rect, serializedObject.targetObject.name, _style);
+            GUI.Box(rect, SerializedObject.targetObject.name, _style);
         }
 
         public virtual void Drag(Vector2 delta)
@@ -51,11 +55,11 @@ namespace SAS.StateMachineGraph.Editor
 
         public Vector3 Position
         {
-            get { return serializedObject.FindProperty("m_Position").vector3Value; }
+            get { return SerializedObject.FindProperty("m_Position").vector3Value; }
             private set
             {
-                serializedObject.FindProperty("m_Position").vector3Value = value;
-                serializedObject.ApplyModifiedProperties();
+                SerializedObject.FindProperty("m_Position").vector3Value = value;
+                SerializedObject.ApplyModifiedProperties();
             }
         }
 
@@ -97,8 +101,8 @@ namespace SAS.StateMachineGraph.Editor
                                 ProcessOnDoubleClicked(this);
                                 return false;
                             }
-                            
-                            ProcessMouseUp(this);
+
+                            ProcessMouseUp(this, e);
                             return true;
                         }
                         else if (e.button == 1)
@@ -129,7 +133,5 @@ namespace SAS.StateMachineGraph.Editor
             set { _style = value ? _selectedNodeStyle : _normalNodeStyle; }
 
         }
-
-
     }
 }

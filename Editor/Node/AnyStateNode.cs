@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace SAS.StateMachineGraph.Editor
 {
@@ -10,9 +9,10 @@ namespace SAS.StateMachineGraph.Editor
     {
         private Action<BaseNode> _startTransition;
         private StateMachineModel _stateMachineModel;
+        internal StateModel Value => TargetObject as StateModel;
 
-        public AnyStateNode(StateMachineModel stateMachineModel, SerializedObject serializedObject, Vector2 position, Action<BaseNode> startTransition) :
-               base(serializedObject, position, Settings.AnyStateNodeStyle, Settings.AnyStateFocusedNodeStyle)
+        public AnyStateNode(StateMachineModel stateMachineModel, Object targetObject, Vector2 position, Action<BaseNode> startTransition) :
+               base(targetObject, position, Settings.AnyStateNodeStyle, Settings.AnyStateFocusedNodeStyle)
         {
             _stateMachineModel = stateMachineModel;
             _startTransition = startTransition;
@@ -25,14 +25,14 @@ namespace SAS.StateMachineGraph.Editor
             genericMenu.ShowAsContext();
         }
 
-        protected override void ProcessMouseUp(BaseNode baseNode)
+        protected override void ProcessMouseUp(BaseNode baseNode, Event e)
         {
         }
 
         public override void Drag(Vector2 delta)
         {
             base.Drag(delta);
-            _stateMachineModel.SetAnyStatePosition((serializedObject.targetObject as StateModel).GetPosition()); ;
+            _stateMachineModel.SetAnyStatePosition((SerializedObject.targetObject as StateModel).GetPosition()); ;
         }
     }
 }

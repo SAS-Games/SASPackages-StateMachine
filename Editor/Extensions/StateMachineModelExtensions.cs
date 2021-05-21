@@ -95,12 +95,19 @@ namespace SAS.StateMachineGraph.Editor
                 stateMachineModel.RemoveState(stateModel);
         }
 
-        public static void SetParent(this StateMachineModel childStateMachineModel, StateMachineModel parentStateMachineModel)
+        public static void SetParent(this StateMachineModel stateMachineModel, StateMachineModel parentStateMachineModel)
         {
-            var childStateMachineModelSO = new SerializedObject(childStateMachineModel);
+            var childStateMachineModelSO = new SerializedObject(stateMachineModel);
             childStateMachineModelSO.FindProperty(ParentStateMachineVar).objectReferenceValue = parentStateMachineModel;
             childStateMachineModelSO.ApplyModifiedProperties();
         }
+
+        public static StateMachineModel GetParent(this StateMachineModel stateMachineModel)
+        {
+            var childStateMachineModelSO = new SerializedObject(stateMachineModel);
+            return childStateMachineModelSO.FindProperty(ParentStateMachineVar).objectReferenceValue as StateMachineModel;
+        }
+          
 
         internal static void SetAnyStatePosition(this StateMachineModel stateMachineModel, Vector3 position)
         {
