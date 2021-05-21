@@ -12,8 +12,10 @@ namespace SAS.StateMachineGraph.Editor
         internal StateModel Value => TargetObject as StateModel;
 
         public AnyStateNode(StateMachineModel stateMachineModel, Object targetObject, Vector2 position, Action<BaseNode> startTransition) :
-               base(targetObject, position, Settings.AnyStateNodeStyle, Settings.AnyStateFocusedNodeStyle)
+               base(targetObject, position)
         {
+            _normalStyleName = "flow node 2";
+            _focusedStyleName = "flow node 2 on";
             _stateMachineModel = stateMachineModel;
             _startTransition = startTransition;
         }

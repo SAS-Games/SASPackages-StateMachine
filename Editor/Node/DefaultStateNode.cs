@@ -11,8 +11,10 @@ namespace SAS.StateMachineGraph.Editor
     {
 
         public DefaultStateNode(Object targetObject, Vector2 position, Action<BaseNode> startTransition, Action<BaseNode> makeTransition, Action<StateNode> removeNode) :
-              base(targetObject, position, startTransition, makeTransition, removeNode, null, Settings.DefaultNormalNodeStyle, Settings.DefaultFocusedNodeStyle)
+              base(targetObject, position, startTransition, makeTransition, removeNode, null)
         {
+            _normalStyleName = "flow node 5";
+            _focusedStyleName = "flow node 5 on";
         }
 
         protected override void ProcessContextMenu()

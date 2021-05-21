@@ -14,6 +14,8 @@ namespace SAS.StateMachineGraph.Editor
         [NonSerialized] private GUIStyle anyStateNormalStyle;
         [NonSerialized] private GUIStyle anyStateFocusedStyle;
         [NonSerialized] private GUIStyle _childStateMachinestoolBarStyle;
+        [NonSerialized] private GUIStyle _stateMachineNormalStyle;
+        [NonSerialized] private GUIStyle _stateMachineFocusedStyle;
 
         public static implicit operator Settings(EditorSettings v)
         {
@@ -79,6 +81,31 @@ namespace SAS.StateMachineGraph.Editor
                     Instance.focusedStyle.alignment = TextAnchor.MiddleCenter;
                 }
                 return Instance.focusedStyle;
+            }
+        }
+
+        public static GUIStyle StateMachineNodeNormalStyle
+        {
+            get
+            {
+                if (Instance._stateMachineNormalStyle == null)
+                    Instance._stateMachineNormalStyle = Array.Find(GUI.skin.customStyles, style => style.name.Equals("flow node hex 0"));
+                return Instance._stateMachineNormalStyle;
+            }
+        }
+
+        public static GUIStyle StateMachineNodeFocudeStyle
+        {
+            get
+            {
+                if (Instance._stateMachineFocusedStyle == null)
+                {
+                    Instance._stateMachineFocusedStyle = new GUIStyle();
+                    Instance._stateMachineFocusedStyle.normal.background = EditorGUIUtility.Load("builtin skins/darkskin/images/node0 on.png") as Texture2D;
+                    Instance._stateMachineFocusedStyle.border = new RectOffset(12, 12, 12, 12);
+                    Instance._stateMachineFocusedStyle.alignment = TextAnchor.MiddleCenter;
+                }
+                return Instance._stateMachineFocusedStyle;
             }
         }
 

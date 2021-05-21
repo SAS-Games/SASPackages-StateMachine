@@ -18,9 +18,11 @@ namespace SAS.StateMachineGraph.Editor
 
         public StateMachineModel Value => TargetObject as StateMachineModel;
 
-        public StateMachineNode(Object targetObject, Vector2 position, Action<StateMachineNode, StateModel> makeTransition, Action<StateMachineNode> mouseup,  Action<StateMachineNode> removeNode, Action<StateMachineNode> selectStateMachine) :
-            base(targetObject, position, 150, 100, Settings.NodeNormalStyle, Settings.NodeFocudeStyle)
+        public StateMachineNode(Object targetObject, Vector2 position, Action<StateMachineNode, StateModel> makeTransition, Action<StateMachineNode> mouseup, Action<StateMachineNode> removeNode, Action<StateMachineNode> selectStateMachine) :
+            base(targetObject, position, 190, 40)
         {
+            _normalStyleName = "flow node hex 0";
+            _focusedStyleName = "flow node hex 0 on";
             _removeNode = removeNode;
             _mouseup = mouseup;
             _createConnection = makeTransition;
@@ -29,15 +31,15 @@ namespace SAS.StateMachineGraph.Editor
 
         protected override void ProcessContextMenu()
         {
-             GenericMenu genericMenu = new GenericMenu();
-             genericMenu.AddItem(new GUIContent("Delete"), false, () => _removeNode.Invoke(this));
-             genericMenu.ShowAsContext();
+            GenericMenu genericMenu = new GenericMenu();
+            genericMenu.AddItem(new GUIContent("Delete"), false, () => _removeNode.Invoke(this));
+            genericMenu.ShowAsContext();
         }
 
         protected override void ProcessMouseUp(BaseNode baseNode, Event e)
         {
             e.Use();
-             _mouseup.Invoke(this);
+            _mouseup.Invoke(this);
         }
 
         protected override void ProcessOnDoubleClicked(BaseNode baseNode)

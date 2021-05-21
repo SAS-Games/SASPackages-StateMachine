@@ -119,7 +119,7 @@ namespace SAS.StateMachineGraph.Editor
 
             var parentStateModel = SelectedStateMachineModel.GetParent();
             if (parentStateModel != null)
-                CreateChildMachinelNode(parentStateModel);
+                CreatePareentMachinelNode(parentStateModel);
         }
 
 
@@ -280,6 +280,12 @@ namespace SAS.StateMachineGraph.Editor
             _nodes.Add(node);
         }
 
+        private void CreatePareentMachinelNode(StateMachineModel stateMachineModel)
+        {
+            var node = new ParentStateMachineNode(stateMachineModel, stateMachineModel.GetPosition(), GoToMachineNode);
+            _nodes.Add(node);
+        }
+
         private void StateMachineModelMouseUp(StateMachineNode stateMachineNode)
         {
             if (_transition.SourceStateModel == null)
@@ -321,7 +327,18 @@ namespace SAS.StateMachineGraph.Editor
 
         private void SelectStateMachineNode(StateMachineNode stateMachineNode)
         {
+            _transition.Clear();
             _selectedChildStateMachines.Add(stateMachineNode.Value);
+            CreateSelectedStateMachineNodes();
+            Repaint();
+        }
+
+        private void GoToMachineNode(StateMachineNode stateMachineNode)
+        {
+            int index = _selectedChildStateMachines.IndexOf(stateMachineNode.Value);
+            _selectedChildStateMachines.RemoveRange(index + 1, (_selectedChildStateMachines.Count - index) - 1);
+            
+            _transition.Clear();
             CreateSelectedStateMachineNodes();
             Repaint();
         }

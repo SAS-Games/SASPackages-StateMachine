@@ -7,14 +7,15 @@ namespace SAS.StateMachineGraph.Editor
 {
     public abstract class BaseNode
     {
+        protected string _normalStyleName = "flow node 0";
+        protected string _focusedStyleName = "flow node 0 on";
         protected SerializedObject SerializedObject { get; }
         internal Object TargetObject { get; }
         internal Rect rect;
         private bool _isDragged;
 
-        private GUIStyle _style;
-        private GUIStyle _normalNodeStyle;
-        private GUIStyle _selectedNodeStyle;
+        private GUIStyle _normalStyle;
+        private GUIStyle _focusedStyle;
 
         public Port endPort;
         public Port startPort;
@@ -23,8 +24,9 @@ namespace SAS.StateMachineGraph.Editor
         protected abstract void ProcessMouseUp(BaseNode baseNode, Event e);
         protected virtual void ProcessOnDoubleClicked(BaseNode baseNode) { }
         private bool _isDoubleClicked = false;
+        protected string Prefix { get; set; }
 
-        public BaseNode(Object targetObject, Vector2 position, float width, float height, GUIStyle normal, GUIStyle selected)
+        public BaseNode(Object targetObject, Vector2 position, float width, float height)
         {
             TargetObject = targetObject;
             SerializedObject = new SerializedObject(targetObject);
@@ -33,18 +35,15 @@ namespace SAS.StateMachineGraph.Editor
             rect = new Rect(position.x, position.y, width, height);
             endPort = new Port(this, 1);
             startPort = new Port(this, 2);
-            _normalNodeStyle = normal;
-            _selectedNodeStyle = selected;
-            _style = _normalNodeStyle;
         }
 
-        public BaseNode(Object targetObject, Vector2 position, GUIStyle normal, GUIStyle selected) : this(targetObject, position, 180, 50, normal, selected) { }
+        public BaseNode(Object targetObject, Vector2 position) : this(targetObject, position, 180, 40) { }
 
         public void Draw()
         {
             endPort.Draw();
             startPort.Draw();
-            GUI.Box(rect, SerializedObject.targetObject.name, _style);
+            GUI.Box(rect, $"{Prefix} {TargetObject.name}", Style);
         }
 
         public virtual void Drag(Vector2 delta)
@@ -72,7 +71,7 @@ namespace SAS.StateMachineGraph.Editor
                     if (rect.Contains(e.mousePosition))
                     {
                         StateModelInspector.NormalView();
-                        _style = _selectedNodeStyle;
+                        IsFocused = true;
                         if (e.button == 0)
                         {
                             _isDoubleClicked = e.clickCount == 2;
@@ -86,7 +85,7 @@ namespace SAS.StateMachineGraph.Editor
                         return true;
                     }
                     else
-                        _style = _normalNodeStyle;
+                        IsFocused = false;
 
                     break;
 
@@ -129,9 +128,36 @@ namespace SAS.StateMachineGraph.Editor
 
         public bool IsFocused
         {
-            get { return _style == _selectedNodeStyle; }
-            set { _style = value ? _selectedNodeStyle : _normalNodeStyle; }
+            get;
+            set;
+        }
 
+        public GUIStyle Style
+        {
+            get
+            {
+                return IsFocused ? FocusedStyle : NormalStyle;
+            }
+        }
+
+        public GUIStyle NormalStyle
+        {
+            get
+            {
+                if (_normalStyle == null || _normalStyle.name != _normalStyleName)
+                    _normalStyle = Array.Find(GUI.skin.customStyles, style => style.name.Equals(_normalStyleName));
+                return _normalStyle;
+            }
+        }
+
+        public GUIStyle FocusedStyle
+        {
+            get
+            {
+                if (_focusedStyle == null || _focusedStyle.name != _normalStyleName)
+                    _focusedStyle = Array.Find(GUI.skin.customStyles, style => style.name.Equals(_focusedStyleName));
+                return _focusedStyle;
+            }
         }
     }
 }

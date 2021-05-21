@@ -7,8 +7,11 @@ namespace SAS.StateMachineGraph.Editor
     {
         public Vector2 panOffset { get { return _panOffset; } set { _panOffset = value; Repaint(); } }
         private Vector2 _panOffset;
-        public float Zoom { get { return _zoom; } 
-                            set { _zoom = Mathf.Clamp(value,0.2f, 2f); Repaint(); } }
+        public float Zoom
+        {
+            get { return _zoom; }
+            set { _zoom = Mathf.Clamp(value, 0.2f, 2f); Repaint(); }
+        }
         private float _zoom = 1f;
 
         protected Vector2 offset;

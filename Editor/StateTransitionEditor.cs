@@ -102,5 +102,11 @@ namespace SAS.StateMachineGraph.Editor
             SourceStateModel = null;
             TargetStateModel = null;
         }
+
+        public void Clear()
+        {
+            _transitions.Clear();
+            ClearConnectionSelection();
+        }
     }
 }

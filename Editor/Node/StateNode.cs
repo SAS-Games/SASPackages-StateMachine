@@ -16,13 +16,8 @@ namespace SAS.StateMachineGraph.Editor
 
         internal StateModel Value => TargetObject as StateModel;
        
-        public StateNode(Object targetObject, Vector2 position, Action<BaseNode> startTransition, Action<BaseNode> makeTransition, Action<StateNode> removeNode, Action<StateNode, bool> setAsDefaultNode) : 
-            this(targetObject, position, startTransition,  makeTransition,  removeNode,  setAsDefaultNode, Settings.NodeNormalStyle, Settings.NodeFocudeStyle)
-        {
-        }
-
-        protected StateNode(Object targetObject, Vector2 position, Action<BaseNode> startTransition, Action<BaseNode> makeTransition, Action<StateNode> removeNode, Action<StateNode, bool> setAsDefaultNode, GUIStyle normal, GUIStyle focussed) :
-              base(targetObject, position, normal, focussed)
+        public StateNode(Object targetObject, Vector2 position, Action<BaseNode> startTransition, Action<BaseNode> makeTransition, Action<StateNode> removeNode, Action<StateNode, bool> setAsDefaultNode) :
+              base(targetObject, position)
         {
             _removeNode = removeNode;
             _startTransition = startTransition;
