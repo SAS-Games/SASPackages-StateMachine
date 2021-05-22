@@ -12,7 +12,7 @@ namespace SAS.StateMachineGraph.Editor
     public class ParentStateMachineNode : StateMachineNode
     {
         private Action<StateMachineNode> _selectStateMachine;
-        public ParentStateMachineNode(Object targetObject, Vector2 position, Action<StateMachineNode> selectStateMachine) : base(targetObject, position, null, null, null, selectStateMachine)
+        public ParentStateMachineNode(Object targetObject, Vector2 position, bool isDefault, Action<StateMachineNode> selectStateMachine) : base(targetObject, position, isDefault, null, null, null, selectStateMachine)
         {
             _selectStateMachine = selectStateMachine;
             Prefix = "(Up)";

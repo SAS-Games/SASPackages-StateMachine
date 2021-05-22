@@ -60,14 +60,45 @@ namespace SAS.StateMachineGraph.Editor
             var up = Vector3.Cross(Vector3.forward, right).normalized;
             var size = HandleUtility.GetHandleSize(end);
             var width = size * 0.3f;
-            var height = size * 0.6f;
-            var mid = start + (end - start).normalized * Vector2.Distance(start, end) * 0.5f;
-            arrowHead[0] = mid;
+            var height = size * 0.3f;
+            var mid = Vector3.Lerp(start, end, 0.50f);
+
+            arrowHead[0] = mid + right * height;
             arrowHead[1] = mid - right * height + up * width;
             arrowHead[2] = mid - right * height - up * width;
 
             Handles.color = Color.white;
             Handles.DrawAAConvexPolygon(arrowHead);
+        }
+
+        public static void DrawTrippleArrow(Vector3 start, Vector3 end, bool inverted)
+        {
+            if (inverted)
+            {
+                var temp = start;
+                start = end;
+                end = temp;
+            }
+            var arrowHead = new Vector3[3];
+
+            var right = (end - start).normalized;
+            var up = Vector3.Cross(Vector3.forward, right).normalized;
+            var size = HandleUtility.GetHandleSize(end);
+            var width = size * 0.3f;
+            var height = size * 0.3f;
+
+            Handles.color = Color.white;
+
+            var mid = Vector3.Lerp(start, end, 0.50f);
+
+            for (int i = -1; i <= 1; i++)
+            {
+                var pos = mid - right * height * i * 1.5f;
+                arrowHead[0] = pos + right * height;
+                arrowHead[1] = pos - right * height + up * width;
+                arrowHead[2] = pos - right * height - up * width;
+                Handles.DrawAAConvexPolygon(arrowHead);
+            }
         }
     }
 }

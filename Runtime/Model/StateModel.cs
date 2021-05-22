@@ -52,11 +52,6 @@ namespace SAS.StateMachineGraph
 
 			return stateActions.ToArray();
 		}
-
-		public int GetTransitionStateIndex(StateModel state)
-		{
-			return Array.IndexOf(m_Transitions, (Array.Find(m_Transitions, ele => ele.TargetState == state)));
-		}
 	}
 }
 

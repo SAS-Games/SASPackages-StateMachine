@@ -8,18 +8,23 @@ namespace SAS.StateMachineGraph.Editor
     {
         public BaseNode StartNode { get; }
         public BaseNode EndNode { get; }
+
+        private StateModel _sourceStateModel;
+        private StateModel _targetStateModel;
+
         private Action<Connection> OnClickRemoveConnection;
         RuntimeStateMachineController _runtimeStateMachineController;
 
-        public Connection(RuntimeStateMachineController runtimeStateMachineController, BaseNode start, BaseNode end, Action<Connection> onClickRemoveConnection)
+        public Connection(RuntimeStateMachineController runtimeStateMachineController, BaseNode start, BaseNode end, StateModel sourceStateModel, StateModel targetStateModel, Action<Connection> onClickRemoveConnection)
         {
             StartNode = start;
             EndNode = end;
+            _sourceStateModel = sourceStateModel;
+            _targetStateModel = targetStateModel;
             _runtimeStateMachineController = runtimeStateMachineController;
-           // OnClickRemoveConnection = onClickRemoveConnection;
         }
 
-        void DrwaConnection()
+        private void DrwaConnection(Event e)
         {
             Vector2 startPos;
             Vector2 endPos;
@@ -38,9 +43,10 @@ namespace SAS.StateMachineGraph.Editor
 
             EditorUtilities.DrawLine(startPos, endPos);
             EditorUtilities.DrawArrow(startPos, endPos, inverted);
+            ProcessMouseEvent(e, new Vector3[] { startPos, endPos });
         }
 
-        public static float DistanceToPolyLine(params Vector3[] points)
+        private static float DistanceToPolyLine(params Vector3[] points)
         {
             if (points == null)
                 throw new ArgumentNullException(nameof(points));
@@ -54,29 +60,28 @@ namespace SAS.StateMachineGraph.Editor
             return dist;
         }
 
-        private void DrawArrow(Vector2 startPos, Vector2 endPos)
+        public void Draw(Event e)
         {
-           // startPos = GUI.matrix.MultiplyVector(startPos);
-           // endPos *= GUI.matrix.MultiplyVector(endPos);
-           // Matrix4x4 matrixBackup = GUI.matrix;
-
-            Vector2 pos = startPos + (endPos - startPos).normalized * Vector2.Distance(startPos, endPos) * 0.5f;
-            Handles.Label(pos, " text");
-            //  GUIUtility.RotateAroundPivot(Angle(StartNode.Position, EndNode.Position), pos);
-            //  if (GUI.Button(new Rect(new Vector2(pos.x - 12, pos.y - 12), Vector2.one * 24), Settings.GetArrowTexture(), GUIStyle.none))
-            {
-               // Selection.activeObject = null;
-              //  Selection.activeObject = StartNode.serializedObject.targetObject;
-             //   StartNode.IsFocused = false;
-               // int index = StartNode.state.GetTransitionStateIndex(EndNode.state); //ToDo: will visit it later
-              //  StateTransitionInspector.Show(index, _stateMachineSO, StartNode.serializedObject);
-            }
-         //   GUI.matrix = matrixBackup;
+            DrwaConnection(e);
         }
 
-        public void Draw()
+        private void ProcessMouseEvent(Event e, Vector3[] points)
         {
-            DrwaConnection();
+            switch (e.type)
+            {
+                case EventType.MouseDown:
+                    if (e.button == 0)
+                    {
+                        if (DistanceToPolyLine(points) < 10)
+                        {
+                            Selection.activeObject = _sourceStateModel;
+                            StartNode.IsFocused = false;
+                            int index = _sourceStateModel.GetTransitionStateIndex(_targetStateModel); //ToDo: will visit it later
+                            StateTransitionInspector.Show(index, _runtimeStateMachineController, _sourceStateModel.ToSerializedObject());
+                        }
+                    }
+                    break;
+            }
         }
     }
 }

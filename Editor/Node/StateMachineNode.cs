@@ -18,11 +18,11 @@ namespace SAS.StateMachineGraph.Editor
 
         public StateMachineModel Value => TargetObject as StateMachineModel;
 
-        public StateMachineNode(Object targetObject, Vector2 position, Action<StateMachineNode, StateModel> makeTransition, Action<StateMachineNode> mouseup, Action<StateMachineNode> removeNode, Action<StateMachineNode> selectStateMachine) :
+        public StateMachineNode(Object targetObject, Vector2 position, bool isDefault, Action<StateMachineNode, StateModel> makeTransition, Action<StateMachineNode> mouseup, Action<StateMachineNode> removeNode, Action<StateMachineNode> selectStateMachine) :
             base(targetObject, position, 190, 40)
         {
-            _normalStyleName = "flow node hex 0";
-            _focusedStyleName = "flow node hex 0 on";
+            _normalStyleName = isDefault ? "flow node hex 5" : "flow node hex 0";
+            _focusedStyleName = isDefault ? "flow node hex 5 on" : "flow node hex 0 on";
             _removeNode = removeNode;
             _mouseup = mouseup;
             _createConnection = makeTransition;

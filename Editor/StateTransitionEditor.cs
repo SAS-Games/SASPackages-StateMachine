@@ -18,12 +18,12 @@ namespace SAS.StateMachineGraph.Editor
             _runtimeStateMachineController = runtimeStateMachineController;
         }
 
-        public void DrawConnections()
+        public void DrawConnections(Event e)
         {
             if (_transitions != null)
             {
                 for (int i = 0; i < _transitions.Count; i++)
-                    _transitions[i].Draw();
+                    _transitions[i].Draw(e);
             }
         }
 
@@ -61,14 +61,14 @@ namespace SAS.StateMachineGraph.Editor
             ClearConnectionSelection();
         }
 
-        public void Add(BaseNode start, BaseNode end)
+        public void Add(BaseNode sourceNode, BaseNode targetNode, StateModel sourceStateModel, StateModel targetStateModel)
         {
-            _transitions.Add(new Connection(_runtimeStateMachineController, start, end, RemoveTransition));
+            _transitions.Add(new Connection(_runtimeStateMachineController, sourceNode, targetNode, sourceStateModel, targetStateModel, RemoveTransition));
         }
 
         private void AddTransition()
         {
-            _transitions.Add(new Connection(_runtimeStateMachineController, _startPort.node, _endPort.node, RemoveTransition));
+            _transitions.Add(new Connection(_runtimeStateMachineController, _startPort.node, _endPort.node, SourceStateModel, TargetStateModel, RemoveTransition));
             SourceStateModel.AddStateTransition(TargetStateModel);
         }
 

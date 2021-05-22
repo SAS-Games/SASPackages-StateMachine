@@ -146,25 +146,15 @@ namespace SAS.StateMachineGraph.Editor
             return conditions;
         }
 
-        public static void Show(int index, SerializedObject stateMachineSO, SerializedObject stateModelSO)
+        public static void Show(int index, RuntimeStateMachineController runtimeStateMachineController, SerializedObject stateModelSO)
         {
             SelectedTransitionIndex = index;
             if (index != -1)
             {
                 SelectedTransitionIndex = 0;
-                _stateMachineSO = stateMachineSO;
+                _stateMachineSO = runtimeStateMachineController.ToSerializedObject();
                 FilterTransitions(index, stateModelSO);
-                var _parameters = stateMachineSO.FindProperty("_parameters");
-                if (_parameters.arraySize > 0)
-                {
-                    _parametersList = new string[_parameters.arraySize];
-                    for (int i = 0; i < _parametersList.Length; ++i)
-                    {
-                        var element = _parameters.GetArrayElementAtIndex(i);
-                        var name = element.FindPropertyRelative("m_Name");
-                        _parametersList[i] = name.stringValue;
-                    }
-                }
+                _parametersList = runtimeStateMachineController.ParametersName();
             }
           
         }

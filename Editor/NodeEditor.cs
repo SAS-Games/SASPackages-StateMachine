@@ -23,11 +23,11 @@ namespace SAS.StateMachineGraph.Editor
             switch (id)
             {
                 case 1:
-                    rect.x = node.rect.x + node.rect.width / 2 - 10;
+                    rect.x = node.rect.x + node.rect.width / 2 - 7;
                     break;
 
                 case 2:
-                    rect.x = node.rect.x + node.rect.width / 2 + 10;
+                    rect.x = node.rect.x + node.rect.width / 2 + 7;
                     break;
             }
         }

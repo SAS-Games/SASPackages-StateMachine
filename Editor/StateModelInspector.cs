@@ -124,7 +124,7 @@ namespace SAS.StateMachineGraph.Editor
 
         private void SetupTransitions()
         {
-            _transitionStates = new ReorderableList(serializedObject, serializedObject.FindProperty("m_Transitions"), true, true, false, false);
+            _transitionStates = new ReorderableList(serializedObject, serializedObject.FindProperty("m_Transitions"), true, true, false, true);
 
             _transitionStates.drawHeaderCallback = (Rect rect) =>
             {
@@ -142,19 +142,6 @@ namespace SAS.StateMachineGraph.Editor
                 else
                     EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight), val + "None");
             };
-        }
-
-        string TextField(Rect rect, string text, string placeholder)
-        {
-            var newText = EditorGUI.TextField(rect, text);
-            if (string.IsNullOrEmpty(text))
-            {
-                var guiColor = GUI.color;
-                GUI.color = Color.grey;
-                EditorGUI.LabelField(rect, placeholder);
-                GUI.color = guiColor;
-            }
-            return newText;
         }
     }
 }

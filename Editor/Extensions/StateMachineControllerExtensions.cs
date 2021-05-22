@@ -38,7 +38,7 @@ namespace SAS.StateMachineGraph.Editor
 
         private static void AddStateMachine(this RuntimeStateMachineController runtimeStateMachineController, StateMachineModel baseStateMachineModel)
         {
-            var runtimeStateMachineControllerSO = new SerializedObject(runtimeStateMachineController);
+            var runtimeStateMachineControllerSO = runtimeStateMachineController.ToSerializedObject();
             var baseStateMachineModelProp = runtimeStateMachineControllerSO.FindProperty(BaseStateMachineModelVar);
             baseStateMachineModelProp.objectReferenceValue = baseStateMachineModel;
             runtimeStateMachineControllerSO.ApplyModifiedProperties();
@@ -60,7 +60,7 @@ namespace SAS.StateMachineGraph.Editor
 
         private static void AddAnyState(this RuntimeStateMachineController runtimeStateMachineController, StateModel anyStateModel)
         {
-            var runtimeStateMachineControllerSO = new SerializedObject(runtimeStateMachineController);
+            var runtimeStateMachineControllerSO = runtimeStateMachineController.ToSerializedObject();
             var anyStateModelProp = runtimeStateMachineControllerSO.FindProperty(AnyStateModelVar);
             anyStateModelProp.objectReferenceValue = anyStateModel;
             runtimeStateMachineControllerSO.ApplyModifiedProperties();
@@ -90,7 +90,7 @@ namespace SAS.StateMachineGraph.Editor
 
         internal static List<StateMachineModel> GetAllStateMachines(this RuntimeStateMachineController runtimeStateMachineController)
         {
-            var runtimeStateMachineControllerSO = new SerializedObject(runtimeStateMachineController);
+            var runtimeStateMachineControllerSO = runtimeStateMachineController.ToSerializedObject();
             var baseStateMachineModel = runtimeStateMachineControllerSO.FindProperty(BaseStateMachineModelVar).objectReferenceValue as StateMachineModel;
 
             List<StateMachineModel> ret = new List<StateMachineModel>() { baseStateMachineModel };
@@ -100,7 +100,7 @@ namespace SAS.StateMachineGraph.Editor
 
         internal static StateMachineModel BaseStateMachineModel(this RuntimeStateMachineController runtimeStateMachineController)
         {
-            var runtimeStateMachineControllerSO = new SerializedObject(runtimeStateMachineController);
+            var runtimeStateMachineControllerSO = runtimeStateMachineController.ToSerializedObject();
             return runtimeStateMachineControllerSO.FindProperty(BaseStateMachineModelVar).objectReferenceValue as StateMachineModel;
         }
 
@@ -210,14 +210,12 @@ namespace SAS.StateMachineGraph.Editor
 
         internal static Object AnyStateModel(this RuntimeStateMachineController runtimeStateMachineController)
         {
-            var runtimeStateMachineControllerSO = new SerializedObject(runtimeStateMachineController);
-            return runtimeStateMachineControllerSO.FindProperty(AnyStateModelVar).objectReferenceValue;
+            return runtimeStateMachineController.ToSerializedObject().FindProperty(AnyStateModelVar).objectReferenceValue;
         }
 
         internal static StateModel GetDefaultState(this RuntimeStateMachineController runtimeStateMachineController)
         {
-            var runtimeStateMachineControllerSO = new SerializedObject(runtimeStateMachineController);
-            return runtimeStateMachineControllerSO.FindProperty(DefaultStateModelVar).objectReferenceValue as StateModel;
+            return runtimeStateMachineController.ToSerializedObject().FindProperty(DefaultStateModelVar).objectReferenceValue as StateModel;
         }
 
         public static void Rename(this StateModel stateModel, RuntimeStateMachineController runtimeStateMachineController, string name)
@@ -240,9 +238,44 @@ namespace SAS.StateMachineGraph.Editor
 
         internal static void SetDefaultNode(this RuntimeStateMachineController runtimeStateMachineController, StateModel stateModel)
         {
-            var runtimeStateMachineControllerSO = new SerializedObject(runtimeStateMachineController);
+            var runtimeStateMachineControllerSO = runtimeStateMachineController.ToSerializedObject();
             runtimeStateMachineControllerSO.FindProperty(DefaultStateModelVar).objectReferenceValue = stateModel;
             runtimeStateMachineControllerSO.ApplyModifiedProperties();
+        }
+
+        internal static bool IsDefaultStateMachine(this RuntimeStateMachineController runtimeStateMachineController, StateMachineModel stateMachineModel)
+        {
+            var defaultStateModel = runtimeStateMachineController.GetDefaultState();
+            var allStateModels = stateMachineModel.GetStates();
+            foreach (var stateModel in allStateModels)
+            {
+                if (defaultStateModel == stateModel)
+                    return true;
+            }
+
+            return false;
+        }
+        public static SerializedObject ToSerializedObject(this RuntimeStateMachineController runtimeStateMachineController)
+        {
+            return new SerializedObject(runtimeStateMachineController);
+        }
+
+        internal static string[] ParametersName(this RuntimeStateMachineController runtimeStateMachineController)
+        {
+            var runtimeStateMachineControllerSO = runtimeStateMachineController.ToSerializedObject();
+            var _parameters = runtimeStateMachineControllerSO.FindProperty("_parameters");
+            var parametersName = new string[_parameters.arraySize];
+            if (_parameters.arraySize > 0)
+            {
+                for (int i = 0; i < parametersName.Length; ++i)
+                {
+                    var element = _parameters.GetArrayElementAtIndex(i);
+                    var name = element.FindPropertyRelative("m_Name");
+                    parametersName[i] = name.stringValue;
+                }
+            }
+
+            return parametersName;
         }
     }
 }
