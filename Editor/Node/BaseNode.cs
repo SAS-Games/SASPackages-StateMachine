@@ -43,7 +43,7 @@ namespace SAS.StateMachineGraph.Editor
         {
             endPort.Draw();
             startPort.Draw();
-            GUI.Box(rect, $"{Prefix} {TargetObject.name}", Style);
+            GUI.Box(rect, $"{Prefix} {TargetObject?.name}", Style);
         }
 
         public virtual void Drag(Vector2 delta)

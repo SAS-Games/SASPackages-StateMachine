@@ -379,7 +379,7 @@ namespace SAS.StateMachineGraph.Editor
         private void RemoveDefaultStateModelNode(StateNode node)
         {
             RuntimeStateMachineController.RemoveDefaultState(SelectedStateMachineModel, node.Value);
-            RemoveStateModelNode(node);
+            _nodes.Remove(node);
         }
 
         private void RemoveStateModelNode(StateNode node)

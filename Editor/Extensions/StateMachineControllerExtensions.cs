@@ -140,8 +140,8 @@ namespace SAS.StateMachineGraph.Editor
 
         internal static void RemoveDefaultState(this RuntimeStateMachineController runtimeStateMachineController, StateMachineModel stateMachineModel, StateModel stateModel)
         {
-            runtimeStateMachineController.RemoveStateInternal(stateMachineModel, stateModel);
             runtimeStateMachineController.SetDefaultNode(null);
+            runtimeStateMachineController.RemoveStateInternal(stateMachineModel, stateModel);
             AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(runtimeStateMachineController));
         }
 
