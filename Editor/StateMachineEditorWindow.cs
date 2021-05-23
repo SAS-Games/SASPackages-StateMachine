@@ -121,21 +121,45 @@ namespace SAS.StateMachineGraph.Editor
                     sourceStateModel = stateNode.Value;
                 else if (sourceNode is AnyStateNode anyStateNode)
                     sourceStateModel = anyStateNode.Value;
-
-                if (sourceStateModel != null)
+                else if (sourceNode is ParentStateMachineNode parentStateMachine)
                 {
-                    var stateTransitions = sourceStateModel?.GetTransitionsProp();
-                    for (int i = 0; i < stateTransitions.arraySize; ++i)
+                    var stateModels = parentStateMachine.Value.GetStates();
+                    foreach (var stateModel in stateModels)
+                        CreateTransitions(sourceNode, stateModel);
+                    return;
+                }
+                CreateTransitions(sourceNode, sourceStateModel);
+            }
+        }
+
+        private void CreateTransitions(BaseNode sourceNode, StateModel sourceStateModel)
+        {
+            if (sourceStateModel == null)
+                return;
+
+            var stateTransitions = sourceStateModel?.GetTransitionsProp();
+            for (int i = 0; i < stateTransitions.arraySize; ++i)
+            {
+                var element = stateTransitions.GetArrayElementAtIndex(i);
+                var targetStateModel = element.FindPropertyRelative("m_TargetState").objectReferenceValue as StateModel;
+                var targetNode = _nodes.Find(ele => ele.TargetObject == targetStateModel);
+                if (targetNode == null)
+                {
+                    //check if target state belongs to any childStateMachine
+                    foreach (BaseNode node in _nodes)
                     {
-                        var element = stateTransitions.GetArrayElementAtIndex(i);
-                        var targetStateModel = element.FindPropertyRelative("m_TargetState").objectReferenceValue as StateModel;
-                        var targetNode = _nodes.Find(ele => ele.TargetObject == targetStateModel);
-                        if (targetNode != null)
-                            _transition.Add(sourceNode, targetNode, sourceStateModel, targetStateModel ) ;
+                        if (node is StateMachineNode stateMachineNode)
+                        {
+                            if (stateMachineNode.Value.Contains(targetStateModel))
+                            {
+                                targetNode = node;
+                                break;
+                            }
+                        }
                     }
                 }
+                _transition.Add(sourceNode, targetNode, sourceStateModel, targetStateModel);
             }
-
         }
 
         protected override void OnGUI()
@@ -162,9 +186,10 @@ namespace SAS.StateMachineGraph.Editor
             // SetCurrentActiveNode();
 
             _transition.DrawConnectionLine(Event.current);
-            _transition.DrawConnections(Event.current);
+            _transition.DrawConnections();
             DrawNodes();
             ProcessNodeEvents(Event.current);
+            _transition.ProcessConnectionEvents(Event.current);
             ProcessMouseEvent(Event.current);
         }
 
@@ -208,12 +233,11 @@ namespace SAS.StateMachineGraph.Editor
             base.ProcessMouseEvent(e);
             switch (e.type)
             {
-                case EventType.MouseDown:
+                case EventType.MouseUp:
                     if (e.button == 1)
                         ProcessContextMenu(e.mousePosition);
-                    break;
-                case EventType.MouseUp:
-                    if (e.button == 0)
+
+                    else if (e.button == 0)
                         _transition.ClearConnectionSelection();
                     break;
             }

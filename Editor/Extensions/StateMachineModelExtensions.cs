@@ -188,7 +188,6 @@ namespace SAS.StateMachineGraph.Editor
             return childStateMachines;
         }
 
-
         internal static List<StateMachineModel> GetStateMachineRecursivily(this StateMachineModel stateMachineModel)
         {
             var childStateMachines = stateMachineModel.GetChildStateMachines();
@@ -199,6 +198,22 @@ namespace SAS.StateMachineGraph.Editor
                 stateMachineModels.AddRange(childStateMachines[i].GetStateMachineRecursivily());
 
             return stateMachineModels;
+        }
+
+        internal static bool Contains(this StateMachineModel stateMachineModel, StateModel stateModel, bool recursive = true)
+        {
+            return stateMachineModel.GetStatesRecursivily().IndexOf(stateModel) != -1;
+        }
+
+        internal static List<StateModel> GetStatesRecursivily(this StateMachineModel stateMachineModel)
+        {
+            var stateModels = new List<StateModel>();
+            var childStateMachinesModel = new List<StateMachineModel>() { stateMachineModel };
+            childStateMachinesModel.AddRange(stateMachineModel.GetStateMachineRecursivily());
+            foreach (var csmm in childStateMachinesModel)
+                stateModels.AddRange(csmm.GetStates());
+
+            return stateModels;
         }
 
         internal static List<StateModel> GetStates(this StateMachineModel stateMachineModel)

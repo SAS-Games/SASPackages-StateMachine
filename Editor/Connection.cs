@@ -9,41 +9,48 @@ namespace SAS.StateMachineGraph.Editor
         public BaseNode StartNode { get; }
         public BaseNode EndNode { get; }
 
-        private StateModel _sourceStateModel;
-        private StateModel _targetStateModel;
+        public StateModel SourceStateModel { get; }
+        public StateModel TargetStateModel { get; }
 
-        private Action<Connection> OnClickRemoveConnection;
+        private Vector2 _startPos;
+        private Vector2 _endPos;
+
+        private Action<Connection> _removeConnection;
         RuntimeStateMachineController _runtimeStateMachineController;
 
-        public Connection(RuntimeStateMachineController runtimeStateMachineController, BaseNode start, BaseNode end, StateModel sourceStateModel, StateModel targetStateModel, Action<Connection> onClickRemoveConnection)
+        public Connection(RuntimeStateMachineController runtimeStateMachineController, BaseNode start, BaseNode end, StateModel sourceStateModel, StateModel targetStateModel, Action<Connection> removeConnection)
         {
             StartNode = start;
             EndNode = end;
-            _sourceStateModel = sourceStateModel;
-            _targetStateModel = targetStateModel;
+            SourceStateModel = sourceStateModel;
+            TargetStateModel = targetStateModel;
             _runtimeStateMachineController = runtimeStateMachineController;
+            _removeConnection = removeConnection;
         }
 
-        private void DrwaConnection(Event e)
+       
+
+        private void DrwaConnection()
         {
-            Vector2 startPos;
-            Vector2 endPos;
+           
             bool inverted = false;
             if (StartNode.Position.y < EndNode.Position.y)
             {
-                startPos = StartNode.startPort.rect.center;
-                endPos = EndNode.startPort.rect.center;
+                _startPos = StartNode.startPort.rect.center;
+                _endPos = EndNode.startPort.rect.center;
             }
             else
             {
-                startPos = EndNode.endPort.rect.center;
-                endPos = StartNode.endPort.rect.center;
+                _startPos = EndNode.endPort.rect.center;
+                _endPos = StartNode.endPort.rect.center;
                 inverted = true;
             }
 
-            EditorUtilities.DrawLine(startPos, endPos);
-            EditorUtilities.DrawArrow(startPos, endPos, inverted);
-            ProcessMouseEvent(e, new Vector3[] { startPos, endPos });
+            EditorUtilities.DrawLine(_startPos, _endPos);
+            if (SourceStateModel.GetTransitionCount(TargetStateModel) <= 1)
+                EditorUtilities.DrawArrow(_startPos, _endPos, inverted);
+            else
+                EditorUtilities.DrawTrippleArrow(_startPos, _endPos, inverted);
         }
 
         private static float DistanceToPolyLine(params Vector3[] points)
@@ -60,28 +67,50 @@ namespace SAS.StateMachineGraph.Editor
             return dist;
         }
 
-        public void Draw(Event e)
+        public void Draw()
         {
-            DrwaConnection(e);
+            DrwaConnection();
+        }
+
+        public void ProcessMouseEvent(Event e)
+        {
+            ProcessMouseEvent(e, new Vector3[] { _startPos, _endPos });
         }
 
         private void ProcessMouseEvent(Event e, Vector3[] points)
         {
-            switch (e.type)
-            {
-                case EventType.MouseDown:
-                    if (e.button == 0)
-                    {
-                        if (DistanceToPolyLine(points) < 10)
+            if (DistanceToPolyLine(points) < 10)
+
+                switch (e.type)
+                {
+                    case EventType.MouseDown:
+
+                        if (e.button == 0)
                         {
-                            Selection.activeObject = _sourceStateModel;
+
+                            Selection.activeObject = SourceStateModel;
                             StartNode.IsFocused = false;
-                            int index = _sourceStateModel.GetTransitionStateIndex(_targetStateModel); //ToDo: will visit it later
-                            StateTransitionInspector.Show(index, _runtimeStateMachineController, _sourceStateModel.ToSerializedObject());
+                            int index = SourceStateModel.GetTransitionStateIndex(TargetStateModel);
+                            StateTransitionInspector.Show(index, _runtimeStateMachineController, SourceStateModel.ToSerializedObject());
+
                         }
-                    }
-                    break;
-            }
+                        break;
+                    case EventType.MouseUp:
+                        if (e.button == 1)
+                        {
+                            e.Use();
+                            ProcessContextMenu(e.mousePosition);
+                        }
+                        break;
+
+                }
+        }
+
+        private void ProcessContextMenu(Vector2 mousePosition)
+        {
+            GenericMenu genericMenu = new GenericMenu();
+            genericMenu.AddItem(new GUIContent("Clear Connection"), false, () => _removeConnection?.Invoke(this));
+            genericMenu.ShowAsContext();
         }
     }
 }

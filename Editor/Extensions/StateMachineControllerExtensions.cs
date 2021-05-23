@@ -193,6 +193,7 @@ namespace SAS.StateMachineGraph.Editor
         internal static void ClearAllTransition(this RuntimeStateMachineController runtimeStateMachineController, StateModel stateModel)
         {
             var allStateModels = runtimeStateMachineController.GetAllStateModels();
+            allStateModels.Add(runtimeStateMachineController.AnyStateModel());
             foreach (var sm in allStateModels)
             {
                 var stateTransitions = new SerializedObject(sm).FindProperty("m_Transitions");
@@ -200,7 +201,7 @@ namespace SAS.StateMachineGraph.Editor
                 {
                     var element = stateTransitions.GetArrayElementAtIndex(i);
 
-                    if (element.FindPropertyRelative("m_TargetState").objectReferenceValue == stateModel)
+                    if (element.FindPropertyRelative("m_TargetState").objectReferenceValue == stateModel || element.FindPropertyRelative("m_TargetState").objectReferenceValue == null)
                         stateTransitions.DeleteArrayElementAtIndex(i);
                 }
 
@@ -208,9 +209,9 @@ namespace SAS.StateMachineGraph.Editor
             }
         }
 
-        internal static Object AnyStateModel(this RuntimeStateMachineController runtimeStateMachineController)
+        internal static StateModel AnyStateModel(this RuntimeStateMachineController runtimeStateMachineController)
         {
-            return runtimeStateMachineController.ToSerializedObject().FindProperty(AnyStateModelVar).objectReferenceValue;
+            return runtimeStateMachineController.ToSerializedObject().FindProperty(AnyStateModelVar).objectReferenceValue as StateModel;
         }
 
         internal static StateModel GetDefaultState(this RuntimeStateMachineController runtimeStateMachineController)

@@ -55,9 +55,39 @@ namespace SAS.StateMachineGraph.Editor
             return -1;
         }
 
+        public static int GetTransitionCount(this StateModel state, StateModel targetState)
+        {
+            int count = 0;
+            var stateTransitions = state.GetTransitionsProp();
+            for (int i = 0; i < stateTransitions.arraySize; ++i)
+            {
+                var element = stateTransitions.GetArrayElementAtIndex(i);
+                if (element.FindPropertyRelative("m_TargetState").objectReferenceValue == targetState)
+                    count++;
+            }
+
+            return count;
+        }
+
         public static SerializedObject ToSerializedObject(this StateModel stateModel)
         {
             return new SerializedObject(stateModel);
+        }
+
+        public static void ClearConnection(this StateModel sourceStateModel, StateModel targetStateMode)
+        {
+            var stateTransitions = sourceStateModel.GetTransitionsProp();
+            for (int i = 0; i < stateTransitions.arraySize; ++i)
+            {
+                var element = stateTransitions.GetArrayElementAtIndex(i);
+                if (element.FindPropertyRelative("m_TargetState").objectReferenceValue == targetStateMode)
+                {
+                    stateTransitions.DeleteArrayElementAtIndex(i);
+                    stateTransitions.serializedObject.ApplyModifiedProperties();
+                    break;
+                }
+
+            }
         }
     }
 }

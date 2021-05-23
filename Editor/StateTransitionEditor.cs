@@ -18,12 +18,21 @@ namespace SAS.StateMachineGraph.Editor
             _runtimeStateMachineController = runtimeStateMachineController;
         }
 
-        public void DrawConnections(Event e)
+        public void DrawConnections()
         {
             if (_transitions != null)
             {
                 for (int i = 0; i < _transitions.Count; i++)
-                    _transitions[i].Draw(e);
+                    _transitions[i].Draw();
+            }
+        }
+
+        public void ProcessConnectionEvents(Event e)
+        {
+            if (_transitions != null)
+            {
+                for (int i = 0; i < _transitions.Count; i++)
+                    _transitions[i].ProcessMouseEvent(e);
             }
         }
 
@@ -74,7 +83,7 @@ namespace SAS.StateMachineGraph.Editor
 
         private void RemoveTransition(Connection connection)
         {
-            // connection.startPort.node.state.RemoveTransitionState(connection.endPort.node.state);
+            connection.SourceStateModel.ClearConnection(connection.TargetStateModel);
             _transitions.Remove(connection);
         }
 
