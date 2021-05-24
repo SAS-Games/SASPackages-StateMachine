@@ -5,13 +5,11 @@ namespace SAS.StateMachineGraph
 {
     public class RuntimeStateMachineController : ScriptableObject
     {
-        private const string AnyStateModelName = "Any State";
-        [SerializeField] private StateMachineModel m_BaseStateMachineModel;
-        [SerializeField] private List<StateModel> _stateModels = new List<StateModel>();
-        [SerializeField] private StateMachineParameter[] _parameters;
-        [SerializeField] private StateModel m_DefaultStateModel;
-        [SerializeField] private StateModel m_AnyStateModel;
-
+        [SerializeField] private StateMachineModel m_BaseStateMachineModel = default;
+        [SerializeField] private StateMachineParameter[] _parameters = default;
+        [SerializeField] private StateModel m_DefaultStateModel = default;
+        [SerializeField] private StateModel m_AnyStateModel = default;
+        
         private void Awake()
         {
 #if UNITY_EDITOR
@@ -26,12 +24,15 @@ namespace SAS.StateMachineGraph
             StateMachine stateMachine = new StateMachine(actor, _parameters);
             var cachedState = new Dictionary<ScriptableObject, object>();
             var cachedActions = new Dictionary<StateActionModel, object[]>();
-            foreach (StateModel stateModel in _stateModels)
+            
+            var stateModels = m_BaseStateMachineModel.GetStatesRecursivily();
+
+            foreach (StateModel stateModel in stateModels)
             {
                 var state = stateModel.GetState(stateMachine, cachedState, cachedActions);
                 if (stateModel == m_DefaultStateModel)
                     stateMachine.DefaultState = state;
-                else if (stateModel.name.Equals(AnyStateModelName))
+                else if (stateModel == m_AnyStateModel)
                     stateMachine.AnyState = state;
             }
 
@@ -42,7 +43,6 @@ namespace SAS.StateMachineGraph
         internal void Initialize(RuntimeStateMachineController model)
         {
             name = model.name;
-            _stateModels = model._stateModels;
             _parameters = new StateMachineParameter[model._parameters.Length];
             
             for(int i =0; i < _parameters.Length; ++i)

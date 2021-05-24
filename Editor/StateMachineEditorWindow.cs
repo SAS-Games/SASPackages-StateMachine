@@ -174,8 +174,8 @@ namespace SAS.StateMachineGraph.Editor
             DrawStateMachineWindow();
             EditorZoomArea.End();
 
-            DrawParameterWindow();
             DrawToolBar();
+            DrawParameterWindow();
             EditorUtilities.VerticalLine(new Rect(Mathf.Max(200, position.width / 5) - 2, 1, position.width, position.height), 2, Color.black);
         }
 
@@ -196,7 +196,7 @@ namespace SAS.StateMachineGraph.Editor
         private void DrawToolBar()
         {
             EditorUtilities.HorizontalLine(new Rect(0, -2, position.width, 21), 22, new Color(0.2196079f, 0.2196079f, 0.2196079f));
-            DrawStateMachineToolBar(new Rect(0, 0, position.width, 20));
+            DrawStateMachineToolBar(new Rect(0, -1, position.width, 20));
             EditorUtilities.HorizontalLine(new Rect(0, 20, position.width, 21), 1, Color.black);
         }
 
@@ -207,7 +207,7 @@ namespace SAS.StateMachineGraph.Editor
             if (Application.isPlaying && RuntimeStateMachineController != null)
                 _parameterEditor = new StateMachineParameterEditor(new SerializedObject(RuntimeStateMachineController));
 
-            var windowRect = GUI.Window(1, new Rect(0, 0, Mathf.Max(200, position.width / 5), position.height - 2), _parameterEditor.DrawParametersWindow, "", new GUIStyle());
+            var windowRect = GUI.Window(1, new Rect(0, -2, Mathf.Max(200, position.width / 5), position.height - 2), _parameterEditor.DrawParametersWindow, "", new GUIStyle());
             _parameterEditor.DrawRect(windowRect);
             EndWindows();
         }
@@ -215,7 +215,10 @@ namespace SAS.StateMachineGraph.Editor
         int selectedIndex = 0;
         private void DrawStateMachineToolBar(Rect rect)
         {
-            rect.x = Mathf.Max(200, position.width / 5) - 2;
+            if (SelectedStateMachineModel == null)
+                return;
+
+            rect.x = Mathf.Max(200, position.width / 5) - 10;
             var childStateMachines = _selectedChildStateMachines.Select(ele => ele.name).ToArray();
 
             selectedIndex = GUI.Toolbar(rect, _selectedChildStateMachines.Count - 1, childStateMachines, Settings.ChildStateMachinestoolBarStyle);
@@ -380,13 +383,14 @@ namespace SAS.StateMachineGraph.Editor
         {
             RuntimeStateMachineController.RemoveDefaultState(SelectedStateMachineModel, node.Value);
             _nodes.Remove(node);
+            CreateSelectedStateMachineNodes();
         }
 
         private void RemoveStateModelNode(StateNode node)
         {
             RuntimeStateMachineController.RemoveState(SelectedStateMachineModel, node.Value);
             _nodes.Remove(node);
-            // _transition.ClearNodeConnection(node);
+            CreateSelectedStateMachineNodes();
         }
 
         private void SetAsDefaultNode(StateNode stateModelNode, bool isFocused)

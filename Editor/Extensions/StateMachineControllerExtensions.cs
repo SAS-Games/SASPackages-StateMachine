@@ -19,7 +19,7 @@ namespace SAS.StateMachineGraph.Editor
 
             controller.name = Path.GetFileName(path);
             AssetDatabase.CreateAsset(controller, path);
-            controller.AddStateMachine("Base State Machine");
+            controller.AddStateMachine("Base StateMachine");
             return controller;
         }
 
@@ -76,7 +76,6 @@ namespace SAS.StateMachineGraph.Editor
 
             return usedNames;
         }
-       
 
         internal static List<StateModel> GetAllStateModels(this RuntimeStateMachineController runtimeStateMachineController)
         {
@@ -90,8 +89,7 @@ namespace SAS.StateMachineGraph.Editor
 
         internal static List<StateMachineModel> GetAllStateMachines(this RuntimeStateMachineController runtimeStateMachineController)
         {
-            var runtimeStateMachineControllerSO = runtimeStateMachineController.ToSerializedObject();
-            var baseStateMachineModel = runtimeStateMachineControllerSO.FindProperty(BaseStateMachineModelVar).objectReferenceValue as StateMachineModel;
+            var baseStateMachineModel = runtimeStateMachineController.BaseStateMachineModel();
 
             List<StateMachineModel> ret = new List<StateMachineModel>() { baseStateMachineModel };
             ret.AddRange(baseStateMachineModel.GetStateMachineRecursivily());
@@ -104,24 +102,24 @@ namespace SAS.StateMachineGraph.Editor
             return runtimeStateMachineControllerSO.FindProperty(BaseStateMachineModelVar).objectReferenceValue as StateMachineModel;
         }
 
-        internal static StateMachineModel GetStateMachineModel(this RuntimeStateMachineController runtimeStateMachineController,string name)
+        internal static StateMachineModel GetStateMachineModel(this RuntimeStateMachineController runtimeStateMachineController, string name)
         {
-           return runtimeStateMachineController.GetAllStateMachines().Find(smm=>smm.name.Equals(name, StringComparison.OrdinalIgnoreCase));
+            return runtimeStateMachineController.GetAllStateMachines().Find(smm => smm.name.Equals(name, StringComparison.OrdinalIgnoreCase));
         }
 
-      /*  public static void AddState(this RuntimeStateMachineController runtimeStateMachineController, StateMachineModel stateMachineModel, string name)
-        {
-            var stateMachineSO = new SerializedObject(stateMachineModel);
-            var stateModelsProp = stateMachineSO.FindProperty(StateMachineModelExtensions.StateModelsVar);
+        /*  public static void AddState(this RuntimeStateMachineController runtimeStateMachineController, StateMachineModel stateMachineModel, string name)
+          {
+              var stateMachineSO = new SerializedObject(stateMachineModel);
+              var stateModelsProp = stateMachineSO.FindProperty(StateMachineModelExtensions.StateModelsVar);
 
-            if (stateModelsProp.arraySize > 0)
-            {
-                var stateModel = stateModelsProp.GetArrayElementAtIndex(stateModelsProp.arraySize - 1).objectReferenceValue as StateModel;
-                runtimeStateMachineController.AddState(stateMachineModel, name, stateModel.GetPosition() + new Vector3(35, 65));
-            }
-            else
-                runtimeStateMachineController.AddState(stateMachineModel, name, new Vector3(200, 0, 0));
-        }*/
+              if (stateModelsProp.arraySize > 0)
+              {
+                  var stateModel = stateModelsProp.GetArrayElementAtIndex(stateModelsProp.arraySize - 1).objectReferenceValue as StateModel;
+                  runtimeStateMachineController.AddState(stateMachineModel, name, stateModel.GetPosition() + new Vector3(35, 65));
+              }
+              else
+                  runtimeStateMachineController.AddState(stateMachineModel, name, new Vector3(200, 0, 0));
+          }*/
 
         public static StateModel AddState(this RuntimeStateMachineController runtimeStateMachineController, StateMachineModel stateMachineModel, string name, Vector3 position)
         {
@@ -168,7 +166,7 @@ namespace SAS.StateMachineGraph.Editor
         internal static void RemoveStateMachine(this RuntimeStateMachineController runtimeStateMachineController, StateMachineModel stateMachineModel)
         {
             runtimeStateMachineController.RemoveStateMachineRecursively(stateMachineModel);
-            
+
             runtimeStateMachineController.RemoveStateMachineInternal(stateMachineModel);
             AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(runtimeStateMachineController));
         }
@@ -225,7 +223,7 @@ namespace SAS.StateMachineGraph.Editor
             foreach (var stateMachineModel in allStateMachineModel)
             {
                 var allStateModel = stateMachineModel.GetStates();
-                foreach(var sm in allStateModel)
+                foreach (var sm in allStateModel)
                 {
                     if (sm == stateModel)
                     {
