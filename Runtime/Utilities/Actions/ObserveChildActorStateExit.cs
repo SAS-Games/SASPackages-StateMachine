@@ -13,7 +13,7 @@ namespace SAS.StateMachineGraph.Utilities
         public void OnInitialize(Actor actor, string tag, string key)
         {
             _stateName = key;
-            actor.TryGet(out _childActor, tag, true);
+            actor.TryGetComponentInChildren(out _childActor, tag, true);
         }
 
         public void Execute(Actor actor)

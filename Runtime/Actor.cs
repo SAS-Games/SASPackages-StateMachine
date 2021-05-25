@@ -63,31 +63,35 @@ namespace SAS.StateMachineGraph
             StateMachineController?.TryTransition(OnStateChanged);
         }
 
-        public T Get<T>(string tag = "", bool includeInactive = false)
+        public T Get<T>(string tag = "") where T : ScriptableObject
         {
-            if (TryGet<T>(out var service, tag, includeInactive))
+            if (TryGet<T>(out var service, tag))
                 return service;
             return default(T);
         }
 
 
-        public bool TryGet<T>(out T service, string tag = "", bool includeInactive = false)
+        public bool TryGet<T>(out T service, string tag = "") where T : ScriptableObject
         {
-            if (!_serviceLocator.TryGet<T>(out service, tag))
-            {
-                if (typeof(T).IsSubclassOf(typeof(Component)))
-                    return TryGetComponent(out service, tag, includeInactive);
-            }
-            return true;
+            return _serviceLocator.TryGet<T>(out service, tag);
         }
 
-        private bool TryGetComponent<T>(out T component, string tag, bool includeInactive)
+        public bool TryGetComponentInChildren<T>(out T component, string tag, bool includeInactive)
         {
-            component = (T)(object)GetComponent(typeof(T), tag, includeInactive);
+            component = (T)(object)GetComponentInChildren(typeof(T), tag, includeInactive);
             return component != null;
         }
 
-        public bool TryGetComponents<T>(string tag, out T[] components, bool includeInactive = false)
+        public Component GetComponentInChildren(Type type, string tag, bool includeInactive)
+        {
+            var obj = TaggerExtensions.GetComponentInChildren(this, type, tag, includeInactive);
+            if (obj == null)
+                Debug.LogError($"No component of type {type.GetType()} with tag {tag} is found under actor {this}, attached on the game object {gameObject.name}. Try assigning the component with the right Tag");
+
+            return obj;
+        }
+
+        public bool GetComponentsInChildren<T>(string tag, out T[] components, bool includeInactive = false)
         {
             var results = this.GetComponentsInChildren(typeof(T), tag, includeInactive);
             try
@@ -107,26 +111,6 @@ namespace SAS.StateMachineGraph
             }
 
             return true;
-        }
-
-        private Component GetComponent(Type type, string tag, bool includeInactive)
-        {
-            if (!_serviceLocator.TryGet(type, out var obj, tag))
-            {
-                obj = this.GetComponentInChildren(type, tag, includeInactive);
-                if (obj != null)
-                    _serviceLocator.Add(type, obj, tag);
-                else
-                    Debug.LogError($"No component of type {type.GetType()} with tag {tag} is found under actor {this}, attached on the game object {gameObject.name}. Try assigning the component with the right Tag");
-            }
-
-            if (!includeInactive && !(obj as Behaviour).isActiveAndEnabled)
-            {
-                obj = null;
-                Debug.LogError($"No active component of type {type.GetType()} with tag {tag} is found under actor {this}, attached on the game object {gameObject.name}. Try assigning the component with the right Tag and Make sure that the component is active");
-            }
-
-            return obj as Component;
         }
 
         public void SetFloat(string name, float value)
