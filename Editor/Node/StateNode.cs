@@ -15,21 +15,38 @@ namespace SAS.StateMachineGraph.Editor
         protected Action<StateNode> _removeNode;
 
         internal StateModel Value => TargetObject as StateModel;
+        private bool _isDefaultNode;
        
-        public StateNode(Object targetObject, Vector2 position, Action<BaseNode> startTransition, Action<BaseNode> makeTransition, Action<StateNode> removeNode, Action<StateNode, bool> setAsDefaultNode) :
+        public StateNode(Object targetObject, Vector2 position, bool isDefaultState, Action<BaseNode> startTransition, Action<BaseNode> makeTransition, Action<StateNode> removeNode, Action<StateNode, bool> setAsDefaultNode) :
               base(targetObject, position)
         {
             _removeNode = removeNode;
             _startTransition = startTransition;
             _setAsDefaultNode = setAsDefaultNode;
             _createConnection = makeTransition;
+
+            _isDefaultNode = isDefaultState;
+            
+            if (_isDefaultNode)
+            {
+                _normalStyleName = "flow node 5";
+                _focusedStyleName = "flow node 5 on";
+            }
+        }
+
+        public void SetDefault()
+        {
+            _isDefaultNode = true;
+            _normalStyleName = "flow node 5";
+            _focusedStyleName = "flow node 5 on";
         }
 
         protected override void ProcessContextMenu()
         {
             GenericMenu genericMenu = new GenericMenu();
             genericMenu.AddItem(new GUIContent("Make Transition"), false, () => _startTransition.Invoke(this));
-            genericMenu.AddItem(new GUIContent("Set as Default State"), false, () => _setAsDefaultNode.Invoke(this, true));
+            if (!_isDefaultNode)
+                genericMenu.AddItem(new GUIContent("Set as Default State"), false, () => _setAsDefaultNode.Invoke(this, true));
             genericMenu.AddItem(new GUIContent("Delete"), false, () => _removeNode.Invoke(this));
             genericMenu.ShowAsContext();
         }

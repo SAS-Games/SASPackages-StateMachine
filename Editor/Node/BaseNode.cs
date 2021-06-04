@@ -70,6 +70,7 @@ namespace SAS.StateMachineGraph.Editor
 
                     if (rect.Contains(e.mousePosition))
                     {
+                        e.Use();
                         StateModelInspector.NormalView();
                         IsFocused = true;
                         if (e.button == 0)
@@ -117,7 +118,6 @@ namespace SAS.StateMachineGraph.Editor
                     if (e.button == 0 && _isDragged)
                     {
                         Drag(e.delta);
-                        e.Use();
                         return true;
                     }
                     break;

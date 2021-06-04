@@ -29,6 +29,12 @@ namespace SAS.StateMachineGraph.Editor
             _selectStateMachine = selectStateMachine;
         }
 
+        public void SetDefault(bool isDefault)
+        {
+            _normalStyleName = isDefault ? "flow node hex 5" : "flow node hex 0";
+            _focusedStyleName = isDefault ? "flow node hex 5 on" : "flow node hex 0 on";
+        }
+
         protected override void ProcessContextMenu()
         {
             GenericMenu genericMenu = new GenericMenu();

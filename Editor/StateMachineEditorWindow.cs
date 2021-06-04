@@ -106,7 +106,7 @@ namespace SAS.StateMachineGraph.Editor
 
             var parentStateModel = SelectedStateMachineModel.GetParent();
             if (parentStateModel != null)
-                CreatePareentMachinelNode(parentStateModel);
+                CreateParentMachinelNode(parentStateModel);
 
             CreateTransitions();
             Repaint();
@@ -226,7 +226,7 @@ namespace SAS.StateMachineGraph.Editor
             if (selectedIndex != _selectedChildStateMachines.Count - 1)
             {
                 _selectedChildStateMachines.RemoveRange(selectedIndex + 1, (_selectedChildStateMachines.Count - selectedIndex) - 1);
-               
+
                 CreateSelectedStateMachineNodes();
             }
         }
@@ -303,13 +303,10 @@ namespace SAS.StateMachineGraph.Editor
         private void CreateStateModelNode(StateModel stateModel)
         {
             StateNode node;
-            if (stateModel == RuntimeStateMachineController.GetDefaultState() || RuntimeStateMachineController.GetAllStateModels().Count == 1)
-            {
-                node = new DefaultStateNode(stateModel, stateModel.GetPosition(), StartTranstion, MakeTranstion, RemoveDefaultStateModelNode);
+            bool isDefaultState = (stateModel == RuntimeStateMachineController.GetDefaultState() || RuntimeStateMachineController.GetAllStateModels().Count == 1);
+            node = new StateNode(stateModel, stateModel.GetPosition(), isDefaultState, StartTranstion, MakeTranstion, RemoveStateModelNode, SetAsDefaultNode);
+            if (isDefaultState)
                 SetAsDefaultNode(node, false);
-            }
-            else
-                node = new StateNode(stateModel, stateModel.GetPosition(), StartTranstion, MakeTranstion, RemoveStateModelNode, SetAsDefaultNode);
 
             _nodes.Add(node);
         }
@@ -320,7 +317,7 @@ namespace SAS.StateMachineGraph.Editor
             _nodes.Add(node);
         }
 
-        private void CreatePareentMachinelNode(StateMachineModel stateMachineModel)
+        private void CreateParentMachinelNode(StateMachineModel stateMachineModel)
         {
             var node = new ParentStateMachineNode(stateMachineModel, stateMachineModel.GetPosition(), RuntimeStateMachineController.IsDefaultStateMachine(stateMachineModel), GoToMachineNode);
             _nodes.Add(node);
@@ -376,7 +373,7 @@ namespace SAS.StateMachineGraph.Editor
             int index = _selectedChildStateMachines.IndexOf(stateMachineNode.Value);
             _selectedChildStateMachines.RemoveRange(index + 1, (_selectedChildStateMachines.Count - index) - 1);
             CreateSelectedStateMachineNodes();
-          
+
         }
 
         private void RemoveDefaultStateModelNode(StateNode node)
@@ -396,8 +393,19 @@ namespace SAS.StateMachineGraph.Editor
         private void SetAsDefaultNode(StateNode stateModelNode, bool isFocused)
         {
             RuntimeStateMachineController.SetDefaultNode(stateModelNode.Value);
+            stateModelNode.SetDefault();
+            UpdateDefaultStateMachineNode();
             stateModelNode.IsFocused = isFocused;
             EditorUtility.SetDirty(RuntimeStateMachineController);
+        }
+
+        private void UpdateDefaultStateMachineNode()
+        {
+            foreach (var node in _nodes)
+            {
+                if (node is StateMachineNode stateMachineNode)
+                    stateMachineNode.SetDefault(RuntimeStateMachineController.IsDefaultStateMachine(stateMachineNode.Value));
+            }
         }
     }
 }
