@@ -76,13 +76,13 @@ namespace SAS.StateMachineGraph
             return _serviceLocator.TryGet<T>(out service, tag);
         }
 
-        public bool TryGetComponentInChildren<T>(out T component, string tag, bool includeInactive)
+        public bool TryGetComponentInChildren<T>(out T component, string tag = "", bool includeInactive = false)
         {
             component = (T)(object)GetComponentInChildren(typeof(T), tag, includeInactive);
             return component != null;
         }
 
-        public Component GetComponentInChildren(Type type, string tag, bool includeInactive)
+        public Component GetComponentInChildren(Type type, string tag = "", bool includeInactive = false)
         {
             var obj = TaggerExtensions.GetComponentInChildren(this, type, tag, includeInactive);
             if (obj == null)
