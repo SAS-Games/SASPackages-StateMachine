@@ -60,10 +60,8 @@ namespace SAS.StateMachineGraph.Editor
             }
         }
 
-        protected override void OnEnable()
+        protected void OnEnable()
         {
-            base.OnEnable();
-
             if (RuntimeStateMachineController == null)
             {
                 if (EditorPrefs.HasKey("StateMachine"))

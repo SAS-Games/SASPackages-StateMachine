@@ -17,17 +17,10 @@ namespace SAS.StateMachineGraph.Editor
         protected Vector2 offset;
         private Vector2 drag;
         private Color _gridColor = Color.black;
-        private Texture2D _texture;
 
-        protected virtual void OnEnable()
-        {
-            _texture = new Texture2D(1, 1, TextureFormat.RGBA32, false);
-            _texture.SetPixel(0, 0, new Color(0.1647059f, 0.1647059f, 0.1647059f));
-            _texture.Apply();
-        }
         protected virtual void OnGUI()
         {
-            GUI.DrawTexture(new Rect(0, 0, position.xMax / Zoom, position.yMax / Zoom), _texture, ScaleMode.StretchToFill);
+            GUI.DrawTexture(new Rect(0, 0, position.xMax / Zoom, position.yMax / Zoom), Settings.DarkGreyTexture, ScaleMode.StretchToFill);
             DrawGrid(10, 0.25f, _gridColor);
             DrawGrid(100, 0.5f, _gridColor);
         }
