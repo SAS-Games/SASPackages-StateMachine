@@ -49,8 +49,8 @@ namespace SAS.StateMachineGraph.Editor
         public void DrawRect(Rect rect)
         {
             this.rect = rect;
-          
-            GUI.DrawTexture(new Rect(0, 0, rect.xMax, rect.yMax), _texture, ScaleMode.StretchToFill);
+
+            GUI.DrawTexture(new Rect(0, 0, rect.xMax, rect.yMax), Settings.GreyTexture, ScaleMode.StretchToFill);
         }
 
         public bool ProcessEvents(Event e)

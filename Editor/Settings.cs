@@ -8,6 +8,7 @@ namespace SAS.StateMachineGraph.Editor
     {
         [NonSerialized] private GUIStyle _childStateMachinestoolBarStyle;
         [NonSerialized] private Texture2D _darkGreyTexture2D;
+        [NonSerialized] private Texture2D _greyTexture2D;
 
         public static implicit operator Settings(EditorSettings v)
         {
@@ -52,6 +53,21 @@ namespace SAS.StateMachineGraph.Editor
                 }
 
                 return Instance._darkGreyTexture2D;
+            }
+        }
+
+        public static Texture2D GreyTexture
+        {
+            get
+            {
+                if (Instance._greyTexture2D == null)
+                {
+                    Instance._greyTexture2D = new Texture2D(1, 1, TextureFormat.RGBA32, false);
+                    Instance._greyTexture2D.SetPixel(0, 0, new Color(0.2196079f, 0.2196079f, 0.2196079f));
+                    Instance._greyTexture2D.Apply();
+                }
+
+                return Instance._greyTexture2D;
             }
         }
     }
