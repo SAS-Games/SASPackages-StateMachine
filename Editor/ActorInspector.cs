@@ -33,9 +33,14 @@ namespace SAS.StateMachineGraph.Editor
                 {
                     var data = configsRef.GetArrayElementAtIndex(index).FindPropertyRelative("data");
                     var tag = configsRef.GetArrayElementAtIndex(index).FindPropertyRelative("name");
-                
+
                     position.width /= 2;
-                    EditorGUI.ObjectField(position, data, new GUIContent());
+                    var selectedObject = EditorGUI.ObjectField(position, "", data.objectReferenceValue, typeof(ScriptableObject), false);
+                    if (selectedObject != data.objectReferenceValue)
+                    {
+                        data.objectReferenceValue = selectedObject;
+                        serializedObject.ApplyModifiedProperties();
+                    }
                     position.x = position.xMax + 10;
                     position.width -= 10;
                     EditorUtility.DropDown("ConfigDrawer".GetHashCode(), position, Keys, Array.IndexOf(Keys, tag.stringValue), selectedIndex => OnKeySelected(tag, selectedIndex), ShowKeysList);
@@ -57,10 +62,11 @@ namespace SAS.StateMachineGraph.Editor
                 }
             };
         }
-        
+
         public override void OnInspectorGUI()
         {
             serializedObject.FindProperty("m_Controller").objectReferenceValue = EditorGUILayout.ObjectField("Controller", serializedObject.FindProperty("m_Controller").objectReferenceValue, typeof(RuntimeStateMachineController), false);
+            serializedObject.ApplyModifiedProperties();
             _configsList.DoLayoutList();
         }
 

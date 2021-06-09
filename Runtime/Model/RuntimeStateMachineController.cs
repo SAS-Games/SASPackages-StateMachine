@@ -44,11 +44,13 @@ namespace SAS.StateMachineGraph
         {
             name = model.name;
             _parameters = new StateMachineParameter[model._parameters.Length];
-            
-            for(int i =0; i < _parameters.Length; ++i)
+
+            for (int i = 0; i < _parameters.Length; ++i)
                 _parameters[i] = new StateMachineParameter(model._parameters[i]);
 
+            m_BaseStateMachineModel = model.m_BaseStateMachineModel;
             m_DefaultStateModel = model.m_DefaultStateModel;
+            m_AnyStateModel = model.m_AnyStateModel;
         }
     }
 }
