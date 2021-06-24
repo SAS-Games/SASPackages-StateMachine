@@ -34,11 +34,11 @@ namespace SAS.StateMachineGraph.Editor
             }
         }
 
-        public void SetDefault()
+        public void SetDefault(bool isDefault)
         {
-            _isDefaultNode = true;
-            _normalStyleName = "flow node 5";
-            _focusedStyleName = "flow node 5 on";
+            _isDefaultNode = isDefault;
+            _normalStyleName = isDefault ? "flow node 5" : "flow node 0";
+            _focusedStyleName = isDefault ? "flow node 5 on" : "flow node 0 on";
         }
 
         protected override void ProcessContextMenu()

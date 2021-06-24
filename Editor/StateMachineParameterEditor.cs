@@ -27,12 +27,9 @@ namespace SAS.StateMachineGraph.Editor
         public Rect rect;
         private Texture2D _texture;
 
-        public StateMachineParameterEditor(SerializedObject serializedObject)
+        public StateMachineParameterEditor(RuntimeStateMachineController runtimeStateMachineController)
         {
-            _texture = new Texture2D(1, 1, TextureFormat.RGBA32, false);
-            _texture.SetPixel(0, 0, new Color(0.2196079f, 0.2196079f, 0.2196079f));
-            _texture.Apply();
-
+            var serializedObject = new SerializedObject(runtimeStateMachineController);
             var parameters = serializedObject?.FindProperty("_parameters");
             _parametersList = new ReorderableList(serializedObject, parameters, true, true, false, true);
 
@@ -49,7 +46,7 @@ namespace SAS.StateMachineGraph.Editor
         public void DrawRect(Rect rect)
         {
             this.rect = rect;
-
+          
             GUI.DrawTexture(new Rect(0, 0, rect.xMax, rect.yMax), Settings.GreyTexture, ScaleMode.StretchToFill);
         }
 

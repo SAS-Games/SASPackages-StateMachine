@@ -28,8 +28,6 @@ namespace SAS.StateMachineGraph.Editor
             _removeConnection = removeConnection;
         }
 
-       
-
         private void DrwaConnection()
         {
            
@@ -92,7 +90,7 @@ namespace SAS.StateMachineGraph.Editor
                             StartNode.IsFocused = false;
                             int index = SourceStateModel.GetTransitionStateIndex(TargetStateModel);
                             StateTransitionInspector.Show(index, _runtimeStateMachineController, SourceStateModel.ToSerializedObject());
-
+                            e.Use();
                         }
                         break;
                     case EventType.MouseUp:

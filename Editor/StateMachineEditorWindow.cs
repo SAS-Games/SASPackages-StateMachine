@@ -11,7 +11,6 @@ namespace SAS.StateMachineGraph.Editor
     {
         protected static RuntimeStateMachineController RuntimeStateMachineController;
         private StateMachineParameterEditor _parameterEditor;
-        private SerializedObject _stateMachineModelSO;
         private StateTransitionEditor _transition;
 
         private List<BaseNode> _nodes = new List<BaseNode>();
@@ -62,6 +61,7 @@ namespace SAS.StateMachineGraph.Editor
 
         protected void OnEnable()
         {
+
             if (RuntimeStateMachineController == null)
             {
                 if (EditorPrefs.HasKey("StateMachine"))
@@ -78,8 +78,7 @@ namespace SAS.StateMachineGraph.Editor
             _selectedChildStateMachines.Clear();
             _selectedChildStateMachines.Add(RuntimeStateMachineController.BaseStateMachineModel());
 
-            _stateMachineModelSO = new SerializedObject(RuntimeStateMachineController);
-            _parameterEditor = new StateMachineParameterEditor(_stateMachineModelSO);
+            _parameterEditor = new StateMachineParameterEditor(RuntimeStateMachineController);
             _transition = new StateTransitionEditor(RuntimeStateMachineController);
 
             CreateSelectedStateMachineNodes();
@@ -181,7 +180,8 @@ namespace SAS.StateMachineGraph.Editor
         {
             if (RuntimeStateMachineController == null)
                 return;
-            // SetCurrentActiveNode();
+
+            SetCurrentActiveNode();
 
             _transition.DrawConnectionLine(Event.current);
             _transition.DrawConnections();
@@ -203,7 +203,7 @@ namespace SAS.StateMachineGraph.Editor
             BeginWindows();
 
             if (Application.isPlaying && RuntimeStateMachineController != null)
-                _parameterEditor = new StateMachineParameterEditor(new SerializedObject(RuntimeStateMachineController));
+                _parameterEditor = new StateMachineParameterEditor(RuntimeStateMachineController);
 
             var windowRect = GUI.Window(1, new Rect(0, -2, Mathf.Max(200, position.width / 5), position.height - 2), _parameterEditor.DrawParametersWindow, "", new GUIStyle());
             _parameterEditor.DrawRect(windowRect);
@@ -254,6 +254,7 @@ namespace SAS.StateMachineGraph.Editor
                     {
                         Selection.activeObject = _nodes[i].TargetObject;
                         GUI.changed = true;
+                        e.Use();
                     }
                 }
             }
@@ -302,7 +303,10 @@ namespace SAS.StateMachineGraph.Editor
         {
             StateNode node;
             bool isDefaultState = (stateModel == RuntimeStateMachineController.GetDefaultState() || RuntimeStateMachineController.GetAllStateModels().Count == 1);
-            node = new StateNode(stateModel, stateModel.GetPosition(), isDefaultState, StartTranstion, MakeTranstion, RemoveStateModelNode, SetAsDefaultNode);
+            Action<StateNode> action = RemoveStateModelNode;
+            if (isDefaultState)
+                action = RemoveDefaultStateModelNode;
+            node = new StateNode(stateModel, stateModel.GetPosition(), isDefaultState, StartTranstion, MakeTranstion, action, SetAsDefaultNode);
             if (isDefaultState)
                 SetAsDefaultNode(node, false);
 
@@ -378,7 +382,15 @@ namespace SAS.StateMachineGraph.Editor
         {
             RuntimeStateMachineController.RemoveDefaultState(SelectedStateMachineModel, node.Value);
             _nodes.Remove(node);
-            CreateSelectedStateMachineNodes();
+
+            foreach (var sNode in _nodes)
+            {
+                if (sNode is StateNode stateNode)
+                {
+                    SetAsDefaultNode(stateNode, false);
+                    break;
+                }
+            }
         }
 
         private void RemoveStateModelNode(StateNode node)
@@ -391,18 +403,34 @@ namespace SAS.StateMachineGraph.Editor
         private void SetAsDefaultNode(StateNode stateModelNode, bool isFocused)
         {
             RuntimeStateMachineController.SetDefaultNode(stateModelNode.Value);
-            stateModelNode.SetDefault();
-            UpdateDefaultStateMachineNode();
+            stateModelNode.SetDefault(true);
+            UpdateDefaultNode();
             stateModelNode.IsFocused = isFocused;
             EditorUtility.SetDirty(RuntimeStateMachineController);
         }
 
-        private void UpdateDefaultStateMachineNode()
+        private void UpdateDefaultNode()
         {
             foreach (var node in _nodes)
             {
                 if (node is StateMachineNode stateMachineNode)
                     stateMachineNode.SetDefault(RuntimeStateMachineController.IsDefaultStateMachine(stateMachineNode.Value));
+                else if (node is StateNode stateNode)
+                    stateNode.SetDefault(stateNode.Value == RuntimeStateMachineController.GetDefaultState());
+            }
+        }
+
+        private void SetCurrentActiveNode()
+        {
+            if (!Application.isPlaying)
+                return;
+
+            Repaint();
+
+            foreach (var node in _nodes)
+            {
+                if (node is StateNode stateNode)
+                    stateNode.IsFocused = stateNode.Value.name == Actor?.CurrentStateName;
             }
         }
     }

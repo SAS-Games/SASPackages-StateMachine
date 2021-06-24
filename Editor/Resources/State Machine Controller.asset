@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e1523b8ee4bacc64cb19ba28d47e9317, type: 3}
   m_Name: State Machine Controller
   m_EditorClassIdentifier: 
-  _stateModels:
-  - {fileID: 3753741740416520589}
+  m_BaseStateMachineModel: {fileID: 0}
   _parameters: []
-  _defaultStateModel: {fileID: 0}
+  m_DefaultStateModel: {fileID: 0}
+  m_AnyStateModel: {fileID: 0}
 --- !u!114 &3753741740416520589
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -28,6 +28,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7557f759ffd418e4bab479f7b35953ed, type: 3}
   m_Name: Any State
   m_EditorClassIdentifier: 
-  position: {x: 336, y: 146, z: 0}
+  m_Position: {x: 0, y: 0, z: 0}
   m_StateActions: []
   m_Transitions: []

@@ -17,7 +17,7 @@ namespace SAS.StateMachineGraph.Editor
         protected Vector2 offset;
         private Vector2 drag;
         private Color _gridColor = Color.black;
-
+     
         protected virtual void OnGUI()
         {
             GUI.DrawTexture(new Rect(0, 0, position.xMax / Zoom, position.yMax / Zoom), Settings.DarkGreyTexture, ScaleMode.StretchToFill);
