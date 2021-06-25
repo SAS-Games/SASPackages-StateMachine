@@ -44,6 +44,17 @@ namespace SAS.StateMachineGraph.Editor
                 inverted = true;
             }
 
+            if (StartNode.Position.x < EndNode.Position.x)
+            {
+                _startPos.y -= 7;
+                _endPos.y -= 7;
+            }
+            else
+            {
+                _startPos.y += 7;
+                _endPos.y += 7;
+            }
+
             EditorUtilities.DrawLine(_startPos, _endPos);
             if (SourceStateModel.GetTransitionCount(TargetStateModel) <= 1)
                 EditorUtilities.DrawArrow(_startPos, _endPos, inverted);
