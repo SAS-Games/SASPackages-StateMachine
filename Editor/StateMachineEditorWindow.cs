@@ -21,7 +21,9 @@ namespace SAS.StateMachineGraph.Editor
         {
             get
             {
-                return _selectedChildStateMachines[_selectedChildStateMachines.Count - 1];
+                if (_selectedChildStateMachines.Count > 0)
+                    return _selectedChildStateMachines[_selectedChildStateMachines.Count - 1];
+                return null;
             }
         }
 
