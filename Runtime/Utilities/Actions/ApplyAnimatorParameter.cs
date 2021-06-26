@@ -1,17 +1,16 @@
-﻿using System;
-using UnityEngine;
-using SAS.StateMachineGraph;
+﻿using UnityEngine;
+using SAS.Utilities;
 
 namespace SAS.StateMachineGraph.Utilities
 {
-	public class ApplyActorParameter : IStateInitialize, IStateEnter, IStateExit
+	public class ApplyAnimatorParameter : IStateInitialize, IStateEnter, IStateExit
 	{
-		private ParameterConfig.ParametersKeyMap _parameter;
-		private Actor _actor;
+		ParameterConfig.ParametersKeyMap _parameter;
+		private Animator _animator;
 
 		void IStateInitialize.OnInitialize(Actor actor, string tag, string key)
 		{
-			actor.TryGetComponentInChildren(out _actor, includeInactive: true);
+			actor.TryGetComponentInChildren(out _animator, includeInactive: true);
 			if (actor.TryGet(out ParameterConfig parameterConfig, tag))
 				_parameter = parameterConfig.Get(key);
 		}
@@ -31,7 +30,7 @@ namespace SAS.StateMachineGraph.Utilities
 		private void ApplyParameters()
 		{
 			for (int i = 0; i < _parameter.parameters.Length; ++i)
-				_actor.Apply(_parameter.parameters[i]);
+				_animator.Apply(_parameter.parameters[i]);
 		}
 	}
 }
