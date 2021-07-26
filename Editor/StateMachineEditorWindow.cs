@@ -436,7 +436,7 @@ namespace SAS.StateMachineGraph.Editor
 
         private void DuplicateNode(StateNode stateModelNode)
         {
-            var stateModel = RuntimeStateMachineController.Clone(SelectedStateMachineModel, stateModelNode.Value);
+            var stateModel = stateModelNode.Value.Clone(RuntimeStateMachineController, SelectedStateMachineModel);
             CreateStateModelNode(stateModel);
         }
 

@@ -26,18 +26,7 @@ namespace SAS.StateMachineGraph.Editor
             }
 
             filePath = AssetDatabase.GenerateUniqueAssetPath(filePath);
-
             StateMachineControllerExtensions.CreateControllerAtPath(filePath);
-            return;
-            // Copy Asset
-            AssetDatabase.CopyAsset(AssetDatabase.GetAssetPath(Resources.Load<RuntimeStateMachineController>("State Machine Controller")), filePath);
-            var stateMachineModal = AssetDatabase.LoadAssetAtPath<RuntimeStateMachineController>(filePath);
-            AssetDatabase.SaveAssets();
-            AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(stateMachineModal));
-            
-            Selection.activeObject = stateMachineModal;
-            EditorUtility.FocusProjectWindow();
-            EditorGUIUtility.PingObject(stateMachineModal);
         }
     }
 }

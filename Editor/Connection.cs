@@ -16,15 +16,13 @@ namespace SAS.StateMachineGraph.Editor
         private Vector2 _endPos;
 
         private Action<Connection> _removeConnection;
-        RuntimeStateMachineController _runtimeStateMachineController;
 
-        public Connection(RuntimeStateMachineController runtimeStateMachineController, BaseNode start, BaseNode end, StateModel sourceStateModel, StateModel targetStateModel, Action<Connection> removeConnection)
+        public Connection(BaseNode start, BaseNode end, StateModel sourceStateModel, StateModel targetStateModel, Action<Connection> removeConnection)
         {
             StartNode = start;
             EndNode = end;
             SourceStateModel = sourceStateModel;
             TargetStateModel = targetStateModel;
-            _runtimeStateMachineController = runtimeStateMachineController;
             _removeConnection = removeConnection;
         }
 

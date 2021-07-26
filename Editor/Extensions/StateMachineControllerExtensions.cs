@@ -122,7 +122,7 @@ namespace SAS.StateMachineGraph.Editor
                   runtimeStateMachineController.AddState(stateMachineModel, name, new Vector3(200, 0, 0));
           }*/
 
-        public static StateModel Clone(this RuntimeStateMachineController runtimeStateMachineController, StateMachineModel stateMachineModel, StateModel stateModel)
+        public static StateModel Clone(this StateModel stateModel, RuntimeStateMachineController runtimeStateMachineController, StateMachineModel stateMachineModel)
         {
             var clone = Object.Instantiate(stateModel);
             clone.name = stateMachineModel.MakeUniqueStateName(stateModel.name);

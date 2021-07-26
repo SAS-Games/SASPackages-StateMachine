@@ -258,7 +258,29 @@ namespace SAS.StateMachineGraph.Editor
         {
             var stateModels = fromStateMachineModel.GetStates();
             foreach (var stateModel in stateModels)
-                runtimeStateMachineController.Clone(toStateMachineModel, stateModel);
+                stateModel.Clone(runtimeStateMachineController, toStateMachineModel);
+            
+            for (int i = 0; i < stateModels.Count; i++)
+            {
+                var stateTransitions = stateModels[i].GetTransitionsProp();
+                for (int j = 0; j < stateTransitions.arraySize; ++j)
+                {
+                    var stateTransitionModel = (StateTransitionModel)stateTransitions.GetArrayElementAtIndex(j).objectReferenceValue;
+                    stateTransitionModel.Clone(runtimeStateMachineController, toStateMachineModel);
+                }
+            }
+        }
+
+        internal static StateModel GetStateModel(this StateMachineModel stateMachineModel, string stateName)
+        {
+            var stateModels = stateMachineModel.GetStates();
+            for (int i = 0; i < stateModels.Count; ++i)
+            {
+                if (stateModels[i].name == stateName)
+                    return stateModels[i];
+            }
+
+            return null;
         }
     }
 }

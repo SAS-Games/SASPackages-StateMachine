@@ -28,8 +28,6 @@ namespace SAS.StateMachineGraph.Editor
 
         public static void AddStateTransition(this StateModel sourceStateModel, RuntimeStateMachineController runtimeStateMachineController, StateModel targerStateModel)
         {
-            var stateModelSO = sourceStateModel.ToSerializedObject();
-            var stateTranstionsList = sourceStateModel.GetTransitionsProp();
             var transitionStateModel = sourceStateModel.CreateStateTransitionModel(runtimeStateMachineController, targerStateModel);
 
             var transitionStateModelSO = new SerializedObject(transitionStateModel);
@@ -42,13 +40,13 @@ namespace SAS.StateMachineGraph.Editor
             var conditions = transitionStateModelSO.FindProperty("m_Conditions");
             conditions.arraySize = 0;
 
+            var stateTranstionsList = sourceStateModel.GetTransitionsProp();
             stateTranstionsList.InsertArrayElementAtIndex(stateTranstionsList.arraySize);
             var element = stateTranstionsList.GetArrayElementAtIndex(stateTranstionsList.arraySize - 1);
             element.objectReferenceValue = transitionStateModel;
 
             stateTranstionsList.serializedObject.ApplyModifiedProperties();
-            stateModelSO.ApplyModifiedProperties();
-            AssetDatabase.SaveAssets();
+            sourceStateModel.ToSerializedObject().ApplyModifiedProperties();
         }
 
         private static StateTransitionModel CreateStateTransitionModel(this StateModel sourceStateModel, RuntimeStateMachineController runtimeStateMachineController, StateModel targerStateModel)
@@ -60,6 +58,7 @@ namespace SAS.StateMachineGraph.Editor
                 AssetDatabase.AddObjectToAsset(stateTransitionModel, AssetDatabase.GetAssetPath(runtimeStateMachineController));
 
             AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
             return stateTransitionModel;
         }
 
@@ -165,7 +164,37 @@ namespace SAS.StateMachineGraph.Editor
         {
             var stateTransitions = stateModel.GetTransitionsProp();
             stateTransitions.arraySize = 0;
+            stateTransitions.serializedObject.ApplyModifiedProperties();
             stateModel.ToSerializedObject().ApplyModifiedProperties();
+        }
+
+        internal static StateTransitionModel Clone(this StateTransitionModel stateTransitionModel, RuntimeStateMachineController runtimeStateMachineController, StateMachineModel toStateMachineModel)
+        {
+            var clonedStateTransitionModel = Object.Instantiate(stateTransitionModel);
+            clonedStateTransitionModel.name = stateTransitionModel.name;
+            if (AssetDatabase.GetAssetPath(runtimeStateMachineController) != "")
+                AssetDatabase.AddObjectToAsset(clonedStateTransitionModel, AssetDatabase.GetAssetPath(runtimeStateMachineController));
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+
+            var sourceStateName = stateTransitionModel.ToSerializedObject().FindProperty("m_SourceState").objectReferenceValue.name;
+            var targetStateName = stateTransitionModel.ToSerializedObject().FindProperty("m_TargetState").objectReferenceValue.name;
+
+            var transitionStateModelSO = clonedStateTransitionModel.ToSerializedObject();
+            transitionStateModelSO.FindProperty("m_SourceState").objectReferenceValue = toStateMachineModel.GetStateModel(sourceStateName);
+            transitionStateModelSO.FindProperty("m_TargetState").objectReferenceValue = toStateMachineModel.GetStateModel(targetStateName);
+            transitionStateModelSO.ApplyModifiedProperties();
+
+            var sourceStateModel = toStateMachineModel.GetStateModel(sourceStateName);
+            var stateTranstionsList = sourceStateModel.GetTransitionsProp();
+            stateTranstionsList.InsertArrayElementAtIndex(stateTranstionsList.arraySize);
+            var element = stateTranstionsList.GetArrayElementAtIndex(stateTranstionsList.arraySize - 1);
+            element.objectReferenceValue = clonedStateTransitionModel;
+
+            stateTranstionsList.serializedObject.ApplyModifiedProperties();
+            sourceStateModel.ToSerializedObject().ApplyModifiedProperties();
+
+            return clonedStateTransitionModel;
         }
     }
 }

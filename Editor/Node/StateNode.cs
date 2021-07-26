@@ -26,7 +26,6 @@ namespace SAS.StateMachineGraph.Editor
             _setAsDefaultNode = setAsDefaultNode;
             _createConnection = makeTransition;
             _duplicateNode = duplicateNode;
-
             _isDefaultNode = isDefaultState;
             
             if (_isDefaultNode)

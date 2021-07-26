@@ -10,7 +10,6 @@ namespace SAS.StateMachineGraph.Editor
         private Action<BaseNode> _startTransition;
         private StateMachineModel _stateMachineModel;
         internal StateModel Value => TargetObject as StateModel;
-
         public AnyStateNode(StateMachineModel stateMachineModel, Object targetObject, Vector2 position, Action<BaseNode> startTransition) :
                base(targetObject, position)
         {

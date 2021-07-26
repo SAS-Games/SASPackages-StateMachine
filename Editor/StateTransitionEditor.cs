@@ -72,12 +72,12 @@ namespace SAS.StateMachineGraph.Editor
 
         public void Add(BaseNode sourceNode, BaseNode targetNode, StateModel sourceStateModel, StateModel targetStateModel)
         {
-            _transitions.Add(new Connection(_runtimeStateMachineController, sourceNode, targetNode, sourceStateModel, targetStateModel, RemoveTransition));
+            _transitions.Add(new Connection(sourceNode, targetNode, sourceStateModel, targetStateModel, RemoveTransition));
         }
 
         private void AddTransition()
         {
-            _transitions.Add(new Connection(_runtimeStateMachineController, _startPort.node, _endPort.node, SourceStateModel, TargetStateModel, RemoveTransition));
+            _transitions.Add(new Connection(_startPort.node, _endPort.node, SourceStateModel, TargetStateModel, RemoveTransition));
             SourceStateModel.AddStateTransition(_runtimeStateMachineController, TargetStateModel);
         }
 
