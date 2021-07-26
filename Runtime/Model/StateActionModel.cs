@@ -4,17 +4,17 @@ using System.Collections.Generic;
 using SAS.TagSystem;
 
 namespace SAS.StateMachineGraph
-{ 
-
+{
     [Serializable]
     internal class StateActionModel : SerializedType
     {
         internal string Name => Sanitize(ToType().ToString());
-		[SerializeField] internal string tag = default;
+        [SerializeField] internal string tag = default;
         [SerializeField] internal string key = default;
+        [SerializeField] internal ActionExecuteEvent whenToExecute = default;
         public override bool Equals(object obj)
         {
-			return Name.Equals((obj as StateActionModel).Name);
+            return Name.Equals((obj as StateActionModel).Name);
         }
 
         public override int GetHashCode()
@@ -22,7 +22,7 @@ namespace SAS.StateMachineGraph
             return (Name + tag + key).GetHashCode();
         }
 
-        internal IStateAction[] GetActions(StateMachine stateMachine, Dictionary<StateActionModel, object[]> createdInstances)
+        internal IStateAction[] GetActions(StateMachine stateMachine, State state, Dictionary<StateActionModel, object[]> createdInstances)
         {
             IStateAction[] stateActions;
             if (createdInstances.TryGetValue(this, out var actions))
@@ -48,9 +48,9 @@ namespace SAS.StateMachineGraph
 
             createdInstances.Add(this, stateActions);
             foreach (var action in stateActions)
-               (action as IStateInitialize)?.OnInitialize(stateMachine.Actor, tag, key);
+                action?.OnInitialize(stateMachine.Actor, tag, key, state);
 
             return stateActions;
         }
-	}
+    }
 }

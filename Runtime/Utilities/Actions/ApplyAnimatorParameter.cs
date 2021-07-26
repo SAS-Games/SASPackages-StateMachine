@@ -1,30 +1,22 @@
 ﻿using UnityEngine;
-using SAS.Utilities;
 
 namespace SAS.StateMachineGraph.Utilities
 {
-	public class ApplyAnimatorParameter : IStateInitialize, IStateEnter, IStateExit
+	public class ApplyAnimatorParameter : IStateAction
 	{
 		ParameterConfig.ParametersKeyMap _parameter;
 		private Animator _animator;
 
-		void IStateInitialize.OnInitialize(Actor actor, string tag, string key)
+		void IStateAction.OnInitialize(Actor actor, string tag, string key, State state)
 		{
 			actor.TryGetComponentInChildren(out _animator, includeInactive: true);
 			if (actor.TryGet(out ParameterConfig parameterConfig, tag))
 				_parameter = parameterConfig.Get(key);
 		}
 
-		void IStateEnter.OnStateEnter(Actor actor)
+		void IStateAction.Execute(Actor actor)
 		{
-			if (_parameter.executeOnStateEnter)
-				ApplyParameters();
-		}
-
-		void IStateExit.OnStateExit(Actor actor)
-		{
-			if (_parameter.executeOnStateExit)
-				ApplyParameters();
+			ApplyParameters();
 		}
 
 		private void ApplyParameters()

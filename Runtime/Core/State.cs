@@ -5,15 +5,16 @@ using static SAS.StateMachineGraph.Actor;
 
 namespace SAS.StateMachineGraph
 {
-    internal class State
+    public class State
     {
         public string Name { get; private set; }
 
         private StateMachine _stateMachine;
-        internal IStateEnter[] _onEnter = default;
-        internal IStateExit[] _onExit = default;
-        internal IStateUpdate[] _onUpdate = default;
-        internal IStateFixedUpdate[] _onFixedUpdate = default;
+        internal IStateAction[] _onEnter = default;
+        internal IStateAction[] _onExit = default;
+        internal IStateAction[] _onFixedUpdate = default;
+        internal IStateAction[] _onUpdate = default;
+        internal IStateAction[] _onLateUpdate = default;
         internal IAwaitableStateAction[] _awaitableStateAction = default;
         internal TransitionState[] _transitionStates;
 
@@ -27,32 +28,38 @@ namespace SAS.StateMachineGraph
 
         internal void OnEnter()
         {
-            for (int i = 0; i < _onEnter.Length; ++i)
-                _onEnter[i]?.OnStateEnter(_stateMachine.Actor);
+            for (int i = 0; i < _onEnter?.Length; ++i)
+                _onEnter[i].Execute(_stateMachine.Actor);
         }
 
         internal void OnExit()
         {
-            for (int i = 0; i < _onExit.Length; ++i)
-                _onExit[i]?.OnStateExit(_stateMachine.Actor);
-        }
-
-        internal void OnUpdate()
-        {
-            for (int i = 0; i < _onUpdate.Length; ++i)
-                _onUpdate[i]?.OnUpdate(_stateMachine.Actor);
+            for (int i = 0; i < _onExit?.Length; ++i)
+                _onExit[i].Execute(_stateMachine.Actor);
         }
 
         internal void OnFixedUpdate()
         {
-            for (int i = 0; i < _onFixedUpdate.Length; ++i)
-                _onFixedUpdate[i]?.OnFixedUpdate(_stateMachine.Actor);
+            for (int i = 0; i < _onFixedUpdate?.Length; ++i)
+                _onFixedUpdate[i].Execute(_stateMachine.Actor);
+        }
+
+        internal void OnUpdate()
+        {
+            for (int i = 0; i < _onUpdate?.Length; ++i)
+                _onUpdate[i].Execute(_stateMachine.Actor);
+        }
+
+        internal void OnLateUpdate()
+        {
+            for (int i = 0; i < _onLateUpdate?.Length; ++i)
+                _onLateUpdate[i].Execute(_stateMachine.Actor);
         }
 
         internal void AwaitableStateAction()
         {
-            for (int i = 0; i < _awaitableStateAction.Length; ++i)
-                _awaitableStateAction[i]?.Execute(_stateMachine.Actor);
+            for (int i = 0; i < _awaitableStateAction?.Length; ++i)
+                _awaitableStateAction[i].Execute(_stateMachine.Actor);
         }
 
         internal void TryTransition(StateChanged stateChanged)
@@ -64,31 +71,29 @@ namespace SAS.StateMachineGraph
                     if (_transitionStates[i].TryGetTransiton(_stateMachine, out _nextState))
                     {
                         ResetExitTime();
-                        return;
+                        break;
                     }
                 }
-                return;
             }
 
-            if (IsAllAwaitableActionCompleted())
+            if (_nextState != null && IsAllAwaitableActionCompleted())
             {
-                stateChanged.Invoke(_stateMachine.CurrentState.Name, false);
+                stateChanged.Invoke(_stateMachine.CurrentState, false);
                 _stateMachine.CurrentState = _nextState;
-                stateChanged?.Invoke(_nextState.Name, true);
+                stateChanged?.Invoke(_nextState, true);
                 _nextState = null;
             }
         }
 
-        internal void ResetExitTime()
+        private void ResetExitTime()
         {
             for (int i = 0; i < _transitionStates.Length; ++i)
                 _transitionStates[i].TimeElapsed = 0;
         }
 
-
         private bool IsAllAwaitableActionCompleted()
         {
-            for (int i = 0; i < _awaitableStateAction.Length; ++i)
+            for (int i = 0; i < _awaitableStateAction?.Length; ++i)
             {
                 if (!_awaitableStateAction[i].IsCompleted)
                     return false;

@@ -2,15 +2,15 @@
 
 namespace SAS.StateMachineGraph.Utilities
 {
-    public sealed class ActivateObjectOnStateEnter : IStateInitialize, IStateEnter
+    public sealed class ActivateGameObject : IStateAction
     {
         private Transform _transform;
-        void IStateInitialize.OnInitialize(Actor actor, string tag, string key)
+        void IStateAction.OnInitialize(Actor actor, string tag, string key, State state)
         {
             actor.TryGetComponentInChildren(out _transform, tag, true);
         }
 
-        void IStateEnter.OnStateEnter(Actor actor)
+        void IStateAction.Execute(Actor actor)
         {
             _transform?.gameObject.SetActive(true);
         }

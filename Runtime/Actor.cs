@@ -8,11 +8,11 @@ namespace SAS.StateMachineGraph
 {
     public sealed class Actor : MonoBehaviour, IActivatable
     {
-        internal delegate void StateChanged(string stateName, bool entered);
+        internal delegate void StateChanged(State state, bool entered);
         private StateChanged OnStateChanged;
 
-        public Action<string> OnStateEnter;
-        public Action<string> OnStateExit;
+        public Action<State> OnStateEnter;
+        public Action<State> OnStateExit;
 
         [Serializable]
         public struct Config
@@ -27,6 +27,7 @@ namespace SAS.StateMachineGraph
         internal StateMachine StateMachineController { get; private set; }
         private readonly ServiceLocator _serviceLocator = new ServiceLocator();
         public string CurrentStateName => StateMachineController?.CurrentState?.Name;
+        public State CurrentState => StateMachineController?.CurrentState;
 
         private void Awake()
         {
@@ -59,6 +60,7 @@ namespace SAS.StateMachineGraph
 
         private void LateUpdate()
         {
+            StateMachineController?.OnLateUpdate();
             StateMachineController?.TryTransition(OnStateChanged);
         }
 
@@ -132,6 +134,11 @@ namespace SAS.StateMachineGraph
             StateMachineController?.SetTrigger(name);
         }
 
+        public void ResetSetTrigger(string name)
+        {
+            StateMachineController?.ResetSetTrigger(name);
+        }
+
         public int GetInt(string name)
         {
             return StateMachineController.GetInt(name);
@@ -145,11 +152,6 @@ namespace SAS.StateMachineGraph
         public bool GetBool(string name)
         {
             return StateMachineController.GetBool(name);
-        }
-
-        public void Reset()
-        {
-            
         }
 
         void IActivatable.Activate()
@@ -181,12 +183,12 @@ namespace SAS.StateMachineGraph
             }
         }
 
-        private void InvokeEvent(string name, bool isStateEntered)
+        private void InvokeEvent(State state, bool isStateEntered)
         {
             if (isStateEntered)
-                OnStateEnter?.Invoke(name);
+                OnStateEnter?.Invoke(state);
             else
-                OnStateExit?.Invoke(name);
+                OnStateExit?.Invoke(state);
         }
     }
 }

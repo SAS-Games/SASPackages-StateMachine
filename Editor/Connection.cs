@@ -30,7 +30,6 @@ namespace SAS.StateMachineGraph.Editor
 
         private void DrwaConnection()
         {
-           
             bool inverted = false;
             if (StartNode.Position.y < EndNode.Position.y)
             {
@@ -56,10 +55,13 @@ namespace SAS.StateMachineGraph.Editor
             }
 
             EditorUtilities.DrawLine(_startPos, _endPos);
-            if (SourceStateModel.GetTransitionCount(TargetStateModel) <= 1)
-                EditorUtilities.DrawArrow(_startPos, _endPos, inverted);
-            else
-                EditorUtilities.DrawTrippleArrow(_startPos, _endPos, inverted);
+            if (SourceStateModel != null && TargetStateModel != null)
+            {
+                if (SourceStateModel.GetTransitionCount(TargetStateModel) <= 1)
+                    EditorUtilities.DrawArrow(_startPos, _endPos, inverted);
+                else
+                    EditorUtilities.DrawTrippleArrow(_startPos, _endPos, inverted);
+            }
         }
 
         private static float DistanceToPolyLine(params Vector3[] points)
@@ -96,11 +98,9 @@ namespace SAS.StateMachineGraph.Editor
 
                         if (e.button == 0)
                         {
-
-                            Selection.activeObject = SourceStateModel;
+                            StateTransitionInspector.SelectedTransitionIndex = SourceStateModel.GetTransitionStateIndex(TargetStateModel);
+                            Selection.activeObject = SourceStateModel.GetTransitionStateModel(TargetStateModel);
                             StartNode.IsFocused = false;
-                            int index = SourceStateModel.GetTransitionStateIndex(TargetStateModel);
-                            StateTransitionInspector.Show(index, _runtimeStateMachineController, SourceStateModel.ToSerializedObject());
                             e.Use();
                         }
                         break;

@@ -26,9 +26,15 @@ namespace SAS.StateMachineGraph.Editor
         private ReorderableList _parametersList;
         public Rect rect;
         private Texture2D _texture;
+        private RuntimeStateMachineController _runtimeStateMachineController;
+
+        public StateMachineParameterEditor()
+        { 
+        }
 
         public StateMachineParameterEditor(RuntimeStateMachineController runtimeStateMachineController)
         {
+            _runtimeStateMachineController = runtimeStateMachineController;
             var serializedObject = new SerializedObject(runtimeStateMachineController);
             var parameters = serializedObject?.FindProperty("_parameters");
             _parametersList = new ReorderableList(serializedObject, parameters, true, true, false, true);
@@ -76,7 +82,8 @@ namespace SAS.StateMachineGraph.Editor
         {
             ProcessEvents(Event.current);
             _parametersList.DoList(rect);
-            _parametersList?.serializedProperty?.serializedObject?.ApplyModifiedProperties();
+            if (_runtimeStateMachineController)
+                _parametersList?.serializedProperty?.serializedObject?.ApplyModifiedProperties();
         }
 
         private void ProcessContextMenu()

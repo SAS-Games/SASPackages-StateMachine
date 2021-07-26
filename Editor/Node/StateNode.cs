@@ -13,17 +13,19 @@ namespace SAS.StateMachineGraph.Editor
         protected Action<BaseNode> _createConnection;
         private Action<StateNode, bool> _setAsDefaultNode;
         protected Action<StateNode> _removeNode;
+        private Action<StateNode> _duplicateNode;
 
         internal StateModel Value => TargetObject as StateModel;
         private bool _isDefaultNode;
        
-        public StateNode(Object targetObject, Vector2 position, bool isDefaultState, Action<BaseNode> startTransition, Action<BaseNode> makeTransition, Action<StateNode> removeNode, Action<StateNode, bool> setAsDefaultNode) :
+        public StateNode(Object targetObject, Vector2 position, bool isDefaultState, Action<BaseNode> startTransition, Action<BaseNode> makeTransition, Action<StateNode> removeNode, Action<StateNode, bool> setAsDefaultNode, Action<StateNode> duplicateNode) :
               base(targetObject, position)
         {
             _removeNode = removeNode;
             _startTransition = startTransition;
             _setAsDefaultNode = setAsDefaultNode;
             _createConnection = makeTransition;
+            _duplicateNode = duplicateNode;
 
             _isDefaultNode = isDefaultState;
             
@@ -48,6 +50,7 @@ namespace SAS.StateMachineGraph.Editor
             if (!_isDefaultNode)
                 genericMenu.AddItem(new GUIContent("Set as Default State"), false, () => _setAsDefaultNode.Invoke(this, true));
             genericMenu.AddItem(new GUIContent("Delete"), false, () => _removeNode.Invoke(this));
+            genericMenu.AddItem(new GUIContent("Duplicate"), false, () => _duplicateNode.Invoke(this));
             genericMenu.ShowAsContext();
         }
 

@@ -26,68 +26,146 @@ namespace SAS.StateMachineGraph.Editor
             return new SerializedObject(stateModel).FindProperty(TransitionsVar);
         }
 
-        public static void AddStateTransition(this StateModel sourceStateModel, StateModel targerStateModel)
+        public static void AddStateTransition(this StateModel sourceStateModel, RuntimeStateMachineController runtimeStateMachineController, StateModel targerStateModel)
         {
-            var stateModelSO = new SerializedObject(sourceStateModel);
-            var stateTranstionsList = stateModelSO.FindProperty(TransitionsVar);
-            stateTranstionsList.InsertArrayElementAtIndex(stateTranstionsList.arraySize);
+            var stateModelSO = sourceStateModel.ToSerializedObject();
+            var stateTranstionsList = sourceStateModel.GetTransitionsProp();
+            var transitionStateModel = sourceStateModel.CreateStateTransitionModel(runtimeStateMachineController, targerStateModel);
 
-            var transitionState = stateTranstionsList.GetArrayElementAtIndex(stateTranstionsList.arraySize - 1);
-            var targetState = transitionState.FindPropertyRelative("m_TargetState");
+            var transitionStateModelSO = new SerializedObject(transitionStateModel);
+            var sourceState = transitionStateModelSO.FindProperty("m_SourceState");
+            var targetState = transitionStateModelSO.FindProperty("m_TargetState");
+            sourceState.objectReferenceValue = sourceStateModel;
             targetState.objectReferenceValue = targerStateModel;
+            transitionStateModelSO.ApplyModifiedProperties();
 
-            var conditions = transitionState.FindPropertyRelative("m_Conditions");
+            var conditions = transitionStateModelSO.FindProperty("m_Conditions");
             conditions.arraySize = 0;
+
+            stateTranstionsList.InsertArrayElementAtIndex(stateTranstionsList.arraySize);
+            var element = stateTranstionsList.GetArrayElementAtIndex(stateTranstionsList.arraySize - 1);
+            element.objectReferenceValue = transitionStateModel;
+
             stateTranstionsList.serializedObject.ApplyModifiedProperties();
             stateModelSO.ApplyModifiedProperties();
+            AssetDatabase.SaveAssets();
         }
 
-        public static int GetTransitionStateIndex(this StateModel state, StateModel targetState)
+        private static StateTransitionModel CreateStateTransitionModel(this StateModel sourceStateModel, RuntimeStateMachineController runtimeStateMachineController, StateModel targerStateModel)
+        {
+            var stateTransitionModel = ScriptableObject.CreateInstance<StateTransitionModel>();
+            stateTransitionModel.name = sourceStateModel.name + "->To->" + targerStateModel.name;
+
+            if (AssetDatabase.GetAssetPath(runtimeStateMachineController) != "")
+                AssetDatabase.AddObjectToAsset(stateTransitionModel, AssetDatabase.GetAssetPath(runtimeStateMachineController));
+
+            AssetDatabase.SaveAssets();
+            return stateTransitionModel;
+        }
+
+        internal static int GetTransitionStateIndex(this StateModel state, StateModel targetState)
         {
             var stateTransitions = state.GetTransitionsProp();
             for (int i = 0; i < stateTransitions.arraySize; ++i)
             {
-                var element = stateTransitions.GetArrayElementAtIndex(i);
-                if (element.FindPropertyRelative("m_TargetState").objectReferenceValue == targetState)
+                var element = (StateTransitionModel)stateTransitions.GetArrayElementAtIndex(i).objectReferenceValue;
+                if (element.ToSerializedObject().FindProperty("m_TargetState").objectReferenceValue == targetState)
                     return i;
             }
 
             return -1;
         }
 
-        public static int GetTransitionCount(this StateModel state, StateModel targetState)
+        internal static StateTransitionModel GetTransitionStateModel(this StateModel state, StateModel targetState)
+        {
+            var stateTransitions = state.GetTransitionsProp();
+            for (int i = 0; i < stateTransitions.arraySize; ++i)
+            {
+                var element = (StateTransitionModel)stateTransitions.GetArrayElementAtIndex(i).objectReferenceValue;
+                if (element.ToSerializedObject().FindProperty("m_TargetState").objectReferenceValue == targetState)
+                    return element;
+            }
+
+            return null;
+        }
+
+        internal static int GetTransitionCount(this StateModel state, StateModel targetState)
         {
             int count = 0;
             var stateTransitions = state.GetTransitionsProp();
             for (int i = 0; i < stateTransitions.arraySize; ++i)
             {
-                var element = stateTransitions.GetArrayElementAtIndex(i);
-                if (element.FindPropertyRelative("m_TargetState").objectReferenceValue == targetState)
-                    count++;
+                var element = (StateTransitionModel)stateTransitions.GetArrayElementAtIndex(i).objectReferenceValue;
+                if (element != null)
+                {
+                    if (element.ToSerializedObject().FindProperty("m_TargetState").objectReferenceValue == targetState)
+                        count++;
+                }
             }
 
             return count;
         }
 
-        public static SerializedObject ToSerializedObject(this StateModel stateModel)
+        internal static SerializedObject ToSerializedObject(this StateModel stateModel)
         {
             return new SerializedObject(stateModel);
         }
 
-        public static void ClearConnection(this StateModel sourceStateModel, StateModel targetStateMode)
+        internal static SerializedObject ToSerializedObject(this StateTransitionModel stateTransitionModel)
+        {
+            return new SerializedObject(stateTransitionModel);
+        }
+
+        /// <summary>
+        /// clear all statetransions between source and target state. 
+        /// if target state is null clear all the transtions from the source state model.
+        /// also remove the transion state model assets
+        /// </summary>
+        /// <param name="sourceStateModel"></param>
+        /// <param name="targetStateModel"></param>
+        public static void ClearConnection(this StateModel sourceStateModel, StateModel targetStateModel = null)
         {
             var stateTransitions = sourceStateModel.GetTransitionsProp();
+            List<StateTransitionModel> stateTransitionModelsToDelete = new List<StateTransitionModel>();
             for (int i = 0; i < stateTransitions.arraySize; ++i)
             {
-                var element = stateTransitions.GetArrayElementAtIndex(i);
-                if (element.FindPropertyRelative("m_TargetState").objectReferenceValue == targetStateMode)
+                var element = ((StateTransitionModel)stateTransitions.GetArrayElementAtIndex(i).objectReferenceValue);
+                if (targetStateModel == null || element.ToSerializedObject().FindProperty("m_TargetState").objectReferenceValue == targetStateModel)
                 {
                     stateTransitions.DeleteArrayElementAtIndex(i);
                     stateTransitions.serializedObject.ApplyModifiedProperties();
-                    break;
-                }
+                    if (stateTransitions.GetArrayElementAtIndex(i) != null)
+                    {
+                        stateTransitions.DeleteArrayElementAtIndex(i);
+                        stateTransitions.serializedObject.ApplyModifiedProperties();
+                    }
 
+                    i--;
+                    stateTransitionModelsToDelete.Add(element);
+                    sourceStateModel.ToSerializedObject().ApplyModifiedProperties();
+                }
             }
+
+            DestroyImmediateStateTransitionModels(stateTransitionModelsToDelete.ToArray());
+        }
+
+        internal static void DestroyImmediateStateTransitionModels(StateTransitionModel[] stateTransitionModels)
+        {
+            for (int i = 0; i < stateTransitionModels.Length; ++i)
+                stateTransitionModels[i].DestroyImmediate();
+        }
+
+        internal static void DestroyImmediate(this StateTransitionModel stateTransitionModel)
+        {
+            Object.DestroyImmediate(stateTransitionModel, true);
+            AssetDatabase.SaveAssets();
+        }
+
+        internal static  void ResetTransitions(this StateModel stateModel)
+        {
+            var stateTransitions = stateModel.GetTransitionsProp();
+            stateTransitions.arraySize = 0;
+            stateModel.ToSerializedObject().ApplyModifiedProperties();
         }
     }
 }

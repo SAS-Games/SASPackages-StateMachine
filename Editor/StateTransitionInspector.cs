@@ -5,7 +5,8 @@ using UnityEngine;
 
 namespace SAS.StateMachineGraph.Editor
 {
-    public class StateTransitionInspector
+    [CustomEditor(typeof(StateTransitionModel))]
+    public class StateTransitionInspector : UnityEditor.Editor
     {
         enum FloatMode
         {
@@ -28,29 +29,49 @@ namespace SAS.StateMachineGraph.Editor
 
         private static ReorderableList[] _transitionsConditionList;
         private static string[] _parametersList;
-        private static int SelectedTransitionIndex = -1;
+        public static int SelectedTransitionIndex = -1;
         private static SerializedObject _stateMachineSO;
         private static ReorderableList _allTranstionsToTargetState;
+        private int _transitionCount;
 
-        public bool OnInspectorGUI()
+        private void OnEnable()
         {
+            var runtimeStateMachineController = AssetDatabase.LoadMainAssetAtPath(AssetDatabase.GetAssetPath(target)) as RuntimeStateMachineController;
 
+            var transitionStateModelSO = ((StateTransitionModel)target).ToSerializedObject();
+            var sourceState = ((StateModel)transitionStateModelSO.FindProperty("m_SourceState").objectReferenceValue);
+            var targetState = ((StateModel)transitionStateModelSO.FindProperty("m_TargetState").objectReferenceValue);
+            _transitionCount = sourceState.GetTransitionCount(targetState);
+            Show(runtimeStateMachineController, sourceState.ToSerializedObject());
+        }
+
+        protected override void OnHeaderGUI()
+        {
+            base.OnHeaderGUI();
+            string stateTransition = "1 ActorTranstionBase";
+            if (_transitionCount > 1)
+                stateTransition = $"{_transitionCount} Transitions";
+            EditorGUI.LabelField(new Rect(50, 30, EditorGUIUtility.currentViewWidth - 60, EditorGUIUtility.singleLineHeight), new GUIContent(stateTransition));
+        }
+
+        public override void OnInspectorGUI()
+        {
             if (SelectedTransitionIndex == -1)
-                return false;
+                return;
 
             _allTranstionsToTargetState.DoLayoutList();
-            if (_allTranstionsToTargetState.list.Count > 0 && _allTranstionsToTargetState.list.Count > SelectedTransitionIndex)
+            if (SelectedTransitionIndex != -1 && _allTranstionsToTargetState.list.Count > 0 && _allTranstionsToTargetState.list.Count > SelectedTransitionIndex)
             {
-                var stateTransitionProp = _allTranstionsToTargetState.list[SelectedTransitionIndex] as SerializedProperty;
-                var hasExitTime = stateTransitionProp.FindPropertyRelative("m_HasExitTime");
-                var exitTime = stateTransitionProp.FindPropertyRelative("m_ExitTime");
+                var stateTransitionProp = ((StateTransitionModel)(_allTranstionsToTargetState.list[SelectedTransitionIndex] as SerializedProperty).objectReferenceValue).ToSerializedObject();
+                var hasExitTime = stateTransitionProp.FindProperty("m_HasExitTime");
+                var exitTime = stateTransitionProp.FindProperty("m_ExitTime");
 
                 hasExitTime.boolValue = EditorGUILayout.Toggle("Has Exit Time", hasExitTime.boolValue);
 
                 EditorGUI.BeginDisabledGroup(hasExitTime.boolValue == false);
                 exitTime.floatValue = EditorGUILayout.FloatField("Exit Time", exitTime.floatValue);
                 EditorGUI.EndDisabledGroup();
-                stateTransitionProp.serializedObject.ApplyModifiedProperties();
+                stateTransitionProp.ApplyModifiedProperties();
             }
             EditorGUILayout.Space(10);
 
@@ -62,13 +83,11 @@ namespace SAS.StateMachineGraph.Editor
                         _transitionsConditionList[i].DoLayoutList();
                 }
             }
-
-            return true;
         }
 
         private static ReorderableList DrawConditionBlock(SerializedProperty transitionState, SerializedObject serializedObject)
         {
-            ReorderableList conditions = new ReorderableList(serializedObject, transitionState.FindPropertyRelative("m_Conditions"), true, true, true, true);
+            ReorderableList conditions = new ReorderableList(serializedObject, ((StateTransitionModel)transitionState.objectReferenceValue).ToSerializedObject().FindProperty("m_Conditions"), true, true, true, true);
             conditions.drawHeaderCallback = (Rect rect) =>
             {
                 EditorGUI.LabelField(rect, "Conditions");
@@ -146,25 +165,15 @@ namespace SAS.StateMachineGraph.Editor
             return conditions;
         }
 
-        public static void Show(int index, RuntimeStateMachineController runtimeStateMachineController, SerializedObject stateModelSO)
+        private static void Show(RuntimeStateMachineController runtimeStateMachineController, SerializedObject stateModelSO)
         {
-            SelectedTransitionIndex = index;
-            if (index != -1)
+            if (SelectedTransitionIndex != -1)
             {
-                SelectedTransitionIndex = 0;
                 _stateMachineSO = runtimeStateMachineController.ToSerializedObject();
-                FilterTransitions(index, stateModelSO);
+                FilterTransitions(SelectedTransitionIndex, stateModelSO);
                 _parametersList = runtimeStateMachineController.ParametersName();
             }
-          
         }
-
-        public static void ResetView()
-        {
-            SelectedTransitionIndex = -1;
-            _stateMachineSO = null;
-        }
-
 
         private static int GetParameterType(int index)
         {
@@ -184,14 +193,16 @@ namespace SAS.StateMachineGraph.Editor
             var allTranstionFromThisState = stateModelSO.FindProperty("m_Transitions");
             if (allTranstionFromThisState?.arraySize > 0)
             {
-                var element = allTranstionFromThisState.GetArrayElementAtIndex(index);
-                var targetState = element.FindPropertyRelative("m_TargetState").objectReferenceValue;
+                var element =allTranstionFromThisState.GetArrayElementAtIndex(index);
+                var elementSO = ((StateTransitionModel)element.objectReferenceValue).ToSerializedObject();
+                var targetState = elementSO.FindProperty("m_TargetState").objectReferenceValue;
                 var allTranstionsToTargetState = new List<SerializedProperty>();
 
                 for (int i = 0; i < allTranstionFromThisState.arraySize; ++i)
                 {
                     element = allTranstionFromThisState.GetArrayElementAtIndex(i);
-                    var state = element.FindPropertyRelative("m_TargetState").objectReferenceValue;
+                    elementSO = ((StateTransitionModel)element.objectReferenceValue).ToSerializedObject();
+                    var state = elementSO.FindProperty("m_TargetState").objectReferenceValue;
                     if (targetState == state)
                         allTranstionsToTargetState.Add(element);
                 }
@@ -223,28 +234,37 @@ namespace SAS.StateMachineGraph.Editor
 
             _allTranstionsToTargetState.onRemoveCallback = list =>
             {
-                var selectedElement = allTranstionsToTargetState[list.index];
+                var selectedStateTransitionModel = (StateTransitionModel)allTranstionsToTargetState[list.index].objectReferenceValue;
                 allTranstionsToTargetState.RemoveAt(list.index);
                 SelectedTransitionIndex = list.index - 1;
                 var allTranstionFromThisState = stateModelSO.FindProperty("m_Transitions");
                 int i = 0;
                 for (; i < allTranstionFromThisState.arraySize; ++i)
                 {
-                    var element = allTranstionFromThisState.GetArrayElementAtIndex(i);
-                    if (element.displayName.Equals(selectedElement.displayName))
+                    var element = allTranstionFromThisState.GetArrayElementAtIndex(i).objectReferenceValue;
+
+                    var stateTransitionModel = ((StateTransitionModel)allTranstionFromThisState.GetArrayElementAtIndex(i).objectReferenceValue);
+                    if (stateTransitionModel == selectedStateTransitionModel)
                     {
                         allTranstionFromThisState.DeleteArrayElementAtIndex(i);
+                        allTranstionFromThisState.serializedObject.ApplyModifiedProperties();
+                        if (allTranstionFromThisState.GetArrayElementAtIndex(i) != null)
+                        {
+                            allTranstionFromThisState.DeleteArrayElementAtIndex(i);
+                            allTranstionFromThisState.serializedObject.ApplyModifiedProperties();
+                        }
+
+                        stateModelSO.ApplyModifiedProperties();
+                        selectedStateTransitionModel.DestroyImmediate();
                         break;
                     }
                 }
-
-                allTranstionFromThisState.serializedObject.ApplyModifiedProperties();
             };
 
             _allTranstionsToTargetState.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
             {
-                var element = allTranstionsToTargetState[index];
-                SerializedProperty property = element.FindPropertyRelative("m_TargetState");
+                var element = ((StateTransitionModel)allTranstionsToTargetState[index].objectReferenceValue).ToSerializedObject();
+                SerializedProperty property = element.FindProperty("m_TargetState");
                 string val = stateModelSO.targetObject.name + "  ->  " + property.objectReferenceValue.name;
                 rect.y += 2;
                 EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight), val);

@@ -1,36 +1,14 @@
 ﻿
 namespace SAS.StateMachineGraph
 {
-    public interface IStateAction { }
-
-    public interface IStateInitialize : IStateAction
+    public interface IStateAction 
     {
-        void OnInitialize(Actor actor, string tag, string key);
-    }
-
-    public interface IStateEnter : IStateAction
-    {
-        void OnStateEnter(Actor actor);
-    }
-
-    public interface IStateFixedUpdate : IStateAction
-    {
-        void OnFixedUpdate(Actor actor);
-    }
-
-    public interface IStateUpdate : IStateAction
-    {
-        void OnUpdate(Actor actor);
-    }
-
-    public interface IStateExit : IStateAction
-    {
-        void OnStateExit(Actor actor);
+        void OnInitialize(Actor actor, string tag, string key, State state);
+        void Execute(Actor actor);
     }
 
     public interface IAwaitableStateAction : IStateAction
     {
         bool IsCompleted { get; set; }
-        void Execute(Actor actor);
     }
 }

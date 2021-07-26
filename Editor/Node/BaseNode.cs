@@ -52,10 +52,10 @@ namespace SAS.StateMachineGraph.Editor
             Position = rect.position;
         }
 
-        public Vector3 Position
+        public virtual Vector3 Position
         {
             get { return SerializedObject.FindProperty("m_Position").vector3Value; }
-            private set
+            protected set
             {
                 SerializedObject.FindProperty("m_Position").vector3Value = value;
                 SerializedObject.ApplyModifiedProperties();
@@ -71,7 +71,6 @@ namespace SAS.StateMachineGraph.Editor
                     if (rect.Contains(e.mousePosition))
                     {
                         e.Use();
-                        StateModelInspector.NormalView();
                         IsFocused = true;
                         if (e.button == 0)
                         {

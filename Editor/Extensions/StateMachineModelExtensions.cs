@@ -8,6 +8,7 @@ namespace SAS.StateMachineGraph.Editor
     public static class StateMachineModelExtensions
     {
         const string PositionVar = "m_Position";
+        const string PositionAsUpNodeVar = "m_PositionAsUpNode";
         const string AnyStatePositionVar = "m_AnyStatePosition";
         const string ParentStateMachineVar = "m_ParentStateMachine";
         const string ChildStateMachinesVar = "m_ChildStateMachines";
@@ -22,6 +23,7 @@ namespace SAS.StateMachineGraph.Editor
             childStateMachine.SetPosition(position);
             if (AssetDatabase.GetAssetPath(runtimeStateMachineController) != "")
                 AssetDatabase.AddObjectToAsset(childStateMachine, AssetDatabase.GetAssetPath(runtimeStateMachineController));
+            AssetDatabase.SaveAssets();
 
             childStateMachine.SetAnyStatePosition(new Vector3(300, 50, 0));
             stateMachineModel.AddChildStateMachine(childStateMachine);
@@ -107,7 +109,7 @@ namespace SAS.StateMachineGraph.Editor
             var childStateMachineModelSO = new SerializedObject(stateMachineModel);
             return childStateMachineModelSO.FindProperty(ParentStateMachineVar).objectReferenceValue as StateMachineModel;
         }
-          
+
 
         internal static void SetAnyStatePosition(this StateMachineModel stateMachineModel, Vector3 position)
         {
@@ -133,6 +135,12 @@ namespace SAS.StateMachineGraph.Editor
         {
             var stateMachineModelSO = new SerializedObject(stateMachineModel);
             return stateMachineModelSO.FindProperty(PositionVar).vector3Value;
+        }
+
+        public static Vector3 GetPositionAsUpNode(this StateMachineModel stateMachineModel)
+        {
+            var stateMachineModelSO = new SerializedObject(stateMachineModel);
+            return stateMachineModelSO.FindProperty(PositionAsUpNodeVar).vector3Value;
         }
 
         public static void Rename(this StateMachineModel stateMachineModel, string name)
@@ -180,7 +188,7 @@ namespace SAS.StateMachineGraph.Editor
         {
             var stateMachineModelSO = new SerializedObject(stateMachineModel);
             var childStateMachinesProp = stateMachineModelSO.FindProperty(ChildStateMachinesVar);
-           
+
             var childStateMachines = new List<StateMachineModel>();
             for (int i = 0; i < childStateMachinesProp.arraySize; ++i)
                 childStateMachines.Add(childStateMachinesProp.GetArrayElementAtIndex(i).objectReferenceValue as StateMachineModel);
@@ -193,7 +201,7 @@ namespace SAS.StateMachineGraph.Editor
             var childStateMachines = stateMachineModel.GetChildStateMachines();
             List<StateMachineModel> stateMachineModels = new List<StateMachineModel>();
             stateMachineModels.AddRange(childStateMachines);
-           
+
             for (int i = 0; i < childStateMachines.Count; i++)
                 stateMachineModels.AddRange(childStateMachines[i].GetStateMachineRecursivily());
 
@@ -226,6 +234,31 @@ namespace SAS.StateMachineGraph.Editor
                 stateModels.Add(stateModelsProp.GetArrayElementAtIndex(i).objectReferenceValue as StateModel);
 
             return stateModels;
+        }
+
+        internal static StateMachineModel CloneMachineRecursivily(this StateMachineModel stateMachineModel, RuntimeStateMachineController runtimeStateMachineController, StateMachineModel parentStateModel, Vector3 position)
+        {
+            var childStateMachines = stateMachineModel.GetChildStateMachines();
+            var clonedStateMachine = runtimeStateMachineController.AddChildStateMachine(parentStateModel, stateMachineModel.name, position);
+            stateMachineModel.CopyStateModels(runtimeStateMachineController, clonedStateMachine);
+
+            for (int i = 0; i < childStateMachines.Count; i++)
+                childStateMachines[i].CloneMachineRecursivily(runtimeStateMachineController, clonedStateMachine, childStateMachines[i].GetPosition());
+
+            return clonedStateMachine;
+        }
+
+        internal static StateMachineModel CloneMachineRecursivily(this StateMachineModel stateMachineModel, RuntimeStateMachineController runtimeStateMachineController, StateMachineModel parentStateModel)
+        {
+            var position = stateMachineModel.GetPosition() + new Vector3(35, 65);
+            return stateMachineModel.CloneMachineRecursivily(runtimeStateMachineController, parentStateModel, position);
+        }
+
+        private static void CopyStateModels(this StateMachineModel fromStateMachineModel, RuntimeStateMachineController runtimeStateMachineController, StateMachineModel toStateMachineModel)
+        {
+            var stateModels = fromStateMachineModel.GetStates();
+            foreach (var stateModel in stateModels)
+                runtimeStateMachineController.Clone(toStateMachineModel, stateModel);
         }
     }
 }

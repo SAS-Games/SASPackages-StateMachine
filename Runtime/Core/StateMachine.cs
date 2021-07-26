@@ -32,6 +32,11 @@ namespace SAS.StateMachineGraph
             }
         }
 
+        internal void OnFixedUpdate()
+        {
+            CurrentState?.OnFixedUpdate();
+        }
+
         internal State AnyState { get; set; }
 
         internal void OnUpdate()
@@ -39,14 +44,9 @@ namespace SAS.StateMachineGraph
             CurrentState?.OnUpdate();
         }
 
-        internal void OnFixedUpdate()
+        internal void OnLateUpdate()
         {
-            CurrentState?.OnFixedUpdate();
-        }
-
-        internal void AwaitableStateAction()
-        {
-            CurrentState?.AwaitableStateAction();
+            CurrentState?.OnLateUpdate();
         }
 
         internal void TryTransition(StateChanged stateChanged)
@@ -89,7 +89,7 @@ namespace SAS.StateMachineGraph
             }
             catch (KeyNotFoundException e)
             {
-                Debug.LogException(e);
+                Debug.LogError($"{name} parameter not defined for the actor {Actor.name} {e}");
                 return false;
             }
         }
@@ -102,7 +102,7 @@ namespace SAS.StateMachineGraph
             }
             catch (KeyNotFoundException e)
             {
-                Debug.LogException(e);
+                Debug.LogError($"{name} parameter not defined for the actor {Actor.name} {e}");
             }
         }
 
@@ -114,7 +114,7 @@ namespace SAS.StateMachineGraph
             }
             catch (KeyNotFoundException e)
             {
-                Debug.LogException(e);
+                Debug.LogError($"{name} parameter not defined for the actor {Actor.name} {e}");
             }
         }
 
@@ -126,7 +126,7 @@ namespace SAS.StateMachineGraph
             }
             catch (KeyNotFoundException e)
             {
-                Debug.LogException(e);
+                Debug.LogError($"{name} parameter not defined for the actor {Actor.name} {e}");
             }
         }
 

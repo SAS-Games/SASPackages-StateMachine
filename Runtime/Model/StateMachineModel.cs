@@ -7,7 +7,8 @@ namespace SAS.StateMachineGraph
     public class StateMachineModel : ScriptableObject
     {
 #if UNITY_EDITOR
-        [SerializeField] private Vector3 m_Position = default;
+        [SerializeField] private Vector3 m_Position = new Vector3(300, 50, 0);
+        [SerializeField] private Vector3 m_PositionAsUpNode = new Vector3(700, 100);
         [SerializeField] private Vector3 m_AnyStatePosition = default;
         [SerializeField] private StateMachineModel m_ParentStateMachine = default;
 #endif

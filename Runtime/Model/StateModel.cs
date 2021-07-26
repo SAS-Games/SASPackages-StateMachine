@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using SAS.StateMachineGraph.Utilities;
 
 namespace SAS.StateMachineGraph
 {
@@ -13,21 +14,16 @@ namespace SAS.StateMachineGraph
 		[SerializeField] private StateActionModel[] m_StateActions = default;
 		[SerializeField] private StateTransitionModel[] m_Transitions = null;
 
-        internal State GetState(StateMachine stateMachine, Dictionary<ScriptableObject, object> cachedStates, Dictionary<StateActionModel, object[]> cachedActions)
+		internal State GetState(StateMachine stateMachine, Dictionary<ScriptableObject, object> cachedStates, Dictionary<StateActionModel, object[]> cachedActions)
 		{
 			if (cachedStates.TryGetValue(this, out var obj))
 				return (State)obj;
 
 			var state = new State(stateMachine, name);
 			cachedStates.Add(this, state);
-			var stateActions = GetActions(m_StateActions, stateMachine, cachedActions);
-			state._onEnter = stateActions.OfType<IStateEnter>().ToArray();
-			state._awaitableStateAction = stateActions.OfType<IAwaitableStateAction>().ToArray();
-			state._onFixedUpdate = stateActions.OfType<IStateFixedUpdate>().ToArray();
-			state._onUpdate = stateActions.OfType<IStateUpdate>().ToArray();
-			state._onExit = stateActions.OfType<IStateExit>().ToArray();
+			CreateGetActions(m_StateActions, stateMachine, state, cachedActions);
 			state._transitionStates = GetTransitions(m_Transitions, stateMachine, cachedStates, cachedActions);
-
+			
 			return state;
 		}
 
@@ -40,19 +36,57 @@ namespace SAS.StateMachineGraph
 
 			return transitions;
 		}
-
-		private IStateAction[] GetActions(StateActionModel[] scriptableActions, StateMachine stateMachine, Dictionary<StateActionModel, object[]> createdInstances)
+		
+		private void CreateGetActions(StateActionModel[] scriptableActions, StateMachine stateMachine, State state, Dictionary<StateActionModel, object[]> createdInstances)
 		{
 			int count = scriptableActions.Length;
-			var stateActions = new List<IStateAction>();
+			var stateEnterActions = new List<IStateAction>();
+			var stateFixedUpdateActions = new List<IStateAction>();
+			var stateUpdateActions = new List<IStateAction>();
+			var stateLateUpdateActions = new List<IStateAction>();
+			var stateExitActions = new List<IStateAction>();
+
 			for (int i = 0; i < count; i++)
 			{
-				var actions = scriptableActions[i].GetActions(stateMachine, createdInstances);
-				if (actions != null)
-					stateActions.AddRange(actions);
+				var actions = scriptableActions[i].GetActions(stateMachine, state, createdInstances);
+
+				int bits = (int)scriptableActions[i].whenToExecute;
+				for (int k = 1; k <= 5; ++k)
+				{
+					if (IsKthBitSet(bits, k))
+					{
+						switch (k)
+						{
+							case 1:
+								stateEnterActions.AddRange(actions);
+								break;
+							case 2:
+								stateFixedUpdateActions.AddRange(actions);
+								break;
+							case 3:
+                                stateUpdateActions.AddRange(actions);
+								break;
+							case 4:
+								stateLateUpdateActions.AddRange(actions);
+								break;
+							case 5:
+								stateExitActions.AddRange(actions);
+								break;
+						}
+					}
+				}
 			}
 
-			return stateActions.ToArray();
+			state._onEnter = stateEnterActions.ToArray();
+			state._onFixedUpdate = stateFixedUpdateActions.ToArray();
+			state._onUpdate = stateUpdateActions.ToArray();
+			state._onLateUpdate = stateLateUpdateActions.ToArray();
+			state._onExit = stateExitActions.ToArray();
+		}
+
+		private bool IsKthBitSet(int n, int k)
+		{
+			return (n & (1 << (k - 1))) > 0;
 		}
 	}
 }

@@ -3,16 +3,16 @@ using UnityEngine;
 
 namespace SAS.StateMachineGraph.Utilities
 {
-    public class ObserveChildActorStateExit : IStateInitialize, IAwaitableStateAction
+    public class ObserveChildActorStateExit : IAwaitableStateAction
     {
         private Actor _childActor;
         public bool IsCompleted { get; set; }
-        private string _stateName;
-        private Action<string> _onStateExit;
+        private State _state;
+        private Action<State> _onStateExit;
 
-        public void OnInitialize(Actor actor, string tag, string key)
+        public void OnInitialize(Actor actor, string tag, string key, State state)
         {
-            _stateName = key;
+            _state = state;
             actor.TryGetComponentInChildren(out _childActor, tag, true);
         }
 
@@ -21,7 +21,7 @@ namespace SAS.StateMachineGraph.Utilities
             IsCompleted = false;
             _onStateExit = (state) =>
             {
-                if (state.Equals(_stateName))
+                if (state.Equals(_state))
                 {
                     IsCompleted = true;
                     _childActor.OnStateExit -= _onStateExit;

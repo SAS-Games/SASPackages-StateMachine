@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using ReorderableList = UnityEditorInternal.ReorderableList;
 using EditorUtility = SAS.Utilities.Editor.EditorUtility;
 using SAS.TagSystem.Editor;
-using SAS.TagSystem;
-using System.Reflection;
 
 namespace SAS.StateMachineGraph.Editor
 {
@@ -17,7 +14,6 @@ namespace SAS.StateMachineGraph.Editor
         private ReorderableList _stateActions;
         private ReorderableList _transitionStates;
         private Type[] _allActionTypes;
-        private StateTransitionInspector _stateTransitionInspector;
 
         private static string[] Tags => TagList.GetList();
         private static string[] Keys => TagList.GetList("Key List");
@@ -26,7 +22,6 @@ namespace SAS.StateMachineGraph.Editor
         private void OnEnable()
         {
             _actionNotFoundStyle.normal.textColor = Color.red;
-            _stateTransitionInspector = new StateTransitionInspector();
             SetupTransitions();
             _allActionTypes = AppDomain.CurrentDomain.GetAllDerivedTypes<IStateAction>().ToArray();
             _stateActions = new ReorderableList(serializedObject, serializedObject.FindProperty("m_StateActions"), true, true, true, true);
@@ -50,12 +45,9 @@ namespace SAS.StateMachineGraph.Editor
         {
             serializedObject.Update();
 
-            if (_stateTransitionInspector == null || !_stateTransitionInspector.OnInspectorGUI())
-            {
-                if (!target.name.Equals(Util.AnyStateModelName))
-                    _stateActions.DoLayoutList();
-                _transitionStates.DoLayoutList();
-            }
+            if (!target.name.Equals(Util.AnyStateModelName))
+                _stateActions.DoLayoutList();
+            _transitionStates.DoLayoutList();
 
             serializedObject.ApplyModifiedProperties();
             Repaint();
@@ -67,10 +59,16 @@ namespace SAS.StateMachineGraph.Editor
             {
                 var style = new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleCenter, fontStyle = FontStyle.Bold };
                 EditorGUI.LabelField(rect, name);
-                var pos = new Rect(rect.width - Mathf.Min(140, rect.width / 2) -20, rect.y, Mathf.Min(90, rect.width / 3), rect.height);
+                rect.width -= 120;
+                var width = 100;
+
+                var pos = new Rect(rect.width - Mathf.Min(100, rect.width / 3 - 20) - 20, rect.y, width, rect.height);
                 EditorGUI.LabelField(pos, "Tag", style);
-                pos = new Rect(rect.width - Mathf.Min(70, rect.width / 3 - 20), rect.y, Mathf.Min(90, rect.width / 3), rect.height);
+                pos = new Rect(rect.width - Mathf.Min(40, rect.width / 3 - 40), rect.y, width, rect.height);
                 EditorGUI.LabelField(pos, "Key", style);
+
+                pos = new Rect((rect.width + 120) - Mathf.Min(70, rect.width / 3 - 10), rect.y, width, rect.height);
+                EditorGUI.LabelField(pos, "WhenToExecute", style);
             };
             reorderableList.onAddCallback = list =>
             {
@@ -84,6 +82,8 @@ namespace SAS.StateMachineGraph.Editor
                 var actionFullName = reorderableList.serializedProperty.GetArrayElementAtIndex(index).FindPropertyRelative("fullName");
                 var tag = reorderableList.serializedProperty.GetArrayElementAtIndex(index).FindPropertyRelative("tag");
                 var key = reorderableList.serializedProperty.GetArrayElementAtIndex(index).FindPropertyRelative("key");
+                var whenToExecute = reorderableList.serializedProperty.GetArrayElementAtIndex(index).FindPropertyRelative("whenToExecute");
+
                 if (GUI.Button(new Rect(rect.x, rect.y, 30, rect.height - 5), "C#"))
                 {
                     var assetsPath = AssetDatabase.GetAllAssetPaths();
@@ -100,14 +100,16 @@ namespace SAS.StateMachineGraph.Editor
 
                 rect.y += 2;
                 var curActionIndex = Array.FindIndex(_allActionTypes, type => type.AssemblyQualifiedName == actionFullName.stringValue);
-                var pos = new Rect(rect.x + 30, rect.y - 2, Mathf.Max(rect.width - 210, 40), rect.height - 2);
+                var pos = new Rect(rect.x + 30, rect.y - 2, Mathf.Max(rect.width - 280, 40), rect.height - 2);
                 int id = GUIUtility.GetControlID("actionFullName".GetHashCode(), FocusType.Keyboard, pos);
                 if (curActionIndex != -1 || string.IsNullOrEmpty(actionFullName.stringValue))
                     EditorUtility.DropDown(id, pos, _allActionTypes.Select(type => SerializedType.Sanitize(type.ToString())).ToArray(), curActionIndex, selectedIndex => SetSelectedAction(actionFullName, selectedIndex));
                 else
                     EditorUtility.DropDown(id, pos, _allActionTypes.Select(type => SerializedType.Sanitize(type.ToString())).ToArray(), curActionIndex, actionFullName.stringValue, Color.red, selectedIndex => SetSelectedAction(actionFullName, selectedIndex));
 
-                pos = new Rect(rect.width - Mathf.Min(140, rect.width / 2), rect.y - 2, Mathf.Min(90, rect.width / 3), rect.height - 2);
+                var width = Mathf.Min(80, rect.width / 5);
+                var rectEnd = rect.width - 2.5f * width;
+                pos = new Rect(rectEnd, rect.y - 2, width, rect.height - 2);
                 id = GUIUtility.GetControlID("Tag".GetHashCode(), FocusType.Keyboard, pos);
                 var tagIndex = Array.IndexOf(Tags, tag.stringValue);
                 if (tagIndex != -1 || string.IsNullOrEmpty(tag.stringValue))
@@ -115,13 +117,20 @@ namespace SAS.StateMachineGraph.Editor
                 else
                     EditorUtility.DropDown(id, pos, Tags, tagIndex, tag.stringValue, Color.red, selectedIndex => SetTagSerializedProperty(tag, selectedIndex));
 
-                pos = new Rect(rect.width - Mathf.Min(50, rect.width / 3 - 40), rect.y - 2, Mathf.Min(90, rect.width / 3), rect.height);
+                rectEnd = rect.width - 1.5f * width;
+                pos = new Rect(rectEnd, rect.y - 2, width, rect.height);
                 id = GUIUtility.GetControlID("Key".GetHashCode(), FocusType.Keyboard, pos);
                 var keyIndex = Array.IndexOf(Keys, key.stringValue);
                 if (keyIndex != -1 || string.IsNullOrEmpty(key.stringValue))
                     EditorUtility.DropDown(id, pos, Keys, keyIndex, selectedIndex => SetKeySerializedProperty(key, selectedIndex));
                 else
                     EditorUtility.DropDown(id, pos, Keys, keyIndex, key.stringValue, Color.red, selectedIndex => SetKeySerializedProperty(key, selectedIndex));
+
+                rectEnd = rect.width - width / 2;
+                pos = new Rect(rectEnd, rect.y - 2, width, rect.height);
+                uint a = (uint)(EditorGUI.MaskField(pos, "", whenToExecute.intValue, whenToExecute.enumNames));
+                if (EditorGUI.EndChangeCheck())
+                    whenToExecute.intValue = (int)a;
             };
         }
 
@@ -144,12 +153,6 @@ namespace SAS.StateMachineGraph.Editor
             serializedObject.ApplyModifiedProperties();
         }
 
-        public static void NormalView()
-        {
-            StateTransitionInspector.ResetView();
-        }
-
-
         private void SetupTransitions()
         {
             _transitionStates = new ReorderableList(serializedObject, serializedObject.FindProperty("m_Transitions"), true, true, false, true);
@@ -159,11 +162,30 @@ namespace SAS.StateMachineGraph.Editor
                 EditorGUI.LabelField(rect, "Transitons");
             };
 
+            _transitionStates.onRemoveCallback = list =>
+            {
+                var allTranstionFromThisState = _transitionStates.serializedProperty;
+                var selectedStateTransitionModel = (StateTransitionModel)allTranstionFromThisState.GetArrayElementAtIndex(list.index).objectReferenceValue;
+
+
+                allTranstionFromThisState.DeleteArrayElementAtIndex(list.index);
+                allTranstionFromThisState.serializedObject.ApplyModifiedProperties();
+                if (allTranstionFromThisState.GetArrayElementAtIndex(list.index) != null)
+                {
+                    allTranstionFromThisState.DeleteArrayElementAtIndex(list.index);
+                    allTranstionFromThisState.serializedObject.ApplyModifiedProperties();
+                }
+
+                (target as StateModel).ToSerializedObject().ApplyModifiedProperties();
+                selectedStateTransitionModel.DestroyImmediate();
+            };
+          
+
             _transitionStates.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
             {
-                var element = _transitionStates.serializedProperty.GetArrayElementAtIndex(index);
+                var element = ((StateTransitionModel)_transitionStates.serializedProperty.GetArrayElementAtIndex(index).objectReferenceValue).ToSerializedObject();
                 rect.y += 2;
-                SerializedProperty property = element.FindPropertyRelative("m_TargetState");
+                SerializedProperty property = element.FindProperty("m_TargetState");
                 string val = serializedObject.targetObject.name + "  ->  ";
                 if (property != null && property.objectReferenceValue != null)
                     EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight), val + property.objectReferenceValue.name);

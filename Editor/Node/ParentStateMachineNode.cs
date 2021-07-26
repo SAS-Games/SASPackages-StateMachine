@@ -11,10 +11,11 @@ namespace SAS.StateMachineGraph.Editor
 {
     public class ParentStateMachineNode : StateMachineNode
     {
-        private Action<StateMachineNode> _selectStateMachine;
-        public ParentStateMachineNode(Object targetObject, Vector2 position, bool isDefault, Action<StateMachineNode> selectStateMachine) : base(targetObject, position, isDefault, null, null, null, selectStateMachine)
+        //private Action<StateMachineNode> _selectStateMachine;
+        public ParentStateMachineNode(Object targetObject, Vector2 position, bool isDefault, Action<StateMachineNode, StateModel> makeTransition, Action<StateMachineNode> mouseup, Action<StateMachineNode> selectStateMachine) : 
+                                 base(targetObject, position, isDefault, makeTransition, mouseup, null, selectStateMachine, null)
         {
-            _selectStateMachine = selectStateMachine;
+            //_selectStateMachine = selectStateMachine;
             Prefix = "(Up)";
         }
 
@@ -28,9 +29,14 @@ namespace SAS.StateMachineGraph.Editor
 
         }
 
-        protected override void ProcessMouseUp(BaseNode baseNode, Event e)
+        public override Vector3 Position
         {
-            // throw new NotImplementedException();
+            get { return SerializedObject.FindProperty("m_PositionAsUpNode").vector3Value; }
+            protected set
+            {
+                SerializedObject.FindProperty("m_PositionAsUpNode").vector3Value = value;
+                SerializedObject.ApplyModifiedProperties();
+            }
         }
     }
 }

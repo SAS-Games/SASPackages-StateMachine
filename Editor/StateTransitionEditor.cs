@@ -78,7 +78,7 @@ namespace SAS.StateMachineGraph.Editor
         private void AddTransition()
         {
             _transitions.Add(new Connection(_runtimeStateMachineController, _startPort.node, _endPort.node, SourceStateModel, TargetStateModel, RemoveTransition));
-            SourceStateModel.AddStateTransition(TargetStateModel);
+            SourceStateModel.AddStateTransition(_runtimeStateMachineController, TargetStateModel);
         }
 
         private void RemoveTransition(Connection connection)

@@ -54,6 +54,7 @@ namespace SAS.StateMachineGraph.Editor
             if (AssetDatabase.GetAssetPath(runtimeStateMachineController) != "")
                 AssetDatabase.AddObjectToAsset(stateModel, AssetDatabase.GetAssetPath(runtimeStateMachineController));
 
+            AssetDatabase.SaveAssets();
             stateMachineModel.SetAnyStatePosition(new Vector3(300, 50, 0));
             runtimeStateMachineController.AddAnyState(stateModel);
         }
@@ -121,32 +122,45 @@ namespace SAS.StateMachineGraph.Editor
                   runtimeStateMachineController.AddState(stateMachineModel, name, new Vector3(200, 0, 0));
           }*/
 
+        public static StateModel Clone(this RuntimeStateMachineController runtimeStateMachineController, StateMachineModel stateMachineModel, StateModel stateModel)
+        {
+            var clone = Object.Instantiate(stateModel);
+            clone.name = stateMachineModel.MakeUniqueStateName(stateModel.name);
+            runtimeStateMachineController.CreateStateModelAsset(stateMachineModel, clone, stateModel.GetPosition() + new Vector3(35, 65));
+            clone.ResetTransitions();
+            return clone;
+        }
+
         public static StateModel AddState(this RuntimeStateMachineController runtimeStateMachineController, StateMachineModel stateMachineModel, string name, Vector3 position)
         {
             var stateModel = ScriptableObject.CreateInstance<StateModel>();
             stateModel.name = stateMachineModel.MakeUniqueStateName(name);
+            
+            runtimeStateMachineController.CreateStateModelAsset(stateMachineModel, stateModel, position);
+        
+            return stateModel;
+        }
 
+        private static void CreateStateModelAsset(this RuntimeStateMachineController runtimeStateMachineController, StateMachineModel stateMachineModel, StateModel stateModel, Vector3 position)
+        {
             // stateModel.hideFlags = HideFlags.HideInHierarchy;
-
             if (AssetDatabase.GetAssetPath(runtimeStateMachineController) != "")
                 AssetDatabase.AddObjectToAsset(stateModel, AssetDatabase.GetAssetPath(runtimeStateMachineController));
 
             stateModel.SetPosition(position);
             stateMachineModel.AddState(stateModel);
-            return stateModel;
+            AssetDatabase.SaveAssets();
         }
 
         internal static void RemoveDefaultState(this RuntimeStateMachineController runtimeStateMachineController, StateMachineModel stateMachineModel, StateModel stateModel)
         {
             runtimeStateMachineController.SetDefaultNode(null);
             runtimeStateMachineController.RemoveStateInternal(stateMachineModel, stateModel);
-            AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(runtimeStateMachineController));
         }
 
         internal static void RemoveState(this RuntimeStateMachineController runtimeStateMachineController, StateMachineModel stateMachineModel, StateModel stateModel)
         {
             runtimeStateMachineController.RemoveStateInternal(stateMachineModel, stateModel);
-            AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(runtimeStateMachineController));
         }
 
         internal static void RemoveAllState(this RuntimeStateMachineController runtimeStateMachineController, StateMachineModel stateMachineModel)
@@ -160,15 +174,14 @@ namespace SAS.StateMachineGraph.Editor
         {
             runtimeStateMachineController.ClearAllTransition(stateModel);
             stateMachineModel.RemoveState(stateModel);
-            MonoBehaviour.DestroyImmediate(stateModel, true);
+            Object.DestroyImmediate(stateModel, true);
+            AssetDatabase.SaveAssets();
         }
 
         internal static void RemoveStateMachine(this RuntimeStateMachineController runtimeStateMachineController, StateMachineModel stateMachineModel)
         {
             runtimeStateMachineController.RemoveStateMachineRecursively(stateMachineModel);
-
             runtimeStateMachineController.RemoveStateMachineInternal(stateMachineModel);
-            AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(runtimeStateMachineController));
         }
 
         private static void RemoveStateMachineRecursively(this RuntimeStateMachineController runtimeStateMachineController, StateMachineModel stateMachineModel)
@@ -185,26 +198,18 @@ namespace SAS.StateMachineGraph.Editor
         {
             runtimeStateMachineController.RemoveAllState(stateMachineModel);
             stateMachineModel.RemoveStateMachineInternal();
-            MonoBehaviour.DestroyImmediate(stateMachineModel, true);
+            Object.DestroyImmediate(stateMachineModel, true);
+            AssetDatabase.SaveAssets();
         }
 
-        internal static void ClearAllTransition(this RuntimeStateMachineController runtimeStateMachineController, StateModel stateModel)
+        internal static void ClearAllTransition(this RuntimeStateMachineController runtimeStateMachineController, StateModel targetStateModel)
         {
             var allStateModels = runtimeStateMachineController.GetAllStateModels();
+            allStateModels.Remove(targetStateModel);
             allStateModels.Add(runtimeStateMachineController.AnyStateModel());
-            foreach (var sm in allStateModels)
-            {
-                var stateTransitions = new SerializedObject(sm).FindProperty("m_Transitions");
-                for (int i = 0; i < stateTransitions.arraySize; ++i)
-                {
-                    var element = stateTransitions.GetArrayElementAtIndex(i);
-
-                    if (element.FindPropertyRelative("m_TargetState").objectReferenceValue == stateModel || element.FindPropertyRelative("m_TargetState").objectReferenceValue == null)
-                        stateTransitions.DeleteArrayElementAtIndex(i);
-                }
-
-                stateTransitions.serializedObject.ApplyModifiedProperties();
-            }
+            foreach (var sourceStateModel in allStateModels)
+                sourceStateModel.ClearConnection(targetStateModel);
+            targetStateModel.ClearConnection();
         }
 
         internal static StateModel AnyStateModel(this RuntimeStateMachineController runtimeStateMachineController)

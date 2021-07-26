@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace SAS.StateMachineGraph.Utilities
 {
@@ -48,5 +49,31 @@ namespace SAS.StateMachineGraph.Utilities
                     break;
             }
         }
+
+        public static T[] Add<T>(this T[] array, T item)
+        {
+            if (array == null)
+            {
+                return new T[] { item };
+            }
+            Array.Resize(ref array, array.Length + 1);
+            array[array.Length - 1] = item;
+
+            return array;
+        }
+
+        public static T[] AddRange<T>(this T[] array, params T[] items)
+        {
+            if (array == null)
+                array = new T[] { };
+
+            if (items == null)
+                return array;
+
+            Array.Resize(ref array, array.Length + items.Length);
+            Array.Copy(items, 0, array, array.Length - items.Length, items.Length);
+            return array;
+        }
+
     }
 }
