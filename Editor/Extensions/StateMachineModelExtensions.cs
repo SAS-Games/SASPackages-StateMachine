@@ -282,5 +282,10 @@ namespace SAS.StateMachineGraph.Editor
 
             return null;
         }
+
+        internal static SerializedObject serializedObject(this StateMachineModel stateMachineModel)
+        {
+            return new SerializedObject(stateMachineModel);
+        }
     }
 }

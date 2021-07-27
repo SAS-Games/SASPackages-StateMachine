@@ -144,11 +144,13 @@ namespace SAS.StateMachineGraph.Editor
             for (int i = 0; i < stateTransitions.arraySize; ++i)
             {
                 var element = (StateTransitionModel)stateTransitions.GetArrayElementAtIndex(i).objectReferenceValue;
-                var targetStateModel = element.ToSerializedObject().FindProperty("m_TargetState").objectReferenceValue as StateModel;
+                var targetStateModel = element.serializedObject().FindProperty("m_TargetState").objectReferenceValue as StateModel;
                 var targetNode = _nodes.Find(ele => ele.TargetObject == targetStateModel);
                 if (targetNode == null)
                 {
                     //check if target state belongs to any childStateMachine
+                    if (sourceNode is AnyStateNode)
+                        continue;
                     foreach (BaseNode node in _nodes)
                     {
                         if (node is StateMachineNode stateMachineNode)
@@ -375,6 +377,7 @@ namespace SAS.StateMachineGraph.Editor
         {
             var targetStateNode = targetNode as StateNode;
             MakeTranstion(targetNode, targetStateNode.Value);
+            Repaint();
         }
 
         private void MakeTranstion(BaseNode targetNode, StateModel targetStateModel)

@@ -9,7 +9,6 @@ namespace SAS.StateMachineGraph.Editor
     {
         protected string _normalStyleName = "flow node 0";
         protected string _focusedStyleName = "flow node 0 on";
-        protected SerializedObject SerializedObject { get; set; } 
         internal Object TargetObject { get; }
         internal Rect rect;
         private bool _isDragged;
@@ -29,7 +28,6 @@ namespace SAS.StateMachineGraph.Editor
         public BaseNode(Object targetObject, Vector2 position, float width, float height)
         {
             TargetObject = targetObject;
-            SerializedObject = new SerializedObject(targetObject);
             Position = position;
             rect = new Rect(position.x, position.y, width, height);
             endPort = new Port(this, 1);
@@ -53,11 +51,12 @@ namespace SAS.StateMachineGraph.Editor
 
         public virtual Vector3 Position
         {
-            get { return SerializedObject.FindProperty("m_Position").vector3Value; }
+            get { return new SerializedObject(TargetObject).FindProperty("m_Position").vector3Value; }
             protected set
             {
-                SerializedObject.FindProperty("m_Position").vector3Value = value;
-                SerializedObject.ApplyModifiedProperties();
+                var serializedObject = new SerializedObject(TargetObject);
+                serializedObject.FindProperty("m_Position").vector3Value = value;
+                serializedObject.ApplyModifiedProperties();
             }
         }
 

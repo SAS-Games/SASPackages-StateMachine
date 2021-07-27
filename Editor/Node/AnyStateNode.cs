@@ -33,7 +33,7 @@ namespace SAS.StateMachineGraph.Editor
         public override void Drag(Vector2 delta)
         {
             base.Drag(delta);
-            _stateMachineModel.SetAnyStatePosition((SerializedObject.targetObject as StateModel).GetPosition()); ;
+            _stateMachineModel.SetAnyStatePosition(Value.GetPosition()); ;
         }
     }
 }

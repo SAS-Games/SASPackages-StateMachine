@@ -18,9 +18,11 @@ namespace SAS.StateMachineGraph.Editor
         private static string[] Tags => TagList.GetList();
         private static string[] Keys => TagList.GetList("Key List");
         private GUIStyle _actionNotFoundStyle = new GUIStyle();
+        new private SerializedObject serializedObject;
 
         private void OnEnable()
         {
+            serializedObject = ((StateModel)target).serializedObject();
             _actionNotFoundStyle.normal.textColor = Color.red;
             SetupTransitions();
             _allActionTypes = AppDomain.CurrentDomain.GetAllDerivedTypes<IStateAction>().ToArray();
@@ -43,8 +45,6 @@ namespace SAS.StateMachineGraph.Editor
 
         public override void OnInspectorGUI()
         {
-            serializedObject.Update();
-
             if (!target.name.Equals(Util.AnyStateModelName))
                 _stateActions.DoLayoutList();
             _transitionStates.DoLayoutList();
@@ -176,14 +176,14 @@ namespace SAS.StateMachineGraph.Editor
                     allTranstionFromThisState.serializedObject.ApplyModifiedProperties();
                 }
 
-                (target as StateModel).ToSerializedObject().ApplyModifiedProperties();
+                serializedObject.ApplyModifiedProperties();
                 selectedStateTransitionModel.DestroyImmediate();
             };
           
 
             _transitionStates.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
             {
-                var element = ((StateTransitionModel)_transitionStates.serializedProperty.GetArrayElementAtIndex(index).objectReferenceValue).ToSerializedObject();
+                var element = ((StateTransitionModel)_transitionStates.serializedProperty.GetArrayElementAtIndex(index).objectReferenceValue).serializedObject();
                 rect.y += 2;
                 SerializedProperty property = element.FindProperty("m_TargetState");
                 string val = serializedObject.targetObject.name + "  ->  ";

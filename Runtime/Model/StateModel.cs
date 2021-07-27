@@ -14,6 +14,7 @@ namespace SAS.StateMachineGraph
 		[SerializeField] private StateActionModel[] m_StateActions = default;
 		[SerializeField] private StateTransitionModel[] m_Transitions = null;
 
+
 		internal State GetState(StateMachine stateMachine, Dictionary<ScriptableObject, object> cachedStates, Dictionary<StateActionModel, object[]> cachedActions)
 		{
 			if (cachedStates.TryGetValue(this, out var obj))
