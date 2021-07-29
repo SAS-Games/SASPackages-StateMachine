@@ -342,7 +342,6 @@ namespace SAS.StateMachineGraph.Editor
         {
             var node = new StateMachineNode(stateMachineModel, stateMachineModel.GetPosition(), RuntimeStateMachineController.IsDefaultStateMachine(stateMachineModel), MakeTranstion, StateMachineModelMouseUp, RemoveStateMachineNode, SelectStateMachineNode, DuplicateStateMachine);
             _nodes.Add(node);
-            AssetDatabase.SaveAssets();
             Repaint();
         }
 

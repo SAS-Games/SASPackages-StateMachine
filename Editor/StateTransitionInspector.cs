@@ -64,7 +64,7 @@ namespace SAS.StateMachineGraph.Editor
 
         public override void OnInspectorGUI()
         {
-            _allTranstionsToTargetState.DoLayoutList();
+            _allTranstionsToTargetState?.DoLayoutList();
 
             var hasExitTime = _stateTransitionModelSO.FindProperty("m_HasExitTime");
             var exitTime = _stateTransitionModelSO.FindProperty("m_ExitTime");

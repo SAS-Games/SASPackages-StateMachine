@@ -81,7 +81,7 @@ namespace SAS.StateMachineGraph.Editor
         public void DrawParametersWindow(int windowId)
         {
             ProcessEvents(Event.current);
-            _parametersList.DoList(rect);
+            _parametersList?.DoList(rect);
             if (_runtimeStateMachineController)
                 _parametersList?.serializedProperty?.serializedObject?.ApplyModifiedProperties();
         }

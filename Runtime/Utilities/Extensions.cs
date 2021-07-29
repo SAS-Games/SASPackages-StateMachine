@@ -74,6 +74,5 @@ namespace SAS.StateMachineGraph.Utilities
             Array.Copy(items, 0, array, array.Length - items.Length, items.Length);
             return array;
         }
-
     }
 }

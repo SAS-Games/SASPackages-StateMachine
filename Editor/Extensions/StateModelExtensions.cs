@@ -52,11 +52,8 @@ namespace SAS.StateMachineGraph.Editor
         {
             var stateTransitionModel = ScriptableObject.CreateInstance<StateTransitionModel>();
             stateTransitionModel.name = sourceStateModel.name + "->To->" + targerStateModel.name;
+            runtimeStateMachineController.AddObjectToAsset(stateTransitionModel);
 
-            if (AssetDatabase.GetAssetPath(runtimeStateMachineController) != "")
-                AssetDatabase.AddObjectToAsset(stateTransitionModel, AssetDatabase.GetAssetPath(runtimeStateMachineController));
-
-            AssetDatabase.SaveAssets();
             return stateTransitionModel;
         }
 
@@ -170,10 +167,7 @@ namespace SAS.StateMachineGraph.Editor
         {
             var clonedStateTransitionModel = Object.Instantiate(stateTransitionModel);
             clonedStateTransitionModel.name = stateTransitionModel.name;
-            if (AssetDatabase.GetAssetPath(runtimeStateMachineController) != "")
-                AssetDatabase.AddObjectToAsset(clonedStateTransitionModel, AssetDatabase.GetAssetPath(runtimeStateMachineController));
-            AssetDatabase.SaveAssets();
-
+            runtimeStateMachineController.AddObjectToAsset(clonedStateTransitionModel);
             var sourceStateName = stateTransitionModel.serializedObject().FindProperty("m_SourceState").objectReferenceValue.name;
             var targetStateName = stateTransitionModel.serializedObject().FindProperty("m_TargetState").objectReferenceValue.name;
 

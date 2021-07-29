@@ -19,12 +19,8 @@ namespace SAS.StateMachineGraph.Editor
             StateMachineModel childStateMachine = ScriptableObject.CreateInstance<StateMachineModel>();
             childStateMachine.name = stateMachineModel.MakeUniqueStateMachineName(name);
 
-            // subStateMachine.hideFlags = HideFlags.HideInHierarchy;
             childStateMachine.SetPosition(position);
-            if (AssetDatabase.GetAssetPath(runtimeStateMachineController) != "")
-                AssetDatabase.AddObjectToAsset(childStateMachine, AssetDatabase.GetAssetPath(runtimeStateMachineController));
-            AssetDatabase.SaveAssets();
-
+            runtimeStateMachineController.AddObjectToAsset(childStateMachine);
             childStateMachine.SetAnyStatePosition(new Vector3(300, 50, 0));
             stateMachineModel.AddChildStateMachine(childStateMachine);
             return childStateMachine;

@@ -28,10 +28,7 @@ namespace SAS.StateMachineGraph.Editor
             StateMachineModel stateMachineModel = ScriptableObject.CreateInstance<StateMachineModel>();
             stateMachineModel.name = stateMachineModel.MakeUniqueStateMachineName(name);
 
-            // subStateMachine.hideFlags = HideFlags.HideInHierarchy;
-
-            if (AssetDatabase.GetAssetPath(runtimeStateMachineController) != "")
-                AssetDatabase.AddObjectToAsset(stateMachineModel, AssetDatabase.GetAssetPath(runtimeStateMachineController));
+            runtimeStateMachineController.AddObjectToAsset(stateMachineModel);
             runtimeStateMachineController.AddStateMachine(stateMachineModel);
             runtimeStateMachineController.AddAnyState(stateMachineModel);
         }
@@ -49,12 +46,7 @@ namespace SAS.StateMachineGraph.Editor
             var stateModel = ScriptableObject.CreateInstance<StateModel>();
             stateModel.name = stateMachineModel.MakeUniqueStateName("Any State");
 
-            // stateModel.hideFlags = HideFlags.HideInHierarchy;
-
-            if (AssetDatabase.GetAssetPath(runtimeStateMachineController) != "")
-                AssetDatabase.AddObjectToAsset(stateModel, AssetDatabase.GetAssetPath(runtimeStateMachineController));
-
-            AssetDatabase.SaveAssets();
+            runtimeStateMachineController.AddObjectToAsset(stateModel);
             stateMachineModel.SetAnyStatePosition(new Vector3(300, 50, 0));
             runtimeStateMachineController.AddAnyState(stateModel);
         }
@@ -135,21 +127,17 @@ namespace SAS.StateMachineGraph.Editor
         {
             var stateModel = ScriptableObject.CreateInstance<StateModel>();
             stateModel.name = stateMachineModel.MakeUniqueStateName(name);
-            
+
             runtimeStateMachineController.CreateStateModelAsset(stateMachineModel, stateModel, position);
-        
+
             return stateModel;
         }
 
         private static void CreateStateModelAsset(this RuntimeStateMachineController runtimeStateMachineController, StateMachineModel stateMachineModel, StateModel stateModel, Vector3 position)
         {
-            // stateModel.hideFlags = HideFlags.HideInHierarchy;
-            if (AssetDatabase.GetAssetPath(runtimeStateMachineController) != "")
-                AssetDatabase.AddObjectToAsset(stateModel, AssetDatabase.GetAssetPath(runtimeStateMachineController));
-
+            runtimeStateMachineController.AddObjectToAsset(stateModel);
             stateModel.SetPosition(position);
             stateMachineModel.AddState(stateModel);
-            AssetDatabase.SaveAssets();
         }
 
         internal static void RemoveDefaultState(this RuntimeStateMachineController runtimeStateMachineController, StateMachineModel stateMachineModel, StateModel stateModel)
@@ -281,5 +269,34 @@ namespace SAS.StateMachineGraph.Editor
 
             return parametersName;
         }
+
+        internal static void AddObjectToAsset(this RuntimeStateMachineController runtimeStateMachineController, Object objectToAdd)
+        {
+            // stateModel.hideFlags = HideFlags.HideInHierarchy;
+            AssetDatabase.AddObjectToAsset(objectToAdd, AssetDatabase.GetAssetPath(runtimeStateMachineController));
+            AssetDatabase.SaveAssets();
+        }
+
+        internal static void HideInHierarchySubObjectsOfType<T>(this RuntimeStateMachineController runtimeStateMachineController) where T : Object
+        {
+            var subObjects = runtimeStateMachineController.GetSubObjectsOfType<T>();
+            foreach (var subObject in subObjects)
+                subObject.hideFlags = HideFlags.HideInHierarchy;
+        }
+
+        internal static List<T> GetSubObjectsOfType<T>(this RuntimeStateMachineController runtimeStateMachineController) where T : Object
+        {
+            Object[] objs = AssetDatabase.LoadAllAssetsAtPath(AssetDatabase.GetAssetPath(runtimeStateMachineController));
+            List<T> ofType = new List<T>();
+            foreach (Object o in objs)
+            {
+                if (o is T)
+                {
+                    ofType.Add(o as T);
+                }
+            }
+            return ofType;
+        }
+
     }
 }
