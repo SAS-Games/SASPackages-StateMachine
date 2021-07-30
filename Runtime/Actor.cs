@@ -121,7 +121,7 @@ namespace SAS.StateMachineGraph
 
         public void SetInteger(string name, int value)
         {
-            StateMachineController?.SetInt(name, value);
+            StateMachineController?.SetInteger(name, value);
         }
 
         public void SetBool(string name, bool value)
@@ -139,9 +139,9 @@ namespace SAS.StateMachineGraph
             StateMachineController?.ResetSetTrigger(name);
         }
 
-        public int GetInt(string name)
+        public int GetInteger(string name)
         {
-            return StateMachineController.GetInt(name);
+            return StateMachineController.GetInteger(name);
         }
 
         public float GetFloat(string name)

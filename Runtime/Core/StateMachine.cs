@@ -55,7 +55,7 @@ namespace SAS.StateMachineGraph
             AnyState?.TryTransition(stateChanged);
         }
 
-        public int GetInt(string name)
+        public int GetInteger(string name)
         {
             try
             {
@@ -94,7 +94,7 @@ namespace SAS.StateMachineGraph
             }
         }
 
-        public void SetInt(string name, int value)
+        public void SetInteger(string name, int value)
         {
             try
             {
