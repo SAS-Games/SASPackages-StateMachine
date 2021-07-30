@@ -30,12 +30,12 @@ namespace SAS.StateMachineGraph
 
                 case StateMachineParameter.ParameterType.Int:
                     if (m_Mode == Mode.Greater)
-                        return stateMachine.GetInt(m_Name) > (int)m_FloatValue;
+                        return stateMachine.GetInteger(m_Name) > (int)m_FloatValue;
                     else if (m_Mode == Mode.Less)
-                        return stateMachine.GetInt(m_Name) < (int)m_FloatValue;
+                        return stateMachine.GetInteger(m_Name) < (int)m_FloatValue;
                     if (m_Mode == Mode.Equals)
-                        return stateMachine.GetInt(m_Name) == (int)m_FloatValue;
-                    return stateMachine.GetInt(m_Name) != (int)m_FloatValue;
+                        return stateMachine.GetInteger(m_Name) == (int)m_FloatValue;
+                    return stateMachine.GetInteger(m_Name) != (int)m_FloatValue;
 
                 case StateMachineParameter.ParameterType.Float:
                     if (m_Mode == Mode.Greater)
