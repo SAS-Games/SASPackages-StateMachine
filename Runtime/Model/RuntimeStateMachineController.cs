@@ -9,7 +9,10 @@ namespace SAS.StateMachineGraph
         [SerializeField] private StateMachineParameter[] _parameters = default;
         [SerializeField] private StateModel m_DefaultStateModel = default;
         [SerializeField] private StateModel m_AnyStateModel = default;
-        
+#if UNITY_EDITOR
+        [HideInInspector] public string[] tags = new string[] { };
+        [HideInInspector] public string[] keys = new string[] { };
+#endif
         private void Awake()
         {
 #if UNITY_EDITOR

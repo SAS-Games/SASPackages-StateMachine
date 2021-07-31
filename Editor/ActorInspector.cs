@@ -5,6 +5,7 @@ using System;
 using SAS.TagSystem.Editor;
 using EditorUtility = SAS.Utilities.Editor.EditorUtility;
 using SAS.TagSystem;
+using SAS.StateMachineGraph.Utilities;
 
 namespace SAS.StateMachineGraph.Editor
 {
@@ -12,11 +13,61 @@ namespace SAS.StateMachineGraph.Editor
     public class ActorInspector : UnityEditor.Editor
     {
         private ReorderableList _configsList;
-        private static string[] Keys => TagList.GetList("Key List");
-        private static TagList Instance => TagList.Instance("Key List");
+        private string[] _keys;
+        private string[] Keys
+        {
+            get
+            {
+                if (_runtimeStateMachineController == null)
+                {
+                    var actorSO = new SerializedObject(target);
+                    _runtimeStateMachineController = actorSO.FindProperty("m_Controller").objectReferenceValue as RuntimeStateMachineController;
+                }
+                if (_keys == null)
+                {
+                    _keys = _runtimeStateMachineController?.keys;
+                    _keys = _keys.AddRange(_runtimeStateMachineController?.tags);
+                }
+
+                return _keys;
+            }
+        }
+
+        private RuntimeStateMachineController _runtimeStateMachineController;
 
         private void OnEnable()
         {
+            DrawConfigsList();
+        }
+        
+        public override void OnInspectorGUI()
+        {
+            EditorGUI.BeginChangeCheck();
+            serializedObject.FindProperty("m_Controller").objectReferenceValue = EditorGUILayout.ObjectField("Controller", serializedObject.FindProperty("m_Controller").objectReferenceValue, typeof(RuntimeStateMachineController), false);
+
+            if (EditorGUI.EndChangeCheck())
+            {
+                _runtimeStateMachineController = null;
+                _configsList = null;
+                _keys = null;
+                serializedObject.ApplyModifiedProperties();
+                DrawConfigsList();
+            }
+            serializedObject.ApplyModifiedProperties();
+            _configsList?.DoLayoutList();
+        }
+
+        private void OnKeySelected(SerializedProperty serializedProperty, int index)
+        {
+            serializedProperty.stringValue = index != -1 ? Keys[index] : string.Empty;
+            serializedProperty.serializedObject.ApplyModifiedProperties();
+        }
+
+        private void DrawConfigsList()
+        {
+            if (Keys == null)
+                return;
+
             _configsList = new ReorderableList(serializedObject, serializedObject.FindProperty("m_Configs"), true, true, true, true);
             _configsList.drawHeaderCallback = (Rect rect) =>
             {
@@ -32,8 +83,8 @@ namespace SAS.StateMachineGraph.Editor
                 if (configsRef.arraySize > 0)
                 {
                     var data = configsRef.GetArrayElementAtIndex(index).FindPropertyRelative("data");
-                    var tag = configsRef.GetArrayElementAtIndex(index).FindPropertyRelative("name");
-                
+                    var name = configsRef.GetArrayElementAtIndex(index).FindPropertyRelative("name");
+
                     position.width /= 2;
                     var selectedObject = EditorGUI.ObjectField(position, "", data.objectReferenceValue, typeof(ScriptableObject), false);
                     if (selectedObject != data.objectReferenceValue)
@@ -43,7 +94,7 @@ namespace SAS.StateMachineGraph.Editor
                     }
                     position.x = position.xMax + 10;
                     position.width -= 10;
-                    EditorUtility.DropDown("ConfigDrawer".GetHashCode(), position, Keys, Array.IndexOf(Keys, tag.stringValue), selectedIndex => OnKeySelected(tag, selectedIndex), ShowKeysList);
+                    EditorUtility.DropDown("ConfigDrawer".GetHashCode(), position, Keys, Array.IndexOf(Keys, name.stringValue), selectedIndex => OnKeySelected(name, selectedIndex));
                 }
             };
             _configsList.onAddCallback = list =>
@@ -61,24 +112,6 @@ namespace SAS.StateMachineGraph.Editor
                     serializedObject.ApplyModifiedProperties();
                 }
             };
-        }
-        
-        public override void OnInspectorGUI()
-        {
-            serializedObject.FindProperty("m_Controller").objectReferenceValue = EditorGUILayout.ObjectField("Controller", serializedObject.FindProperty("m_Controller").objectReferenceValue, typeof(RuntimeStateMachineController), false);
-            serializedObject.ApplyModifiedProperties();
-            _configsList.DoLayoutList();
-        }
-
-        private void OnKeySelected(SerializedProperty serializedProperty, int index)
-        {
-            serializedProperty.stringValue = index != -1 ? Keys[index] : string.Empty;
-            serializedProperty.serializedObject.ApplyModifiedProperties();
-        }
-
-        private void ShowKeysList()
-        {
-            Selection.activeObject = Instance;
         }
     }
 }

@@ -1,10 +1,9 @@
 {
     "name": "AssemblyStateMachine",
-    "rootNamespace": "",
     "references": [
-        "GUID:1a4a9145c49172041a1a2c63e25939c7",
         "GUID:e344a76f93630b247b9adfd51f24fe40",
-        "GUID:6023175abfeceb148a5a89293809e578"
+        "GUID:6023175abfeceb148a5a89293809e578",
+        "GUID:1a4a9145c49172041a1a2c63e25939c7"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

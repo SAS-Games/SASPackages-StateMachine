@@ -4,7 +4,7 @@ using UnityEditor;
 using UnityEngine;
 using ReorderableList = UnityEditorInternal.ReorderableList;
 using EditorUtility = SAS.Utilities.Editor.EditorUtility;
-using SAS.TagSystem.Editor;
+using SAS.StateMachineGraph.Utilities;
 
 namespace SAS.StateMachineGraph.Editor
 {
@@ -15,13 +15,17 @@ namespace SAS.StateMachineGraph.Editor
         private ReorderableList _transitionStates;
         private Type[] _allActionTypes;
 
-        private static string[] Tags => TagList.GetList();
-        private static string[] Keys => TagList.GetList("Key List");
+        private string[] Tags;// => TagList.GetList();
+        private string[] Keys;// => TagList.GetList("Key List");
         private GUIStyle _actionNotFoundStyle = new GUIStyle();
         new private SerializedObject serializedObject;
+        private RuntimeStateMachineController _runtimeStateMachineController;
 
         private void OnEnable()
         {
+            _runtimeStateMachineController = AssetDatabase.LoadMainAssetAtPath(AssetDatabase.GetAssetPath(target)) as RuntimeStateMachineController;
+            Tags = _runtimeStateMachineController.tags;
+            Keys = _runtimeStateMachineController.keys;
             serializedObject = ((StateModel)target).serializedObject();
             _actionNotFoundStyle.normal.textColor = Color.red;
             SetupTransitions();
@@ -113,21 +117,22 @@ namespace SAS.StateMachineGraph.Editor
                 id = GUIUtility.GetControlID("Tag".GetHashCode(), FocusType.Keyboard, pos);
                 var tagIndex = Array.IndexOf(Tags, tag.stringValue);
                 if (tagIndex != -1 || string.IsNullOrEmpty(tag.stringValue))
-                    EditorUtility.DropDown(id, pos, Tags, tagIndex, selectedIndex => SetTagSerializedProperty(tag, selectedIndex));
+                    EditorUtility.DropDown(id, pos, Tags, tagIndex, selectedIndex => SetTagSerializedProperty(tag, selectedIndex), AddTag);
                 else
-                    EditorUtility.DropDown(id, pos, Tags, tagIndex, tag.stringValue, Color.red, selectedIndex => SetTagSerializedProperty(tag, selectedIndex));
+                    EditorUtility.DropDown(id, pos, Tags, tagIndex, tag.stringValue, Color.red, selectedIndex => SetTagSerializedProperty(tag, selectedIndex), AddTag);
 
                 rectEnd = rect.width - 1.5f * width;
                 pos = new Rect(rectEnd, rect.y - 2, width, rect.height);
                 id = GUIUtility.GetControlID("Key".GetHashCode(), FocusType.Keyboard, pos);
                 var keyIndex = Array.IndexOf(Keys, key.stringValue);
                 if (keyIndex != -1 || string.IsNullOrEmpty(key.stringValue))
-                    EditorUtility.DropDown(id, pos, Keys, keyIndex, selectedIndex => SetKeySerializedProperty(key, selectedIndex));
+                    EditorUtility.DropDown(id, pos, Keys, keyIndex, selectedIndex => SetKeySerializedProperty(key, selectedIndex), AddKey);
                 else
-                    EditorUtility.DropDown(id, pos, Keys, keyIndex, key.stringValue, Color.red, selectedIndex => SetKeySerializedProperty(key, selectedIndex));
+                    EditorUtility.DropDown(id, pos, Keys, keyIndex, key.stringValue, Color.red, selectedIndex => SetKeySerializedProperty(key, selectedIndex), AddKey);
 
                 rectEnd = rect.width - width / 2;
                 pos = new Rect(rectEnd, rect.y - 2, width, rect.height);
+                EditorGUI.BeginChangeCheck();
                 uint a = (uint)(EditorGUI.MaskField(pos, "", whenToExecute.intValue, whenToExecute.enumNames));
                 if (EditorGUI.EndChangeCheck())
                     whenToExecute.intValue = (int)a;
@@ -192,6 +197,37 @@ namespace SAS.StateMachineGraph.Editor
                 else
                     EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight), val + "None");
             };
+        }
+
+        private void AddTag()
+        {
+            EditorWindow.focusedWindow.Close();
+            var value = EditorInputDialog.Show("Add Tag", "", "New Tag");
+            value = GetUniqueName(value, Tags);
+            Tags = _runtimeStateMachineController.tags.Add(value);
+            _runtimeStateMachineController.tags = _runtimeStateMachineController.tags.Add(value);
+            Tags = _runtimeStateMachineController.tags;
+        }
+
+        private void AddKey()
+        {
+            EditorWindow.focusedWindow.Close();
+            var value = EditorInputDialog.Show("Add Key", "", "New Key");
+            value = GetUniqueName(value, Keys);
+            _runtimeStateMachineController.keys = _runtimeStateMachineController.keys.Add(value);
+            Keys = _runtimeStateMachineController.keys;
+        }
+
+        private string GetUniqueName(string nameBase, string[] usedNames)
+        {
+            string name = nameBase;
+            int counter = 1;
+            while (usedNames.Contains(name.Trim()))
+            {
+                name = nameBase + " " + counter;
+                counter++;
+            }
+            return name;
         }
     }
 }
