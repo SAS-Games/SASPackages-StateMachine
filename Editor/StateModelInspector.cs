@@ -203,6 +203,8 @@ namespace SAS.StateMachineGraph.Editor
         {
             EditorWindow.focusedWindow.Close();
             var value = EditorInputDialog.Show("Add Tag", "", "New Tag");
+            if (value == null)
+                return;
             value = GetUniqueName(value, Tags);
             Tags = _runtimeStateMachineController.tags.Add(value);
             _runtimeStateMachineController.tags = _runtimeStateMachineController.tags.Add(value);
@@ -213,6 +215,8 @@ namespace SAS.StateMachineGraph.Editor
         {
             EditorWindow.focusedWindow.Close();
             var value = EditorInputDialog.Show("Add Key", "", "New Key");
+            if (value == null)
+                return;
             value = GetUniqueName(value, Keys);
             _runtimeStateMachineController.keys = _runtimeStateMachineController.keys.Add(value);
             Keys = _runtimeStateMachineController.keys;
