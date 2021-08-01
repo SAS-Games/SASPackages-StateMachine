@@ -20,6 +20,7 @@ namespace SAS.StateMachineGraph.Editor
             {
                 if (_runtimeStateMachineController == null)
                 {
+                    _keys = null;
                     var actorSO = new SerializedObject(target);
                     _runtimeStateMachineController = actorSO.FindProperty("m_Controller").objectReferenceValue as RuntimeStateMachineController;
                 }
@@ -52,6 +53,8 @@ namespace SAS.StateMachineGraph.Editor
                 _keys = null;
                 serializedObject.ApplyModifiedProperties();
                 DrawConfigsList();
+                UnityEditor.EditorUtility.SetDirty(target);
+                Repaint();
             }
             serializedObject.ApplyModifiedProperties();
             _configsList?.DoLayoutList();
