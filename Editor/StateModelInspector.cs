@@ -52,7 +52,8 @@ namespace SAS.StateMachineGraph.Editor
             if (!target.name.Equals(Util.AnyStateModelName))
                 _stateActions.DoLayoutList();
             _transitionStates.DoLayoutList();
-
+            EditorGUI.BeginChangeCheck();
+         
             serializedObject.ApplyModifiedProperties();
             Repaint();
         }
@@ -201,7 +202,6 @@ namespace SAS.StateMachineGraph.Editor
 
         private void AddTag()
         {
-            EditorWindow.focusedWindow.Close();
             var value = EditorInputDialog.Show("Add Tag", "", "New Tag");
             if (value == null)
                 return;
@@ -213,7 +213,6 @@ namespace SAS.StateMachineGraph.Editor
 
         private void AddKey()
         {
-            EditorWindow.focusedWindow.Close();
             var value = EditorInputDialog.Show("Add Key", "", "New Key");
             if (value == null)
                 return;
