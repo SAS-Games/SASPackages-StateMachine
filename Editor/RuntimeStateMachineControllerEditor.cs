@@ -45,7 +45,6 @@ namespace SAS.StateMachineGraph.Editor
 
         public override void OnInspectorGUI()
         {
-            Debug.Log((target as RuntimeStateMachineController).tags.Length);
             base.OnInspectorGUI();
             showTagsList = EditorGUILayout.Foldout(showTagsList, "Tags");
             if (showTagsList)
