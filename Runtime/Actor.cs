@@ -77,10 +77,25 @@ namespace SAS.StateMachineGraph
             return _serviceLocator.TryGet<T>(out service, tag);
         }
 
+        public bool TryGetComponent<T>(out T component, string tag = "")
+        {
+            component = (T)(object)GetComponent(typeof(T), tag);
+            return component != null;
+        }
+
         public bool TryGetComponentInChildren<T>(out T component, string tag = "", bool includeInactive = false)
         {
             component = (T)(object)GetComponentInChildren(typeof(T), tag, includeInactive);
             return component != null;
+        }
+
+        public Component GetComponent(Type type, string tag = "")
+        {
+            var obj = TaggerExtensions.GetComponent(this, type, tag);
+            if (obj == null)
+                Debug.LogError($"No component of type {type.GetType()} with tag {tag} is found under actor {this}, attached on the game object {gameObject.name}. Try assigning the component with the right Tag");
+
+            return obj;
         }
 
         public Component GetComponentInChildren(Type type, string tag = "", bool includeInactive = false)
