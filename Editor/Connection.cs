@@ -55,6 +55,13 @@ namespace SAS.StateMachineGraph.Editor
             EditorUtilities.DrawLine(_startPos, _endPos);
             if (SourceStateModel != null && TargetStateModel != null)
             {
+                if (SourceStateModel == TargetStateModel)
+                {
+                    _startPos.x = StartNode.rect.x + StartNode.rect.width / 2;
+                    _startPos.y = StartNode.rect.y + StartNode.rect.height / 2;
+                    _endPos = _startPos;
+                    _endPos.y += StartNode.rect.height + 20;
+                }
                 if (SourceStateModel.GetTransitionCount(TargetStateModel) <= 1)
                     EditorUtilities.DrawArrow(_startPos, _endPos, inverted);
                 else
