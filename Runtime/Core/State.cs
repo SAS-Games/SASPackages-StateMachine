@@ -15,7 +15,7 @@ namespace SAS.StateMachineGraph
         internal IStateAction[] _onFixedUpdate = default;
         internal IStateAction[] _onUpdate = default;
         internal IStateAction[] _onLateUpdate = default;
-        internal IAwaitableStateAction[] _awaitableStateAction = default;
+        private List<IAwaitableStateAction> _awaitableStateAction = new List<IAwaitableStateAction>();
         internal TransitionState[] _transitionStates;
 
         private State _nextState;
@@ -28,12 +28,14 @@ namespace SAS.StateMachineGraph
 
         internal void OnEnter()
         {
+            FilterAwaitableAction(_onEnter);
             for (int i = 0; i < _onEnter?.Length; ++i)
                 _onEnter[i].Execute(_stateMachine.Actor);
         }
 
         internal void OnExit()
         {
+            FilterAwaitableAction(_onExit);
             for (int i = 0; i < _onExit?.Length; ++i)
                 _onExit[i].Execute(_stateMachine.Actor);
         }
@@ -54,12 +56,6 @@ namespace SAS.StateMachineGraph
         {
             for (int i = 0; i < _onLateUpdate?.Length; ++i)
                 _onLateUpdate[i].Execute(_stateMachine.Actor);
-        }
-
-        internal void AwaitableStateAction()
-        {
-            for (int i = 0; i < _awaitableStateAction?.Length; ++i)
-                _awaitableStateAction[i].Execute(_stateMachine.Actor);
         }
 
         internal void TryTransition(StateChanged stateChanged)
@@ -93,7 +89,7 @@ namespace SAS.StateMachineGraph
 
         private bool IsAllAwaitableActionCompleted()
         {
-            for (int i = 0; i < _awaitableStateAction?.Length; ++i)
+            for (int i = 0; i < _awaitableStateAction.Count; ++i)
             {
                 if (!_awaitableStateAction[i].IsCompleted)
                     return false;
@@ -101,5 +97,15 @@ namespace SAS.StateMachineGraph
             return true;
         }
 
+        private void FilterAwaitableAction(IStateAction[] stateActions)
+        {
+            _awaitableStateAction.Clear();
+            foreach (var action in stateActions)
+            {
+                if (action is IAwaitableStateAction)
+                    _awaitableStateAction.Add(action as IAwaitableStateAction);
+            }
+
+        }
     }
 }

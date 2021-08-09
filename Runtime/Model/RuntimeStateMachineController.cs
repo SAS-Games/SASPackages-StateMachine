@@ -27,7 +27,7 @@ namespace SAS.StateMachineGraph
             StateMachine stateMachine = new StateMachine(actor, _parameters);
             var cachedState = new Dictionary<ScriptableObject, object>();
             var cachedActions = new Dictionary<StateActionModel, object[]>();
-            
+
             var stateModels = m_BaseStateMachineModel.GetStatesRecursivily();
 
             foreach (StateModel stateModel in stateModels)
@@ -43,17 +43,22 @@ namespace SAS.StateMachineGraph
             return stateMachine;
         }
 
-        internal void Initialize(RuntimeStateMachineController model)
+        internal void Initialize(RuntimeStateMachineController runtimeStateMachineController)
         {
-            name = model.name;
-            _parameters = new StateMachineParameter[model._parameters.Length];
-            
-            for(int i =0; i < _parameters.Length; ++i)
-                _parameters[i] = new StateMachineParameter(model._parameters[i]);
+            name = runtimeStateMachineController.name;
+            _parameters = new StateMachineParameter[runtimeStateMachineController._parameters.Length];
 
-            m_BaseStateMachineModel = model.m_BaseStateMachineModel;
-            m_DefaultStateModel = model.m_DefaultStateModel;
-            m_AnyStateModel = model.m_AnyStateModel;
+            for (int i = 0; i < _parameters.Length; ++i)
+                _parameters[i] = new StateMachineParameter(runtimeStateMachineController._parameters[i]);
+
+            m_BaseStateMachineModel = runtimeStateMachineController.m_BaseStateMachineModel;
+            m_DefaultStateModel = runtimeStateMachineController.m_DefaultStateModel;
+            m_AnyStateModel = runtimeStateMachineController.m_AnyStateModel;
+
+#if UNITY_EDITOR
+            tags = runtimeStateMachineController.tags;
+            keys = runtimeStateMachineController.keys;
+#endif
         }
     }
 }

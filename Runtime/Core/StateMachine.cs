@@ -28,7 +28,6 @@ namespace SAS.StateMachineGraph
                 _currentState?.OnExit();
                 _currentState = value;
                 _currentState?.OnEnter();
-                _currentState?.AwaitableStateAction();
             }
         }
 
