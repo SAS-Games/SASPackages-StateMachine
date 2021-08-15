@@ -16,6 +16,8 @@ MonoBehaviour:
   _parameters: []
   m_DefaultStateModel: {fileID: 0}
   m_AnyStateModel: {fileID: 0}
+  tags: []
+  keys: []
 --- !u!114 &3753741740416520589
 MonoBehaviour:
   m_ObjectHideFlags: 1

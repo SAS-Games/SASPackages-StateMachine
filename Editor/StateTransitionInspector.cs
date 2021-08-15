@@ -74,6 +74,9 @@ namespace SAS.StateMachineGraph.Editor
             EditorGUI.BeginDisabledGroup(hasExitTime.boolValue == false);
             exitTime.floatValue = EditorGUILayout.FloatField("Exit Time", exitTime.floatValue);
             EditorGUI.EndDisabledGroup();
+            
+            var waitForAwaitableActionsToComplete = _stateTransitionModelSO.FindProperty("m_WaitForAwaitableActionsToComplete");
+            waitForAwaitableActionsToComplete.boolValue = EditorGUILayout.Toggle("Wait For Awaitable Actions To Complete", waitForAwaitableActionsToComplete.boolValue);
             _stateTransitionModelSO.ApplyModifiedProperties();
 
             EditorGUILayout.Space(10);

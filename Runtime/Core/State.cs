@@ -19,6 +19,7 @@ namespace SAS.StateMachineGraph
         internal TransitionState[] _transitionStates;
 
         private State _nextState;
+        private TransitionState _transitionState;
 
         internal State(StateMachine stateMachine, string name)
         {
@@ -66,6 +67,7 @@ namespace SAS.StateMachineGraph
                 {
                     if (_transitionStates[i].TryGetTransiton(_stateMachine, out _nextState))
                     {
+                        _transitionState = _transitionStates[i];
                         ResetExitTime();
                         break;
                     }
@@ -78,6 +80,7 @@ namespace SAS.StateMachineGraph
                 _stateMachine.CurrentState = _nextState;
                 stateChanged?.Invoke(_nextState, true);
                 _nextState = null;
+                _transitionState = null;
             }
         }
 
@@ -89,6 +92,8 @@ namespace SAS.StateMachineGraph
 
         private bool IsAllAwaitableActionCompleted()
         {
+            if (_transitionState != null && !_transitionState.WaitForAwaitableActionsToComplete)
+                return true;
             for (int i = 0; i < _awaitableStateAction.Count; ++i)
             {
                 if (!_awaitableStateAction[i].IsCompleted)

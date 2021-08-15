@@ -28,14 +28,24 @@ namespace SAS.StateMachineGraph
         private readonly ServiceLocator _serviceLocator = new ServiceLocator();
         public string CurrentStateName => StateMachineController?.CurrentState?.Name;
         public State CurrentState => StateMachineController?.CurrentState;
+        private bool _isConfigsCached = false;
 
         private void Awake()
         {
             OnStateChanged = InvokeEvent;
 
-            foreach (var config in m_Configs)
-                _serviceLocator.Add(config.data.GetType(), config.data, config.name);
+          
             Initialize();
+        }
+
+        private void CacheConfig()
+        {
+            if (!_isConfigsCached)
+            {
+                foreach (var config in m_Configs)
+                    _serviceLocator.Add(config.data.GetType(), config.data, config.name);
+                _isConfigsCached = true;
+            }
         }
 
         private void Initialize()
@@ -74,6 +84,7 @@ namespace SAS.StateMachineGraph
 
         public bool TryGet<T>(out T service, string tag = "") where T : ScriptableObject
         {
+            CacheConfig();
             return _serviceLocator.TryGet<T>(out service, tag);
         }
 
@@ -107,7 +118,7 @@ namespace SAS.StateMachineGraph
             return obj;
         }
 
-        public bool GetComponentsInChildren<T>(string tag, out T[] components, bool includeInactive = false)
+        public bool TryGetComponentsInChildren<T>(out T[] components, string tag, bool includeInactive = false)
         {
             var results = this.GetComponentsInChildren(typeof(T), tag, includeInactive);
             try
@@ -127,6 +138,21 @@ namespace SAS.StateMachineGraph
             }
 
             return true;
+        }
+
+        public bool TryGetComponentInParent<T>(out T component, string tag = "", bool includeInactive = false)
+        {
+            component = (T)(object)GetComponentInParent(typeof(T), tag, includeInactive);
+            return component != null;
+        }
+
+        public Component GetComponentInParent(Type type, string tag = "", bool includeInactive = false)
+        {
+            var obj = TaggerExtensions.GetComponentInParent(this, type, tag, includeInactive);
+            if (obj == null)
+                Debug.LogError($"No component of type {type.GetType()} with tag {tag} is found under actor {this}, attached on the game object {gameObject.name}. Try assigning the component with the right Tag");
+
+            return obj;
         }
 
         public void SetFloat(string name, float value)

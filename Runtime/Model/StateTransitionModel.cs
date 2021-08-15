@@ -11,13 +11,14 @@ namespace SAS.StateMachineGraph
 		[SerializeField] private StateModel m_TargetState = default;
 		[SerializeField] private bool m_HasExitTime = false;
 		[SerializeField] private float m_ExitTime = 0;
+		[SerializeField] private bool m_WaitForAwaitableActionsToComplete = true;
 		[SerializeField] private Condition[] m_Conditions = default;
 
         internal TransitionState GetTransition(StateMachine stateMachine, Dictionary<ScriptableObject, object> cachedStates, Dictionary<StateActionModel, object[]> cachedActions)
 		{
 			var state = m_TargetState.GetState(stateMachine, cachedStates, cachedActions);
 			var conditions = GetConditions();
-			return new TransitionState(state, conditions, m_HasExitTime, m_ExitTime);
+			return new TransitionState(state, conditions, m_HasExitTime, m_ExitTime, m_WaitForAwaitableActionsToComplete);
 		}
 
 		private Condition[] GetConditions()
