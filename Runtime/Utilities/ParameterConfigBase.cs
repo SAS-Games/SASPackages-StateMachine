@@ -3,8 +3,7 @@ using UnityEngine;
 
 namespace SAS.StateMachineGraph.Utilities
 {
-    [CreateAssetMenu(menuName = "SAS/State Machine Character Controller/Parameters Config (Animator|Actor)")]
-    internal class ParameterConfig : ScriptableObject
+    internal abstract class ParameterConfigBase : ScriptableObject
     {
         [System.Serializable]
         internal class ParametersKeyMap

@@ -1,28 +1,32 @@
-﻿using System;
-using UnityEngine;
-using SAS.StateMachineGraph;
+﻿
+using static SAS.StateMachineGraph.Utilities.ParameterConfigBase;
 
 namespace SAS.StateMachineGraph.Utilities
 {
 	public class ApplyActorParameter : IStateAction
 	{
-		private ParameterConfig.ParametersKeyMap _parameter;
+		private Actor[] _actors;
+		private string _key; 
 
 		void IStateAction.OnInitialize(Actor actor, string tag, string key, State state)
 		{
-			if (actor.TryGet(out ParameterConfig parameterConfig, tag))
-				_parameter = parameterConfig.Get(key);
+			actor.TryGetComponentsInChildren(out _actors, tag, true);
+			_key = key;
 		}
 
 		void IStateAction.Execute(Actor actor)
 		{
-			ApplyParameters(actor);
+			for (int i = 0; i < _actors.Length; ++i)
+			{
+				if (_actors[i].TryGet(out ActorParameterConfig parameterConfig))
+					ApplyParameters(_actors[i], parameterConfig.Get(_key).parameters);
+			}
 		}
 
-		private void ApplyParameters(Actor actor)
+		private void ApplyParameters(Actor actor, in Parameter[] parameters)
 		{
-			for (int i = 0; i < _parameter.parameters.Length; ++i)
-				actor.Apply(_parameter.parameters[i]);
+			for (int i = 0; i < parameters.Length; ++i)
+				actor.Apply(parameters[i]);
 		}
 	}
 }

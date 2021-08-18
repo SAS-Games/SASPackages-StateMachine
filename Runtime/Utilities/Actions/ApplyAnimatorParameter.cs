@@ -4,25 +4,26 @@ namespace SAS.StateMachineGraph.Utilities
 {
 	public class ApplyAnimatorParameter : IStateAction
 	{
-		ParameterConfig.ParametersKeyMap _parameter;
-		private Animator _animator;
+		ParameterConfigBase.ParametersKeyMap _parameter;
+		private Animator[] _animators;
 
 		void IStateAction.OnInitialize(Actor actor, string tag, string key, State state)
 		{
-			actor.TryGetComponentInChildren(out _animator, includeInactive: true);
-			if (actor.TryGet(out ParameterConfig parameterConfig, tag))
+			actor.TryGetComponentInChildren(out _animators, tag, true);
+			if (actor.TryGet(out AnimatorParameterConfig parameterConfig, key))
 				_parameter = parameterConfig.Get(key);
 		}
 
 		void IStateAction.Execute(Actor actor)
 		{
-			ApplyParameters();
+			for (int i = 0; i < _animators.Length; ++i)
+				ApplyParameters(_animators[i]);
 		}
 
-		private void ApplyParameters()
+		private void ApplyParameters(Animator animator)
 		{
 			for (int i = 0; i < _parameter.parameters.Length; ++i)
-				_animator.Apply(_parameter.parameters[i]);
+				animator.Apply(_parameter.parameters[i]);
 		}
 	}
 }
