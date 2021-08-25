@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using SAS.TagSystem.Editor;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
@@ -19,27 +21,23 @@ namespace SAS.StateMachineGraph.Editor
         {
             var stateMachineModel = target as RuntimeStateMachineController;
             _tags.Clear();
-            _tags.AddRange(stateMachineModel.tags);
+            _tags.AddRange(TagList.Instance().values);
             _tagsList = new ReorderableList(_tags, typeof(string), false, true, false, true);
             _tagsList.onRemoveCallback = (list) =>
             {
-                List<string> tmp = new List<string>(stateMachineModel.tags);
-                tmp.RemoveAt(list.index);
-                stateMachineModel.tags = tmp.ToArray();
+                TagList.Instance().Remove(list.index);
                 _tags.RemoveAt(list.index);
-                EditorUtility.SetDirty(target);
+                EditorUtility.SetDirty(TagList.Instance());
             };
 
             _keys.Clear();
-            _keys.AddRange(stateMachineModel.tags);
-            _keysList = new ReorderableList(stateMachineModel.keys, typeof(string), false, true, false, true);
+            _keys.AddRange(TagList.Instance(TagList.KeysIdentifier).values);
+            _keysList = new ReorderableList(_keys, typeof(string), false, true, false, true);
             _keysList.onRemoveCallback = (list) =>
             {
-                List<string> tmp = new List<string>(stateMachineModel.keys);
-                tmp.RemoveAt(list.index);
-                stateMachineModel.keys = tmp.ToArray();
+                TagList.Instance(TagList.KeysIdentifier).Remove(list.index);
                 _keys.RemoveAt(list.index);
-                EditorUtility.SetDirty(target);
+                EditorUtility.SetDirty(TagList.Instance(TagList.KeysIdentifier));                
             };
         }
 
@@ -56,6 +54,24 @@ namespace SAS.StateMachineGraph.Editor
 
             if (GUILayout.Button("StateMachineGraphEditor"))
                 StateMachineEditorWindow.ShowBehaviourGraphEditor(target as RuntimeStateMachineController);
+
+            if (GUILayout.Button("Fix Tags and Keys"))
+            {
+                var runtimeStateMachineController = target as RuntimeStateMachineController;
+                var stateModels = runtimeStateMachineController.GetAllStateModels();
+                var usedTags = new List<string>();
+                var usedKeys = new List<string>();
+                foreach (var stateModel in stateModels)
+                {
+                    usedTags.AddRange(stateModel.GetUsedTags());
+                    usedKeys.AddRange(stateModel.GetUsedKeys());
+                }
+
+                usedTags = usedTags.Distinct().ToList();
+                usedKeys = usedKeys.Distinct().ToList();
+                TagList.Instance().AddRange(usedTags);
+                TagList.Instance(TagList.KeysIdentifier).AddRange(usedKeys);
+            }
         }
     }
 }

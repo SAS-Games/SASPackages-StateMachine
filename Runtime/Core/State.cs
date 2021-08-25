@@ -8,6 +8,7 @@ namespace SAS.StateMachineGraph
     public class State
     {
         public string Name { get; private set; }
+        public string Tag { get; private set; }
 
         private StateMachine _stateMachine;
         internal IStateAction[] _onEnter = default;
@@ -21,10 +22,11 @@ namespace SAS.StateMachineGraph
         private State _nextState;
         private TransitionState _transitionState;
 
-        internal State(StateMachine stateMachine, string name)
+        internal State(StateMachine stateMachine, string name,string tag)
         {
             _stateMachine = stateMachine;
             Name = name;
+            Tag = tag;
         }
 
         internal void OnEnter()
@@ -61,7 +63,7 @@ namespace SAS.StateMachineGraph
 
         internal void TryTransition(StateChanged stateChanged)
         {
-            if (_nextState == null)
+            if (_nextState == null || _nextState == this)
             {
                 for (int i = 0; i < _transitionStates.Length; ++i)
                 {

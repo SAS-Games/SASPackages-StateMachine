@@ -9,6 +9,6 @@ namespace SAS.StateMachineGraph
 
     public interface IAwaitableStateAction : IStateAction
     {
-        bool IsCompleted { get; set; }
+        bool IsCompleted { get; }
     }
 }

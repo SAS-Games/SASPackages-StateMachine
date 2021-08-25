@@ -10,7 +10,31 @@ namespace SAS.StateMachineGraph
 	{
 #if UNITY_EDITOR
 		[SerializeField] private Vector3 m_Position;
+		public List<string> GetUsedTags()
+		{
+			List<string> tags = new List<string>();
+			for (int i = 0; i < m_StateActions.Length; ++i)
+			{
+				if (!string.IsNullOrEmpty(m_StateActions[i].tag))
+					tags.Add(m_StateActions[i].tag);
+			}
+
+			return tags;
+		}
+
+		public List<string> GetUsedKeys()
+		{
+			List<string> keys = new List<string>();
+			for (int i = 0; i < m_StateActions.Length; ++i)
+			{
+				if (!string.IsNullOrEmpty(m_StateActions[i].key))
+					keys.Add(m_StateActions[i].key);
+			}
+
+			return keys;
+		}
 #endif
+		[SerializeField] private string m_Tag = "";
 		[SerializeField] private StateActionModel[] m_StateActions = default;
 		[SerializeField] private StateTransitionModel[] m_Transitions = null;
 
@@ -20,7 +44,7 @@ namespace SAS.StateMachineGraph
 			if (cachedStates.TryGetValue(this, out var obj))
 				return (State)obj;
 
-			var state = new State(stateMachine, name);
+			var state = new State(stateMachine, name, m_Tag);
 			cachedStates.Add(this, state);
 			CreateGetActions(m_StateActions, stateMachine, state, cachedActions);
 			state._transitionStates = GetTransitions(m_Transitions, stateMachine, cachedStates, cachedActions);

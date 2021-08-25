@@ -5,6 +5,7 @@ using UnityEngine;
 using ReorderableList = UnityEditorInternal.ReorderableList;
 using EditorUtility = SAS.Utilities.Editor.EditorUtility;
 using SAS.StateMachineGraph.Utilities;
+using SAS.TagSystem.Editor;
 
 namespace SAS.StateMachineGraph.Editor
 {
@@ -15,8 +16,8 @@ namespace SAS.StateMachineGraph.Editor
         private ReorderableList _transitionStates;
         private Type[] _allActionTypes;
 
-        private string[] Tags;// => TagList.GetList();
-        private string[] Keys;// => TagList.GetList("Key List");
+        private string[] Tags => TagList.GetList();
+        private string[] Keys => TagList.GetList(TagList.KeysIdentifier);
         private GUIStyle _actionNotFoundStyle = new GUIStyle();
         new private SerializedObject serializedObject;
         private RuntimeStateMachineController _runtimeStateMachineController;
@@ -24,8 +25,6 @@ namespace SAS.StateMachineGraph.Editor
         private void OnEnable()
         {
             _runtimeStateMachineController = AssetDatabase.LoadMainAssetAtPath(AssetDatabase.GetAssetPath(target)) as RuntimeStateMachineController;
-            Tags = _runtimeStateMachineController.tags;
-            Keys = _runtimeStateMachineController.keys;
             serializedObject = ((StateModel)target).serializedObject();
             _actionNotFoundStyle.normal.textColor = Color.red;
             SetupTransitions();
@@ -38,12 +37,20 @@ namespace SAS.StateMachineGraph.Editor
         {
             base.OnHeaderGUI();
 
-            var curName = EditorGUI.DelayedTextField(new Rect(50, 30, EditorGUIUtility.currentViewWidth - 60, EditorGUIUtility.singleLineHeight), new GUIContent("State Name"), target.name);
+            var curName = EditorGUI.DelayedTextField(new Rect(180, 5, EditorGUIUtility.currentViewWidth - 220, EditorGUIUtility.singleLineHeight), new GUIContent(""), target.name);
             if (curName != target.name)
             {
                 var runtimeStateMachineController = AssetDatabase.LoadMainAssetAtPath(AssetDatabase.GetAssetPath(target)) as RuntimeStateMachineController;
                 ((StateModel)target).Rename(runtimeStateMachineController, curName);
                 Selection.activeObject = AssetDatabase.LoadMainAssetAtPath(AssetDatabase.GetAssetPath(target));
+            }
+
+            var tag = serializedObject.FindProperty("m_Tag");
+            var curTag = EditorGUI.DelayedTextField(new Rect(70, 28, EditorGUIUtility.currentViewWidth - 110, EditorGUIUtility.singleLineHeight), new GUIContent("Tag"), tag.stringValue);
+            if (curTag != tag.stringValue)
+            {
+                tag.stringValue = curTag;
+                serializedObject.ApplyModifiedProperties();
             }
         }
 
@@ -206,9 +213,7 @@ namespace SAS.StateMachineGraph.Editor
             if (value == null)
                 return;
             value = GetUniqueName(value, Tags);
-            Tags = _runtimeStateMachineController.tags.Add(value);
-            _runtimeStateMachineController.tags = _runtimeStateMachineController.tags.Add(value);
-            Tags = _runtimeStateMachineController.tags;
+            TagList.Instance().Add(value);
         }
 
         private void AddKey()
@@ -217,8 +222,7 @@ namespace SAS.StateMachineGraph.Editor
             if (value == null)
                 return;
             value = GetUniqueName(value, Keys);
-            _runtimeStateMachineController.keys = _runtimeStateMachineController.keys.Add(value);
-            Keys = _runtimeStateMachineController.keys;
+            TagList.Instance(TagList.KeysIdentifier).Add(value);
         }
 
         private string GetUniqueName(string nameBase, string[] usedNames)

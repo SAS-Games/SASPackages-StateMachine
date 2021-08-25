@@ -6,6 +6,7 @@ using SAS.TagSystem.Editor;
 using EditorUtility = SAS.Utilities.Editor.EditorUtility;
 using SAS.TagSystem;
 using SAS.StateMachineGraph.Utilities;
+using System.Linq;
 
 namespace SAS.StateMachineGraph.Editor
 {
@@ -18,18 +19,9 @@ namespace SAS.StateMachineGraph.Editor
         {
             get
             {
-                if (_runtimeStateMachineController == null)
-                {
-                    _keys = null;
-                    var actorSO = new SerializedObject(target);
-                    _runtimeStateMachineController = actorSO.FindProperty("m_Controller").objectReferenceValue as RuntimeStateMachineController;
-                }
-                if (_keys == null)
-                {
-                    _keys = _runtimeStateMachineController?.keys;
-                    _keys = _keys.AddRange(_runtimeStateMachineController?.tags);
-                }
-
+                _keys = TagList.Instance(TagList.KeysIdentifier).values;
+                _keys = _keys.AddRange(TagList.Instance().values);
+                _keys = _keys.Distinct().ToArray();
                 return _keys;
             }
         }
