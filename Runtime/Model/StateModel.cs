@@ -38,6 +38,8 @@ namespace SAS.StateMachineGraph
 		[SerializeField] private StateActionModel[] m_StateActions = default;
 		[SerializeField] private StateTransitionModel[] m_Transitions = null;
 
+		public State State { get; private set; }
+
 
 		internal State GetState(StateMachine stateMachine, Dictionary<ScriptableObject, object> cachedStates, Dictionary<StateActionModel, object[]> cachedActions)
 		{
@@ -45,6 +47,7 @@ namespace SAS.StateMachineGraph
 				return (State)obj;
 
 			var state = new State(stateMachine, name, m_Tag);
+			State = state;
 			cachedStates.Add(this, state);
 			CreateGetActions(m_StateActions, stateMachine, state, cachedActions);
 			state._transitionStates = GetTransitions(m_Transitions, stateMachine, cachedStates, cachedActions);

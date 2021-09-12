@@ -1,34 +1,44 @@
 ﻿using System;
-using UnityEngine;
 
 namespace SAS.StateMachineGraph.Utilities
 {
     public class ObserveChildActorStateEnter : IAwaitableStateAction
     {
-        private Actor _childActor;
         public bool IsCompleted { get; set; }
-        private State _state;
-        private Action<State> _onStateEnter;
+        private Actor[] _childActors;
+        private string _childStateTag;
+        private int actorsStateEnterCount;
 
         public void OnInitialize(Actor actor, string tag, string key, State state)
         {
-            _state = state;
-            actor.TryGetComponentInChildren(out _childActor, tag, true);
+            _childStateTag = key;
+            actor.TryGetComponentsInChildren(out _childActors, tag, true);
         }
 
         public void Execute(Actor actor)
         {
             IsCompleted = false;
-            _onStateEnter = (state) =>
-            {
-                if (state.Equals(_state))
-                {
-                    IsCompleted = true;
-                    _childActor.OnStateEnter -= _onStateEnter;
-                }
-            };
+            actorsStateEnterCount = 0;
+            ChildActorsStateEnter(_childActors);
+        }
 
-            _childActor.OnStateEnter += _onStateEnter;
+        private void ChildActorsStateEnter(Actor[] _childActors)
+        {
+            foreach (var actor in _childActors)
+            {
+                Action<State> stateEnterEvent = null;
+                stateEnterEvent = state =>
+                {
+                    if (state.Tag.Equals(_childStateTag))
+                    {
+                        actorsStateEnterCount++;
+                        IsCompleted = actorsStateEnterCount == _childActors.Length;
+                        actor.OnStateEnter -= stateEnterEvent;
+                    }
+                };
+
+                actor.OnStateEnter += stateEnterEvent;
+            }
         }
     }
 }

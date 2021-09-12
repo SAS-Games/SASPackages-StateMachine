@@ -21,6 +21,7 @@ namespace SAS.StateMachineGraph
 
         private State _nextState;
         private TransitionState _transitionState;
+        public Action OnEnterEvent, OnExitEvent;
 
         internal State(StateMachine stateMachine, string name,string tag)
         {
@@ -31,6 +32,7 @@ namespace SAS.StateMachineGraph
 
         internal void OnEnter()
         {
+            OnEnterEvent?.Invoke();
             FilterAwaitableAction(_onEnter);
             for (int i = 0; i < _onEnter?.Length; ++i)
                 _onEnter[i].Execute(_stateMachine.Actor);
@@ -41,6 +43,8 @@ namespace SAS.StateMachineGraph
             FilterAwaitableAction(_onExit);
             for (int i = 0; i < _onExit?.Length; ++i)
                 _onExit[i].Execute(_stateMachine.Actor);
+
+            OnExitEvent?.Invoke();
         }
 
         internal void OnFixedUpdate()

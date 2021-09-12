@@ -98,6 +98,7 @@ namespace SAS.StateMachineGraph.Editor
                 configsRef.InsertArrayElementAtIndex(configsRef.arraySize);
                 serializedObject.ApplyModifiedProperties();
             };
+
             _configsList.onRemoveCallback = list =>
             {
                 if (list.index >= 0)

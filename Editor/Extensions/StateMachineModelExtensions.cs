@@ -57,6 +57,16 @@ namespace SAS.StateMachineGraph.Editor
             parentStateMachineModel.ApplyModifiedProperties();
         }
 
+        internal static bool IsParentOf(this StateMachineModel thisStateMachineModel, StateMachineModel stateMachineModel)
+        {
+            if (stateMachineModel == null || thisStateMachineModel == null)
+                return false;
+            var stateMachineModelSO = new SerializedObject(stateMachineModel);
+            var parentStateMachineModel = stateMachineModelSO.FindProperty(ParentStateMachineVar).objectReferenceValue;
+            return thisStateMachineModel.Equals(parentStateMachineModel);
+        }
+
+
         internal static void AddState(this StateMachineModel stateMachineModel, StateModel state)
         {
             var stateMachineModelSO = new SerializedObject(stateMachineModel);
@@ -255,7 +265,7 @@ namespace SAS.StateMachineGraph.Editor
             var stateModels = fromStateMachineModel.GetStates();
             foreach (var stateModel in stateModels)
                 stateModel.Clone(runtimeStateMachineController, toStateMachineModel);
-            
+
             for (int i = 0; i < stateModels.Count; i++)
             {
                 var stateTransitions = stateModels[i].GetTransitionsProp();

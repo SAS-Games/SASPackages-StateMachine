@@ -33,8 +33,6 @@ namespace SAS.StateMachineGraph
         private void Awake()
         {
             OnStateChanged = InvokeEvent;
-
-          
             Initialize();
         }
 
@@ -74,18 +72,33 @@ namespace SAS.StateMachineGraph
             StateMachineController?.TryTransition(OnStateChanged);
         }
 
-        public T Get<T>(string tag = "") where T : ScriptableObject
+        public T Get<T>(string tag = "")
         {
             if (TryGet<T>(out var service, tag))
                 return service;
+
             return default(T);
         }
 
+        public void Add<T>(object service, string tag = "")
+        {
+            _serviceLocator.Add<T>(service, tag);
+        }
 
-        public bool TryGet<T>(out T service, string tag = "") where T : ScriptableObject
+        public bool TryGet<T>(out T service, string tag = "") 
         {
             CacheConfig();
             return _serviceLocator.TryGet<T>(out service, tag);
+        }
+
+        public T GetOrCreate<T>(string tag = "")
+        {
+            return _serviceLocator.GetOrCreate<T>(tag);
+        }
+
+        public bool Remove<T>(string tag = "")
+        {
+            return _serviceLocator.Remove<T>(tag);
         }
 
         public bool TryGetComponent<T>(out T component, string tag = "")
@@ -104,7 +117,7 @@ namespace SAS.StateMachineGraph
         {
             var obj = TaggerExtensions.GetComponent(this, type, tag);
             if (obj == null)
-                Debug.LogError($"No component of type {type.GetType()} with tag {tag} is found under actor {this}, attached on the game object {gameObject.name}. Try assigning the component with the right Tag");
+                Debug.LogError($"No component of type {type.Name} with tag {tag} is found under actor {this}, attached on the game object {gameObject.name}. Try assigning the component with the right Tag");
 
             return obj;
         }
@@ -113,7 +126,7 @@ namespace SAS.StateMachineGraph
         {
             var obj = TaggerExtensions.GetComponentInChildren(this, type, tag, includeInactive);
             if (obj == null)
-                Debug.LogError($"No component of type {type.GetType()} with tag {tag} is found under actor {this}, attached on the game object {gameObject.name}. Try assigning the component with the right Tag");
+                Debug.LogError($"No component of type {type.Name} with tag {tag} is found under actor {this}, attached on the game object {gameObject.name}. Try assigning the component with the right Tag");
 
             return obj;
         }

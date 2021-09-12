@@ -460,11 +460,40 @@ namespace SAS.StateMachineGraph.Editor
 
             Repaint();
 
-            foreach (var node in _nodes)
+            if (_currentActorState != Actor?.CurrentState)
             {
-                if (node is StateNode stateNode)
-                    stateNode.IsFocused = stateNode.Value.name == Actor?.CurrentStateName;
+                _currentActorState = Actor?.CurrentState;
+                var stateMachineModel = RuntimeStateMachineController.GetStateMachineModel(Actor?.CurrentState);
+                StateMachineNode currentStateMachineNode = null;
+                foreach (var node in _nodes)
+                {
+                    if (node is StateMachineNode stateMachineNode)
+                    {
+                        stateMachineNode.IsFocused = stateMachineNode.Value == stateMachineModel;
+                        if (stateMachineNode.IsFocused)
+                            currentStateMachineNode = stateMachineNode;
+                    }
+                }
+
+                if (stateMachineModel != SelectedStateMachineModel)
+                {
+                    if (currentStateMachineNode != null)
+                    {
+                        if (!stateMachineModel.IsParentOf(SelectedStateMachineModel))
+                            SelectStateMachineNode(currentStateMachineNode);
+                        else
+                            GoToMachineNode(currentStateMachineNode);
+                    }
+                }
+
+                foreach (var node in _nodes)
+                {
+                    if (node is StateNode stateNode)
+                        stateNode.IsFocused = stateNode.Value.State == Actor?.CurrentState;
+                }
             }
         }
+
+        private State _currentActorState;
     }
 }

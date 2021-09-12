@@ -100,6 +100,18 @@ namespace SAS.StateMachineGraph.Editor
             return runtimeStateMachineController.GetAllStateMachines().Find(smm => smm.name.Equals(name, StringComparison.OrdinalIgnoreCase));
         }
 
+        internal static StateMachineModel GetStateMachineModel(this RuntimeStateMachineController runtimeStateMachineController, State state)
+        {
+            var stateMachineModels = runtimeStateMachineController.GetAllStateMachines();
+            foreach(var stateMachineModel in stateMachineModels)
+            {
+                if (stateMachineModel.GetStates().Find(stateModel=> stateModel.State == state))
+                    return stateMachineModel;
+            }
+
+            return null;
+        }
+
         /*  public static void AddState(this RuntimeStateMachineController runtimeStateMachineController, StateMachineModel stateMachineModel, string name)
           {
               var stateMachineSO = new SerializedObject(stateMachineModel);
