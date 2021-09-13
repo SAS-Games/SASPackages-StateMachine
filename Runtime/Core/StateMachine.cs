@@ -25,7 +25,6 @@ namespace SAS.StateMachineGraph
             get => _currentState;
             set
             {
-                _currentState?.OnExit();
                 _currentState = value;
                 _currentState?.OnEnter();
             }

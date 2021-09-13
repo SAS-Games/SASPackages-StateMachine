@@ -79,27 +79,48 @@ namespace SAS.StateMachineGraph
 				var actions = scriptableActions[i].GetActions(stateMachine, state, createdInstances);
 
 				int bits = (int)scriptableActions[i].whenToExecute;
-				for (int k = 1; k <= 5; ++k)
+				if (actions[0] is IAwaitableStateAction)
 				{
-					if (IsKthBitSet(bits, k))
+					for (int k = 1; k <= 2; ++k)
 					{
-						switch (k)
+						if (IsKthBitSet(bits, k))
 						{
-							case 1:
-								stateEnterActions.AddRange(actions);
-								break;
-							case 2:
-								stateFixedUpdateActions.AddRange(actions);
-								break;
-							case 3:
-                                stateUpdateActions.AddRange(actions);
-								break;
-							case 4:
-								stateLateUpdateActions.AddRange(actions);
-								break;
-							case 5:
-								stateExitActions.AddRange(actions);
-								break;
+							switch (k)
+							{
+								case 1:
+									stateEnterActions.AddRange(actions);
+									break;
+								case 2:
+									stateExitActions.AddRange(actions);
+									break;
+							}
+						}
+					}
+				}
+				else
+				{
+					for (int k = 1; k <= 5; ++k)
+					{
+						if (IsKthBitSet(bits, k))
+						{
+							switch (k)
+							{
+								case 1:
+									stateEnterActions.AddRange(actions);
+									break;
+								case 2:
+									stateFixedUpdateActions.AddRange(actions);
+									break;
+								case 3:
+									stateUpdateActions.AddRange(actions);
+									break;
+								case 4:
+									stateLateUpdateActions.AddRange(actions);
+									break;
+								case 5:
+									stateExitActions.AddRange(actions);
+									break;
+							}
 						}
 					}
 				}

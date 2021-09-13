@@ -141,7 +141,12 @@ namespace SAS.StateMachineGraph.Editor
                 rectEnd = rect.width - width / 2;
                 pos = new Rect(rectEnd, rect.y - 2, width, rect.height);
                 EditorGUI.BeginChangeCheck();
-                uint a = (uint)(EditorGUI.MaskField(pos, "", whenToExecute.intValue, whenToExecute.enumNames));
+                var type = Type.GetType(actionFullName.stringValue).GetInterface("IAwaitableStateAction");
+                uint a;
+                if (type != null)
+                    a = (uint)EditorGUI.MaskField(pos, "", whenToExecute.intValue, Enum.GetNames(typeof(AwaitableActionExecuteEvent)));
+                else
+                    a = (uint)EditorGUI.MaskField(pos, "", whenToExecute.intValue, Enum.GetNames(typeof(ActionExecuteEvent)));
                 if (EditorGUI.EndChangeCheck())
                     whenToExecute.intValue = (int)a;
             };
@@ -235,6 +240,13 @@ namespace SAS.StateMachineGraph.Editor
                 counter++;
             }
             return name;
+        }
+
+        [System.Flags]
+        public enum AwaitableActionExecuteEvent
+        {
+            OnStateEnter = 1 << 0,
+            OnStateExit = 1 << 4
         }
     }
 }
