@@ -5,10 +5,10 @@ namespace SAS.StateMachineGraph
 {
     public class RuntimeStateMachineController : ScriptableObject
     {
-        [SerializeField] private StateMachineModel m_BaseStateMachineModel = default;
-        [SerializeField] private StateMachineParameter[] _parameters = default;
-        [SerializeField] private StateModel m_DefaultStateModel = default;
-        [SerializeField] private StateModel m_AnyStateModel = default;
+        [SerializeField, HideInInspector] private StateMachineModel m_BaseStateMachineModel = default;
+        [SerializeField, HideInInspector] private StateMachineParameter[] _parameters = default;
+        [SerializeField, HideInInspector] private StateModel m_DefaultStateModel = default;
+        [SerializeField, HideInInspector] private StateModel m_AnyStateModel = default;
 
         private void Awake()
         {

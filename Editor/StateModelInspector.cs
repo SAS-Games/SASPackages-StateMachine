@@ -4,7 +4,6 @@ using UnityEditor;
 using UnityEngine;
 using ReorderableList = UnityEditorInternal.ReorderableList;
 using EditorUtility = SAS.Utilities.Editor.EditorUtility;
-using SAS.StateMachineGraph.Utilities;
 using SAS.TagSystem.Editor;
 
 namespace SAS.StateMachineGraph.Editor
@@ -141,7 +140,7 @@ namespace SAS.StateMachineGraph.Editor
                 rectEnd = rect.width - width / 2;
                 pos = new Rect(rectEnd, rect.y - 2, width, rect.height);
                 EditorGUI.BeginChangeCheck();
-                var type = Type.GetType(actionFullName.stringValue).GetInterface("IAwaitableStateAction");
+                var type = Type.GetType(actionFullName.stringValue)?.GetInterface("IAwaitableStateAction");
                 uint a;
                 if (type != null)
                     a = (uint)EditorGUI.MaskField(pos, "", whenToExecute.intValue, Enum.GetNames(typeof(AwaitableActionExecuteEvent)));

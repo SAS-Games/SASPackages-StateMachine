@@ -2,7 +2,7 @@ using UnityEditor;
 using UnityEngine;
 
 [CustomPropertyDrawer(typeof(NotNullAttribute))]
-public class CannotBeNullDrawer : PropertyDrawer
+public class NotNullDrawer : PropertyDrawer
 {
     public override void OnGUI(Rect inRect, SerializedProperty inProp, GUIContent label)
     {

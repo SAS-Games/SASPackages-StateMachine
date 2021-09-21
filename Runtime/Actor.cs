@@ -153,6 +153,28 @@ namespace SAS.StateMachineGraph
             return true;
         }
 
+        public bool TryGetComponentsInParent<T>(out T[] components, string tag = "", bool includeInactive = false)
+        {
+            var results = this.GetComponentsInParent(typeof(T), tag, includeInactive);
+            try
+            {
+                if (results.Length == 0)
+                    results = null;
+
+                components = new T[results.Length];
+                for (int i = 0; i < results.Length; ++i)
+                    components[i] = (T)(object)results[i];
+            }
+            catch (Exception)
+            {
+                components = null;
+                Debug.LogError($"No component of type {components.GetType()} with tag {tag} is found in parent of actor {this}, attached on the game object {gameObject.name}. Try assigning the component with the right Tag");
+                return false;
+            }
+
+            return true;
+        }
+
         public bool TryGetComponentInParent<T>(out T component, string tag = "", bool includeInactive = false)
         {
             component = (T)(object)GetComponentInParent(typeof(T), tag, includeInactive);

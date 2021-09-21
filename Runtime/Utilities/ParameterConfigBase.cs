@@ -13,6 +13,9 @@ namespace SAS.StateMachineGraph.Utilities
         }
 
         [SerializeField] private ParametersKeyMap[] m_ParametersKeyMap;
+#if UNITY_EDITOR
+        [SerializeField, TextArea] private string m_Description;
+#endif
 
         internal ParametersKeyMap Get(string key)
         {

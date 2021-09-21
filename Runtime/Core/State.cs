@@ -86,7 +86,6 @@ namespace SAS.StateMachineGraph
             {
                 if (!exitActionsExecutionStarted)
                 {
-                    Debug.Log(Tag);
                     OnExit();
                     exitActionsExecutionStarted = true;
                 }
