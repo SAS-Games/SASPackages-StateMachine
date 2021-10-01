@@ -4,7 +4,6 @@ using UnityEditorInternal;
 using System;
 using SAS.TagSystem.Editor;
 using EditorUtility = SAS.Utilities.Editor.EditorUtility;
-using SAS.TagSystem;
 using SAS.StateMachineGraph.Utilities;
 using System.Linq;
 
@@ -26,8 +25,6 @@ namespace SAS.StateMachineGraph.Editor
             }
         }
 
-        private RuntimeStateMachineController _runtimeStateMachineController;
-
         private void OnEnable()
         {
             DrawConfigsList();
@@ -40,7 +37,6 @@ namespace SAS.StateMachineGraph.Editor
 
             if (EditorGUI.EndChangeCheck())
             {
-                _runtimeStateMachineController = null;
                 _configsList = null;
                 _keys = null;
                 serializedObject.ApplyModifiedProperties();

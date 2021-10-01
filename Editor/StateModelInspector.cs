@@ -110,13 +110,13 @@ namespace SAS.StateMachineGraph.Editor
                 }
 
                 rect.y += 2;
-                var curActionIndex = Array.FindIndex(_allActionTypes, type => type.AssemblyQualifiedName == actionFullName.stringValue);
+                var curActionIndex = Array.FindIndex(_allActionTypes, ele => ele.AssemblyQualifiedName == actionFullName.stringValue);
                 var pos = new Rect(rect.x + 30, rect.y - 2, Mathf.Max(rect.width - 280, 40), rect.height - 2);
                 int id = GUIUtility.GetControlID("actionFullName".GetHashCode(), FocusType.Keyboard, pos);
                 if (curActionIndex != -1 || string.IsNullOrEmpty(actionFullName.stringValue))
-                    EditorUtility.DropDown(id, pos, _allActionTypes.Select(type => SerializedType.Sanitize(type.ToString())).ToArray(), curActionIndex, selectedIndex => SetSelectedAction(actionFullName, selectedIndex));
+                    EditorUtility.DropDown(id, pos, _allActionTypes.Select(ele => SerializedType.Sanitize(ele.ToString())).ToArray(), curActionIndex, selectedIndex => SetSelectedAction(actionFullName, selectedIndex));
                 else
-                    EditorUtility.DropDown(id, pos, _allActionTypes.Select(type => SerializedType.Sanitize(type.ToString())).ToArray(), curActionIndex, actionFullName.stringValue, Color.red, selectedIndex => SetSelectedAction(actionFullName, selectedIndex));
+                    EditorUtility.DropDown(id, pos, _allActionTypes.Select(ele => SerializedType.Sanitize(ele.ToString())).ToArray(), curActionIndex, actionFullName.stringValue, Color.red, selectedIndex => SetSelectedAction(actionFullName, selectedIndex));
 
                 var width = Mathf.Min(80, rect.width / 5);
                 var rectEnd = rect.width - 2.5f * width;
