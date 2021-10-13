@@ -26,6 +26,7 @@ namespace SAS.StateMachineGraph
             var cachedActions = new Dictionary<StateActionModel, object[]>();
 
             var stateModels = m_BaseStateMachineModel.GetStatesRecursivily();
+            stateModels.Add(m_AnyStateModel);
 
             foreach (StateModel stateModel in stateModels)
             {
