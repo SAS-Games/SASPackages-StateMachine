@@ -2,7 +2,7 @@
 
 namespace SAS.StateMachineGraph.Utilities
 {
-    public sealed class DectivateGameObject : IStateAction
+    public sealed class DeactivateGameObject : IStateAction
     {
         private Transform _transform;
         void IStateAction.OnInitialize(Actor actor, string tag, string key, State state)
