@@ -1,4 +1,3 @@
-using SAS.TagSystem;
 using SAS.Utilities;
 using System;
 using UnityEngine;
@@ -7,7 +6,7 @@ using UnityEngine.EventSystems;
 namespace SAS.StateMachineGraph.Utilities
 {
     [RequireComponent(typeof(Actor))]
-    public class PointerHoverHandler : MonoBase, IPointerEnterHandler, IPointerExitHandler, IHoverHandler
+    public class PointerHoverHandler : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IHoverHandler
     {
         public Action<PointerEventData, bool> OnHover { get; set ; }
 

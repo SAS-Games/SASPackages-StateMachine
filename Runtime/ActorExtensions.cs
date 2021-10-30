@@ -103,9 +103,14 @@ namespace SAS.StateMachineGraph
             return default(T);
         }
 
+        public static void Add(this Actor actor, Type type, object service, string tag = "")
+        {
+            ComponentExtensions.serviceLocator.Add(type, service, tag);
+        }
+
         public static void Add<T>(this Actor actor, object service, string tag = "")
         {
-            ComponentExtensions.serviceLocator.Add<T>(service, tag);
+            actor.Add(typeof(T), service, tag);
         }
 
         public static T GetOrCreate<T>(this Actor actor, string tag = "")

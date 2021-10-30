@@ -1,8 +1,9 @@
 ﻿using System;
 using UnityEngine;
 using SAS.TagSystem;
-using SAS.Locator;
 using SAS.StateMachineGraph.Utilities;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace SAS.StateMachineGraph
 {
@@ -27,6 +28,8 @@ namespace SAS.StateMachineGraph
         internal StateMachine StateMachineController { get; private set; }
         public string CurrentStateName => StateMachineController?.CurrentState?.Name;
         public State CurrentState => StateMachineController?.CurrentState;
+
+        private Dictionary<string, List<object>> _configs = new Dictionary<string, List<object>>();
         private bool _isConfigsCached = false;
 
         private void Awake()
@@ -40,16 +43,11 @@ namespace SAS.StateMachineGraph
             if (!_isConfigsCached)
             {
                 foreach (var config in m_Configs)
-                    ComponentExtensions.serviceLocator.Add(config.data.GetType(), config.data, config.name);
+                    Add(config.data.GetType(), config.data, config.name);
                 _isConfigsCached = true;
             }
         }
 
-        public bool TryGet<T>(out T service, string tag = "")
-        {
-            CacheConfig();
-            return ComponentExtensions.serviceLocator.TryGet<T>(out service, tag);
-        }
 
         private void Initialize()
         {
@@ -152,6 +150,52 @@ namespace SAS.StateMachineGraph
                 OnStateEnter?.Invoke(state);
             else
                 OnStateExit?.Invoke(state);
+        }
+
+        public bool TryGet<T>(out T service, string tag = "")
+        {
+            CacheConfig();
+            if (!TryGet(typeof(T),  out var result, tag))
+                return ComponentExtensions.serviceLocator.TryGet<T>(out service, tag);
+
+            service = (T)result;
+            return true;
+        }
+
+        private bool TryGet(Type type, out object config, string tag = "")
+        {
+            var key = $"{type.Name}{tag}";
+            if (!_configs.TryGetValue(key, out var configs))
+            {
+                config = null;
+                return false;
+            }
+
+            if (configs.Count > 1)
+                Debug.LogError($"There is more than one Config that implements {type.Name} with tag {tag} is found under actor {name}");
+
+            config = configs[0];
+            return true;
+        }
+
+        private void Add(Type type, object service, string tag = "")
+        {
+            var key = $"{type.Name}{tag}";
+            if (!_configs.TryGetValue(key, out var serviceList))
+            {
+                serviceList = new List<object>();
+                _configs.Add(key, serviceList);
+            }
+
+            if (!serviceList.Contains(service))
+                serviceList.Add(service);
+
+            var baseTypes = type.GetInterfaces();
+            if (type.BaseType != null)
+                baseTypes = baseTypes.Prepend(type.BaseType).ToArray();
+
+            foreach (var baseType in baseTypes)
+                Add(baseType, service, tag);
         }
     }
 }
