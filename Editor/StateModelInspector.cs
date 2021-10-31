@@ -218,6 +218,7 @@ namespace SAS.StateMachineGraph.Editor
                 return;
             value = GetUniqueName(value, Tags);
             TagList.Instance().Add(value);
+            UnityEditor.EditorUtility.SetDirty(TagList.Instance());
         }
 
         private void AddKey()
@@ -227,6 +228,7 @@ namespace SAS.StateMachineGraph.Editor
                 return;
             value = GetUniqueName(value, Keys);
             TagList.Instance(TagList.KeysIdentifier).Add(value);
+            UnityEditor.EditorUtility.SetDirty(TagList.Instance(TagList.KeysIdentifier));
         }
 
         private string GetUniqueName(string nameBase, string[] usedNames)

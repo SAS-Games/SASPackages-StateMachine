@@ -17,20 +17,21 @@ namespace SAS.StateMachineGraph.Editor
             var tag = property;
             var tagIndex = Array.IndexOf(Key, tag.stringValue);
             if (tagIndex != -1 || string.IsNullOrEmpty(tag.stringValue))
-                EditorUtility.DropDown(0, position, Key, tagIndex, selectedIndex => SetTagSerializedProperty(tag, selectedIndex), AddTag);
+                EditorUtility.DropDown(0, position, Key, tagIndex, selectedIndex => SetTagSerializedProperty(tag, selectedIndex), AddKey);
             else
-                EditorUtility.DropDown(0, position, Key, tagIndex, tag.stringValue, Color.red, selectedIndex => SetTagSerializedProperty(tag, selectedIndex), AddTag);
+                EditorUtility.DropDown(0, position, Key, tagIndex, tag.stringValue, Color.red, selectedIndex => SetTagSerializedProperty(tag, selectedIndex), AddKey);
 
             EditorGUI.EndProperty();
         }
 
-        private void AddTag()
+        private void AddKey()
         {
             var value = EditorInputDialog.Show("Add Key", "", "New Key");
             if (value == null)
                 return;
             value = GetUniqueName(value, Key);
-            TagList.Instance().Add(value);
+            TagList.Instance(TagList.KeysIdentifier).Add(value);
+            UnityEditor.EditorUtility.SetDirty(TagList.Instance(TagList.KeysIdentifier));
         }
 
         private string GetUniqueName(string nameBase, string[] usedNames)
