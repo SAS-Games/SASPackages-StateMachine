@@ -17,7 +17,15 @@ MonoBehaviour:
   m_HasExitTime: 0
   m_ExitTime: 0
   m_WaitForAwaitableActionsToComplete: 1
-  m_Conditions: []
+  m_Conditions:
+  - m_Name: OnHover
+    m_Mode: 2
+    m_Type: 4
+    m_FloatValue: 0
+  - m_Name: OnPress
+    m_Mode: 2
+    m_Type: 4
+    m_FloatValue: 0
 --- !u!114 &-7795001137566989041
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -197,7 +205,11 @@ MonoBehaviour:
   m_HasExitTime: 0
   m_ExitTime: 0
   m_WaitForAwaitableActionsToComplete: 1
-  m_Conditions: []
+  m_Conditions:
+  - m_Name: OnPress
+    m_Mode: 1
+    m_Type: 4
+    m_FloatValue: 0
 --- !u!114 &3786150841037326566
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -233,7 +245,15 @@ MonoBehaviour:
   m_HasExitTime: 0
   m_ExitTime: 0
   m_WaitForAwaitableActionsToComplete: 1
-  m_Conditions: []
+  m_Conditions:
+  - m_Name: OnHover
+    m_Mode: 1
+    m_Type: 4
+    m_FloatValue: 0
+  - m_Name: OnPress
+    m_Mode: 2
+    m_Type: 4
+    m_FloatValue: 0
 --- !u!114 &7966919800593914379
 MonoBehaviour:
   m_ObjectHideFlags: 0

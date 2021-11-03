@@ -51,7 +51,7 @@ namespace SAS.StateMachineGraph
             catch (Exception)
             {
                 components = null;
-                Debug.LogError($"No component of type {components.GetType()} with tag {tag} is found under actor {actor.name}, attached on the game object {actor.gameObject.name}. Try assigning the component with the right Tag");
+                Debug.LogError($"No component of type {typeof(T)} with tag {tag} is found under actor {actor.name}, attached on the game object {actor.gameObject.name}. Try assigning the component with the right Tag");
                 return false;
             }
 
