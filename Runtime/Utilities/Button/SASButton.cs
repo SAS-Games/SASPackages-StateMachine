@@ -23,7 +23,12 @@ namespace SAS.StateMachineGraph.Utilities
         private void OnButtonSelect(BaseEventData eventData, bool status) => _actor.SetBool("OnSelect", status);
         void IActivatable.Activate() => enabled = true;
         void IActivatable.Deactivate() => enabled = false;
-        void IPointerClickHandler.OnPointerClick(PointerEventData eventData) => onClick?.Invoke();
+        void IPointerClickHandler.OnPointerClick(PointerEventData eventData) 
+        {
+            _actor.SetTrigger("OnClick");
+            onClick?.Invoke();
+        }
+ 
         public virtual bool IsInteractable { get { return m_Interactable; } set { m_Interactable = value; } }
 
         private void Register()

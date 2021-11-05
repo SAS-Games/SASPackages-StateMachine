@@ -18,10 +18,6 @@ MonoBehaviour:
   m_ExitTime: 0
   m_WaitForAwaitableActionsToComplete: 1
   m_Conditions:
-  - m_Name: OnHover
-    m_Mode: 2
-    m_Type: 4
-    m_FloatValue: 0
   - m_Name: OnPress
     m_Mode: 2
     m_Type: 4
@@ -73,12 +69,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7557f759ffd418e4bab479f7b35953ed, type: 3}
   m_Name: Press
   m_EditorClassIdentifier: 
-  m_Position: {x: 706, y: 390, z: 0}
+  m_Position: {x: 702, y: 387, z: 0}
   m_Tag: 
   m_StateActions: []
   m_Transitions:
-  - {fileID: -8597801514572536212}
   - {fileID: 4244530783058634991}
+  - {fileID: -8597801514572536212}
 --- !u!114 &-3264200396451376205
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -164,6 +160,11 @@ MonoBehaviour:
     m_DefaultFloat: 0
     m_DefaultInt: 0
     m_DefaultBool: 0
+  - m_Name: OnClick
+    m_Type: 9
+    m_DefaultFloat: 0
+    m_DefaultInt: 0
+    m_DefaultBool: 0
   m_DefaultStateModel: {fileID: -7795001137566989041}
   m_AnyStateModel: {fileID: 7966919800593914379}
 --- !u!114 &2209543802192410597
@@ -246,13 +247,9 @@ MonoBehaviour:
   m_ExitTime: 0
   m_WaitForAwaitableActionsToComplete: 1
   m_Conditions:
-  - m_Name: OnHover
+  - m_Name: OnClick
     m_Mode: 1
-    m_Type: 4
-    m_FloatValue: 0
-  - m_Name: OnPress
-    m_Mode: 2
-    m_Type: 4
+    m_Type: 9
     m_FloatValue: 0
 --- !u!114 &7966919800593914379
 MonoBehaviour:

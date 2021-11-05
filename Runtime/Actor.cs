@@ -139,7 +139,10 @@ namespace SAS.StateMachineGraph
                     SetFloat(parameter.Name, parameter.FloatValue);
                     break;
                 case ParameterType.Trigger:
-                    SetTrigger(parameter.Name);
+                    if (!parameter.BoolValue)
+                        SetTrigger(parameter.Name);
+                    else 
+                        ResetSetTrigger(parameter.Name);
                     break;
             }
         }

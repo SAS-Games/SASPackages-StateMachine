@@ -1,4 +1,5 @@
 ﻿
+using UnityEngine;
 using static SAS.StateMachineGraph.Utilities.ParameterConfigBase;
 
 namespace SAS.StateMachineGraph.Utilities
@@ -19,7 +20,13 @@ namespace SAS.StateMachineGraph.Utilities
 			for (int i = 0; i < _actors.Length; ++i)
 			{
 				if (_actors[i].TryGet(out ActorParameterConfig parameterConfig))
-					ApplyParameters(_actors[i], parameterConfig.Get(_key).parameters);
+				{
+					var parametersKeyMap = parameterConfig.Get(_key);
+					if (parametersKeyMap != null)
+						ApplyParameters(_actors[i], parametersKeyMap.parameters);
+					else
+						Debug.LogWarning($"No parameters config has been found wrt the key:  {_key} for actor: {actor.name}.");
+				}
 			}
 		}
 

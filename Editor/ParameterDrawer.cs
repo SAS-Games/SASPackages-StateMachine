@@ -39,6 +39,9 @@ namespace SAS.StateMachineGraph.Utilities.Editor
 				case (int)ParameterType.Float:
 					EditorGUI.PropertyField(fieldPosition, property.FindPropertyRelative("m_FloatValue"), new GUIContent("Value"));
 					break;
+				case (int)ParameterType.Trigger:
+					EditorGUI.PropertyField(fieldPosition, property.FindPropertyRelative("m_BoolValue"), new GUIContent("Reset"));
+					break;
 			}
 
 			EditorGUI.EndProperty();
