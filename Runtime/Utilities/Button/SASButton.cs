@@ -21,8 +21,7 @@ namespace SAS.StateMachineGraph.Utilities
         private void OnButtonHover(PointerEventData eventData, bool status) => _actor.SetBool("OnHover", status);
         private void OnButtonPress(PointerEventData eventData, bool status) => _actor.SetBool("OnPress", status);
         private void OnButtonSelect(BaseEventData eventData, bool status) => _actor.SetBool("OnSelect", status);
-        void IActivatable.Activate() => enabled = true;
-        void IActivatable.Deactivate() => enabled = false;
+        void IActivatable.SetActive(bool active) => enabled = active;
         void IPointerClickHandler.OnPointerClick(PointerEventData eventData) 
         {
             _actor.SetTrigger("OnClick");

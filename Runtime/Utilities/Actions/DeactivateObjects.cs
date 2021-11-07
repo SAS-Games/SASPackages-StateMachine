@@ -15,7 +15,7 @@ namespace SAS.StateMachineGraph.Utilities
         void IStateAction.Execute(Actor actor)
         {
             foreach (IActivatable activatable in _activatables)
-                activatable.Deactivate();
+                activatable.SetActive(false);
         }
     }
 }
