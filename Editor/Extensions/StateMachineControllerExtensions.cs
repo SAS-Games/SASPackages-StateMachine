@@ -284,7 +284,7 @@ namespace SAS.StateMachineGraph.Editor
 
         internal static void AddObjectToAsset(this RuntimeStateMachineController runtimeStateMachineController, Object objectToAdd)
         {
-            // stateModel.hideFlags = HideFlags.HideInHierarchy;
+            objectToAdd.hideFlags = HideFlags.HideInHierarchy;
             AssetDatabase.AddObjectToAsset(objectToAdd, AssetDatabase.GetAssetPath(runtimeStateMachineController));
             AssetDatabase.SaveAssets();
         }
