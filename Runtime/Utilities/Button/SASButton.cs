@@ -1,7 +1,6 @@
 using SAS.TagSystem;
 using SAS.Utilities;
 using System;
-using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
@@ -15,7 +14,6 @@ namespace SAS.StateMachineGraph.Utilities
         public UnityEvent onClick;
 
         [FieldRequiresSelf] private Actor _actor;
-        [FieldRequiresChild] TMP_Text _label;
         [FieldRequiresSelf] private IPointerEventHandler[] _pointerEventHandlers;
 
         void OnEnable() => Register();
@@ -23,13 +21,14 @@ namespace SAS.StateMachineGraph.Utilities
         private void OnButtonHover(PointerEventData eventData, bool status) => _actor.SetBool("OnHover", status);
         private void OnButtonPress(PointerEventData eventData, bool status) => _actor.SetBool("OnPress", status);
         private void OnButtonSelect(BaseEventData eventData, bool status) => _actor.SetBool("OnSelect", status);
-        void IActivatable.SetActive(bool active) => enabled = active;
-        void IPointerClickHandler.OnPointerClick(PointerEventData eventData)
+        void IActivatable.Activate() => enabled = true;
+        void IActivatable.Deactivate() => enabled = false;
+        void IPointerClickHandler.OnPointerClick(PointerEventData eventData) 
         {
             _actor.SetTrigger("OnClick");
             onClick?.Invoke();
         }
-
+ 
         public virtual bool IsInteractable { get { return m_Interactable; } set { m_Interactable = value; } }
 
         private void Register()
@@ -130,12 +129,6 @@ namespace SAS.StateMachineGraph.Utilities
                     break;
                 }
             }
-        }
-
-        public void SetText(string text)
-        {
-            if (_label != null)
-                _label.text = text;
         }
     }
 }

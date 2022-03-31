@@ -115,9 +115,14 @@ namespace SAS.StateMachineGraph
             return StateMachineController.GetBool(name);
         }
 
-        void IActivatable.SetActive(bool active)
+        void IActivatable.Activate()
         {
-            enabled = active;
+            enabled = true;
+        }
+
+        void IActivatable.Deactivate()
+        {
+            enabled = false;
         }
 
         public void Apply(in Parameter parameter)
