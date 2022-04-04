@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -310,5 +311,18 @@ namespace SAS.StateMachineGraph.Editor
             return ofType;
         }
 
+        internal static string[] GetAllUniqueActions(this RuntimeStateMachineController runtimeStateMachineController)
+        {
+            var uniqueActions = new HashSet<String>();
+            var allStateModels = runtimeStateMachineController.GetAllStateModels();
+            for (int i = 0; i < allStateModels.Count; ++i)
+            {
+                var stateActions = allStateModels[i].GetUniqueActions();
+                foreach (var action in stateActions)
+                    uniqueActions.Add(action);
+            }
+
+            return uniqueActions.ToArray();
+        }
     }
 }

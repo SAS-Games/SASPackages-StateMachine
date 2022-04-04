@@ -10,6 +10,8 @@ namespace SAS.StateMachineGraph
         [SerializeField, HideInInspector] private StateModel m_DefaultStateModel = default;
         [SerializeField, HideInInspector] private StateModel m_AnyStateModel = default;
 
+        internal int GetOriginalClipsCount { get; }
+
         private void Awake()
         {
 #if UNITY_EDITOR

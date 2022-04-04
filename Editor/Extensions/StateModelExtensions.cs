@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -186,6 +187,21 @@ namespace SAS.StateMachineGraph.Editor
             sourceStateModel.serializedObject().ApplyModifiedProperties();
 
             return clonedStateTransitionModel;
+        }
+
+        public static string[] GetUniqueActions(this StateModel stateModel)
+        {
+            var actions = stateModel.serializedObject().FindProperty("m_StateActions");
+            var uniqueActions = new HashSet<string>();
+            for (int i = 0; i < actions.arraySize; ++i)
+            {
+                SerializedProperty serializedProperty = actions.GetArrayElementAtIndex(i);
+                var actionName = serializedProperty.FindPropertyRelative("fullName").stringValue;
+                if (!string.IsNullOrEmpty(actionName))
+                    uniqueActions.Add(actionName);
+            }
+
+            return uniqueActions.ToArray();
         }
     }
 }

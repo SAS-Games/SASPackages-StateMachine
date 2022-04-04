@@ -50,7 +50,7 @@ namespace SAS.StateMachineGraph.Editor
 
         void OnSelectionChange()
         {
-            if (Selection.activeObject == null)
+            if (Selection.activeObject == null || Selection.activeObject is StateMachineOverrideController)
                 return;
 
             var stateMachineModel = Selection.activeObject as RuntimeStateMachineController;
