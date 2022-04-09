@@ -16,7 +16,7 @@ namespace SAS.StateMachineGraph
     {
         [SerializeField] private RuntimeStateMachineController m_Controller;
         [SerializeField] private List<StateActionPair> m_StateActionPairs;
-
+        internal List<StateActionPair> stateActionPairs => m_StateActionPairs;
         public RuntimeStateMachineController runtimeStateMachineController { get => m_Controller; set => m_Controller = value; }
 
         internal int overridesCount
@@ -28,17 +28,6 @@ namespace SAS.StateMachineGraph
                 return m_Controller.GetOriginalClipsCount;
             }
         }
-
-        /*  public void ApplyOverrides(IList<KeyValuePair<StateActionModel, StateActionModel>> overrides)
-          {
-              if (overrides == null)
-                  throw new System.ArgumentNullException("overrides");
-
-                for (int i = 0; i < overrides.Count; i++)
-                    SetClip(overrides[i].Key, overrides[i].Value, false);
-
-                SendNotification();
-          }*/
 
         internal string GetOverrideAction(string originalAction)
         {

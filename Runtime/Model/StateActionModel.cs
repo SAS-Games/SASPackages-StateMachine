@@ -44,13 +44,25 @@ namespace SAS.StateMachineGraph
                 }
             }
             else
-                stateActions = new IStateAction[] { Activator.CreateInstance(ToType()) as IStateAction };
+                stateActions = CreateStateActionInstance(stateMachine);
 
             createdInstances.Add(this, stateActions);
             foreach (var action in stateActions)
                 action?.OnInitialize(stateMachine.Actor, tag, key, state);
 
             return stateActions;
+        }
+
+        private IStateAction[] CreateStateActionInstance(StateMachine stateMachine)
+        {
+            StateActionPair stateActionPair = stateMachine.stateActionPairs.Find(ele => ele.original.Equals(fullName));
+            if(stateActionPair != null)
+            {
+                if (!string.IsNullOrEmpty(stateActionPair.overridden))
+                    return new IStateAction[] { Activator.CreateInstance(Type.GetType(stateActionPair.overridden)) as IStateAction };
+            }
+
+            return new IStateAction[] { Activator.CreateInstance(ToType()) as IStateAction };
         }
     }
 }

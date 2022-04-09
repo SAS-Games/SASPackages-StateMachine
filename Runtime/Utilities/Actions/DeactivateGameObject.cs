@@ -7,6 +7,7 @@ namespace SAS.StateMachineGraph.Utilities
         private Transform _transform;
         void IStateAction.OnInitialize(Actor actor, string tag, string key, State state)
         {
+            Debug.Log("DeactivateGameObject");
             actor.TryGetComponentInChildren(out _transform, tag, true);
         }
 

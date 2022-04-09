@@ -54,9 +54,12 @@ namespace SAS.StateMachineGraph
             var controller = ScriptableObject.CreateInstance<RuntimeStateMachineController>();
             if (m_Controller == null)
                 return;
+            var stateMachineOverrideController = m_Controller as StateMachineOverrideController;
+            m_Controller = (m_Controller is StateMachineOverrideController) ? stateMachineOverrideController.runtimeStateMachineController : m_Controller;
+            
             controller.Initialize(m_Controller);
             m_Controller = controller;
-            StateMachineController = m_Controller?.CreateStateMachine(this);
+            StateMachineController = m_Controller?.CreateStateMachine(this, stateMachineOverrideController);
         }
 
         private void FixedUpdate()

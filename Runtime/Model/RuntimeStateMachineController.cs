@@ -15,15 +15,21 @@ namespace SAS.StateMachineGraph
         private void Awake()
         {
 #if UNITY_EDITOR
+           var controller =  (this is StateMachineOverrideController) ? (this as StateMachineOverrideController).runtimeStateMachineController : this;
             var assetPath = UnityEditor.AssetDatabase.GetAssetPath(this);
             var fileName = System.IO.Path.GetFileNameWithoutExtension(assetPath);
             name = fileName;
 #endif
         }
 
-        internal StateMachine CreateStateMachine(Actor actor)
+        internal StateMachine CreateStateMachine(Actor actor, StateMachineOverrideController stateMachineOverrideController)
         {
-            StateMachine stateMachine = new StateMachine(actor, _parameters);
+            List<StateActionPair> stateActionPairs = new List<StateActionPair>();
+            if (stateMachineOverrideController != null)
+            {
+                stateActionPairs = stateMachineOverrideController.stateActionPairs;
+            }
+            StateMachine stateMachine = new StateMachine(actor, _parameters, stateActionPairs);
             var cachedState = new Dictionary<ScriptableObject, object>();
             var cachedActions = new Dictionary<StateActionModel, object[]>();
 

@@ -212,7 +212,13 @@ namespace SAS.StateMachineGraph.Editor
         private void SetSelectedAction(int elementIndex, int selectedIndex)
         {
             Debug.Log($"{elementIndex}    {selectedIndex}");
-            m_Actions[elementIndex] = new KeyValuePair<string, string>(m_Actions[elementIndex].Key, _allActionTypes[selectedIndex].AssemblyQualifiedName);
+            var overrideAction = "";
+            if (selectedIndex == -1)
+                overrideAction = null;
+            else
+                overrideAction = _allActionTypes[selectedIndex].AssemblyQualifiedName;
+
+            m_Actions[elementIndex] = new KeyValuePair<string, string>(m_Actions[elementIndex].Key,overrideAction);
             ApplyOverrides(target as StateMachineOverrideController, m_Actions);
         }
     }

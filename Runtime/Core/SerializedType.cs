@@ -9,6 +9,7 @@ namespace SAS.StateMachineGraph
         : ISerializationCallbackReceiver
 #endif
     {
+        //AssemblyQualifiedName
         public string fullName;
 
         public Type ToType()

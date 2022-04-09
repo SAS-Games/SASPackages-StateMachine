@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace SAS.StateMachineGraph.Editor
 {
-    public class StateMachineControllerAssetMenu : MonoBehaviour
+    public class StateMachineControllerAssetMenu
     {
         [MenuItem("Assets/Create/SAS/State Machine Controller")]
         public static void CreateStateMachineController(MenuCommand context)

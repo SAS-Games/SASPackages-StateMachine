@@ -8,9 +8,11 @@ namespace SAS.StateMachineGraph
     internal class StateMachine
     {
         private Dictionary<string, StateMachineParameter> _parameters = new Dictionary<string, StateMachineParameter>();
-        public StateMachine(Actor actor, StateMachineParameter[] parameters)
+        internal List<StateActionPair> stateActionPairs;
+        public StateMachine(Actor actor, StateMachineParameter[] parameters, List<StateActionPair> stateActionPairs)
         {
             Actor = actor;
+            this.stateActionPairs = stateActionPairs;
             foreach (StateMachineParameter parameter in parameters)
                 _parameters.Add(parameter.name, parameter);
         }

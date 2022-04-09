@@ -60,6 +60,8 @@ namespace SAS.StateMachineGraph.Editor
                 {
                     var actorSO = new SerializedObject(Actor);
                     stateMachineModel = actorSO.FindProperty("m_Controller").objectReferenceValue as RuntimeStateMachineController;
+                    if (stateMachineModel is StateMachineOverrideController)
+                        stateMachineModel = (stateMachineModel as StateMachineOverrideController).runtimeStateMachineController;
                 }
             }
             else
