@@ -11,7 +11,6 @@ namespace SAS.StateMachineGraph
         [SerializeField] internal string overridden;
     }
 
-    [CreateAssetMenu(menuName = "StateMachineOverrideController")]
     public class StateMachineOverrideController : RuntimeStateMachineController
     {
         [SerializeField] private RuntimeStateMachineController m_Controller;
