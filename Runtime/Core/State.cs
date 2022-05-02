@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
 using static SAS.StateMachineGraph.Actor;
 
 namespace SAS.StateMachineGraph
@@ -36,14 +35,18 @@ namespace SAS.StateMachineGraph
             exitActionsExecutionStarted = false;
             OnEnterEvent?.Invoke();
             FilterAwaitableAction(_onEnter);
-            for (int i = 0; i < _onEnter?.Length; ++i)
+            if (_onEnter == null)
+                return;
+            for (int i = 0; i < _onEnter.Length; ++i)
                 _onEnter[i].Execute(_stateMachine.Actor);
         }
 
         internal void OnExit()
         {
             FilterAwaitableAction(_onExit);
-            for (int i = 0; i < _onExit?.Length; ++i)
+            if (_onExit == null)
+                return;
+            for (int i = 0; i < _onExit.Length; ++i)
                 _onExit[i].Execute(_stateMachine.Actor);
 
             OnExitEvent?.Invoke();
@@ -51,18 +54,24 @@ namespace SAS.StateMachineGraph
 
         internal void OnFixedUpdate()
         {
-            for (int i = 0; i < _onFixedUpdate?.Length; ++i)
+            if (_onFixedUpdate == null)
+                return;
+            for (int i = 0; i < _onFixedUpdate.Length; ++i)
                 _onFixedUpdate[i].Execute(_stateMachine.Actor);
         }
 
         internal void OnUpdate()
         {
-            for (int i = 0; i < _onUpdate?.Length; ++i)
+            if (_onUpdate == null)
+                return;
+            for (int i = 0; i < _onUpdate.Length; ++i)
                 _onUpdate[i].Execute(_stateMachine.Actor);
         }
 
         internal void OnLateUpdate()
         {
+            if (_onLateUpdate == null)
+                return;
             for (int i = 0; i < _onLateUpdate?.Length; ++i)
                 _onLateUpdate[i].Execute(_stateMachine.Actor);
         }

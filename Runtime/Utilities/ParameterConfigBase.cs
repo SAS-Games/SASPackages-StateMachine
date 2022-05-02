@@ -3,10 +3,10 @@ using UnityEngine;
 
 namespace SAS.StateMachineGraph.Utilities
 {
-    internal abstract class ParameterConfigBase : ScriptableObject
+    public abstract class ParameterConfigBase : ScriptableObject
     {
         [System.Serializable]
-        internal class ParametersKeyMap
+        protected class ParametersKeyMap
         {
             public string key;
             public Parameter[] parameters;
@@ -17,10 +17,15 @@ namespace SAS.StateMachineGraph.Utilities
         [SerializeField, TextArea] private string m_Description;
 #endif
 
-        internal ParametersKeyMap Get(string key)
+        protected bool TryGet(string key, out ParametersKeyMap parametersKeyMap)
         {
-            return Array.Find(m_ParametersKeyMap, ele => ele.key.Equals(key, StringComparison.OrdinalIgnoreCase));
+            parametersKeyMap = Array.Find(m_ParametersKeyMap, ele => ele.key.Equals(key, StringComparison.OrdinalIgnoreCase));
+            if (parametersKeyMap == null)
+            {
+                Debug.LogWarning($"No parameters has been found wrt the key:  {key} under the Parameter config SO : {this.name}");
+                return false;
+            }
+            return true;
         }
-
     }
 }

@@ -1,8 +1,4 @@
-﻿
-using UnityEngine;
-using static SAS.StateMachineGraph.Utilities.ParameterConfigBase;
-
-namespace SAS.StateMachineGraph.Utilities
+﻿namespace SAS.StateMachineGraph.Utilities
 {
 	public class ApplyActorParameter : IStateAction
 	{
@@ -20,20 +16,8 @@ namespace SAS.StateMachineGraph.Utilities
 			for (int i = 0; i < _actors.Length; ++i)
 			{
 				if (_actors[i].TryGet(out ActorParameterConfig parameterConfig))
-				{
-					var parametersKeyMap = parameterConfig.Get(_key);
-					if (parametersKeyMap != null)
-						ApplyParameters(_actors[i], parametersKeyMap.parameters);
-					else
-						Debug.LogWarning($"No parameters config has been found wrt the key:  {_key} for actor: {actor.name}.");
-				}
+					parameterConfig.ApplyParameters(_actors[i], _key);
 			}
-		}
-
-		private void ApplyParameters(Actor actor, in Parameter[] parameters)
-		{
-			for (int i = 0; i < parameters.Length; ++i)
-				actor.Apply(parameters[i]);
 		}
 	}
 }
