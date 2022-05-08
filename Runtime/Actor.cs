@@ -158,14 +158,12 @@ namespace SAS.StateMachineGraph
                 OnStateExit?.Invoke(state);
         }
 
-        public bool TryGet<T>(out T service, string tag = "")
+        public bool TryGet<T>(out T config, string tag = "")
         {
             CacheConfig();
-            if (!TryGet(typeof(T),  out var result, tag))
-                return ComponentExtensions.serviceLocator.TryGet<T>(out service, tag);
-
-            service = (T)result;
-            return true;
+            var status = TryGet(typeof(T), out var result, tag);
+            config = (T)result;
+            return status;
         }
 
         private bool TryGet(Type type, out object config, string tag = "")

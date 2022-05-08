@@ -1,6 +1,5 @@
 using SAS.TagSystem;
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace SAS.StateMachineGraph
@@ -102,31 +101,6 @@ namespace SAS.StateMachineGraph
                 return service;
 
             return default(T);
-        }
-
-        public static IEnumerable<T> GetAll<T>(this Actor actor, string tag = "")
-        {
-            return ComponentExtensions.serviceLocator.GetAll<T>(tag);
-        }
-
-        public static void Add(this Actor actor, Type type, object service, string tag = "")
-        {
-            ComponentExtensions.serviceLocator.Add(type, service, tag);
-        }
-
-        public static void Add<T>(this Actor actor, object service, string tag = "")
-        {
-            actor.Add(typeof(T), service, tag);
-        }
-
-        public static T GetOrCreate<T>(this Actor actor, string tag = "")
-        {
-            return ComponentExtensions.serviceLocator.GetOrCreate<T>(tag);
-        }
-
-        public static bool Remove<T>(this Actor actor, string tag = "")
-        {
-            return ComponentExtensions.serviceLocator.Remove<T>(tag);
         }
     }
 }
