@@ -158,7 +158,7 @@ namespace SAS.StateMachineGraph
                 OnStateExit?.Invoke(state);
         }
 
-        public bool TryGet<T>(out T config, string tag = "")
+        public bool TryGet<T>(out T config, string tag = "") where T : ScriptableObject
         {
             CacheConfig();
             var status = TryGet(typeof(T), out var result, tag);

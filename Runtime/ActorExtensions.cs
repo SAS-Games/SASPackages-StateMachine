@@ -95,7 +95,7 @@ namespace SAS.StateMachineGraph
             return obj;
         }
 
-        public static T Get<T>(this Actor actor, string tag = "")
+        public static T Get<T>(this Actor actor, string tag = "") where T : ScriptableObject
         {
             if (actor.TryGet<T>(out var service, tag))
                 return service;
