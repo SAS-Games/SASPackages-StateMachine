@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System;
 using System.Collections.Generic;
-using SAS.TagSystem;
+using SAS.Utilities.TagSystem;
 
 namespace SAS.StateMachineGraph
 {

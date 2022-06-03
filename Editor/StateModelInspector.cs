@@ -4,7 +4,7 @@ using UnityEditor;
 using UnityEngine;
 using ReorderableList = UnityEditorInternal.ReorderableList;
 using EditorUtility = SAS.Utilities.Editor.EditorUtility;
-using SAS.TagSystem.Editor;
+using SAS.Utilities.TagSystem.Editor;
 
 namespace SAS.StateMachineGraph.Editor
 {

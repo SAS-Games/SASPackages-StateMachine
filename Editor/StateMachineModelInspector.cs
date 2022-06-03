@@ -1,12 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEngine;
-using ReorderableList = UnityEditorInternal.ReorderableList;
-using EditorUtility = SAS.Utilities.Editor.EditorUtility;
-using SAS.TagSystem.Editor;
-using SAS.TagSystem;
 
 namespace SAS.StateMachineGraph.Editor
 {

@@ -1,5 +1,4 @@
-using SAS.TagSystem;
-using SAS.Utilities;
+using SAS.Utilities.TagSystem;
 using System;
 using UnityEngine;
 using UnityEngine.Events;
