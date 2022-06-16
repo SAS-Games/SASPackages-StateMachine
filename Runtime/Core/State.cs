@@ -17,6 +17,8 @@ namespace SAS.StateMachineGraph
         internal IStateAction[] _onLateUpdate = default;
         private List<IAwaitableStateAction> _awaitableStateAction = new List<IAwaitableStateAction>();
         internal TransitionState[] _transitionStates;
+        internal HashSet<StateEvent> _stateEnterEventForCustomeTriggers = new HashSet<StateEvent>();
+        internal HashSet<StateEvent> _stateExitEventForCustomeTriggers = new HashSet<StateEvent>();
 
         private State _nextState;
         private TransitionState _transitionState;
@@ -37,6 +39,8 @@ namespace SAS.StateMachineGraph
             FilterAwaitableAction(_onEnter);
             if (_onEnter == null)
                 return;
+            foreach (var stateEnterForCustomTrigger in _stateEnterEventForCustomeTriggers)
+                stateEnterForCustomTrigger.Invoke();
             for (int i = 0; i < _onEnter.Length; ++i)
                 _onEnter[i].Execute(_stateMachine.Actor);
         }
@@ -48,6 +52,9 @@ namespace SAS.StateMachineGraph
                 return;
             for (int i = 0; i < _onExit.Length; ++i)
                 _onExit[i].Execute(_stateMachine.Actor);
+
+            foreach (var stateExitForCustomTrigger in _stateExitEventForCustomeTriggers)
+                stateExitForCustomTrigger.Invoke();
 
             OnExitEvent?.Invoke();
         }
@@ -135,7 +142,6 @@ namespace SAS.StateMachineGraph
                 if (action is IAwaitableStateAction)
                     _awaitableStateAction.Add(action as IAwaitableStateAction);
             }
-
         }
     }
 }

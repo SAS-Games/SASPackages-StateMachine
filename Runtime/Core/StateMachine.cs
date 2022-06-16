@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-using System;
 using static SAS.StateMachineGraph.Actor;
 
 namespace SAS.StateMachineGraph
@@ -93,6 +92,7 @@ namespace SAS.StateMachineGraph
                 return false;
             }
         }
+
 
         public void SetInteger(string name, int value)
         {

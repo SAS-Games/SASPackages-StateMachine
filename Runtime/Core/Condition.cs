@@ -20,6 +20,9 @@ namespace SAS.StateMachineGraph
         [SerializeField] private Mode m_Mode;
         [SerializeField] private StateMachineParameter.ParameterType m_Type;
         [SerializeField] private float m_FloatValue;
+        [SerializeField] internal string m_CustomTrigger;
+
+        internal ICustomTrigger CustomTrigger;
 
         internal bool IsValid(StateMachine stateMachine)
         {
@@ -46,7 +49,8 @@ namespace SAS.StateMachineGraph
                     var resut = stateMachine.GetBool(m_Name) == true;
                     stateMachine.ResetSetTrigger(m_Name);
                     return resut;
-
+                case StateMachineParameter.ParameterType.CustomTrigger:
+                    return CustomTrigger.Evaluate();
                 default:
                     return false;
             }
@@ -59,7 +63,7 @@ namespace SAS.StateMachineGraph
             clone.m_Mode = m_Mode;
             clone.m_Type = m_Type;
             clone.m_FloatValue = m_FloatValue;
-
+            clone.m_CustomTrigger = null;
             return clone;
         }
     }
