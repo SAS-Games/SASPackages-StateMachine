@@ -50,7 +50,7 @@ namespace SAS.StateMachineGraph
                     stateMachine.ResetSetTrigger(m_Name);
                     return resut;
                 case StateMachineParameter.ParameterType.Custom:
-                    return Custom.Evaluate();
+                    return Custom.Evaluate() == (m_Mode == Mode.If);
                 default:
                     return false;
             }

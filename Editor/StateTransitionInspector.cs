@@ -148,12 +148,16 @@ namespace SAS.StateMachineGraph.Editor
                 {
                     var customCondition = element.FindPropertyRelative("m_CustomCondition");
                     var curActionIndex = Array.FindIndex(_allCustomConditionTypes, ele => ele.AssemblyQualifiedName == customCondition.stringValue);
-                    var pos = new Rect(rect.width / 3 + 50, rect.y, rect.width - (rect.width / 3 + 20), rect.height);
+                    var pos = new Rect(rect.width / 3 + 50, rect.y, rect.width - (rect.width / 3 + 75), rect.height);
                     int id = GUIUtility.GetControlID("customtrigger".GetHashCode(), FocusType.Keyboard, pos);
                     if (curActionIndex != -1 || string.IsNullOrEmpty(customCondition.stringValue))
                         EditorUtility.DropDown(id, pos, _allCustomConditionTypes.Select(ele => SerializedType.Sanitize(ele.ToString())).ToArray(), curActionIndex, selectedIndex => SetSelectedCustomTrigger(customCondition, selectedIndex));
                     else
                         EditorUtility.DropDown(id, pos, _allCustomConditionTypes.Select(ele => SerializedType.Sanitize(ele.ToString())).ToArray(), curActionIndex, customCondition.stringValue, Color.red, selectedIndex => SetSelectedCustomTrigger(customCondition, selectedIndex));
+                  
+                    if (!System.Enum.IsDefined(typeof(BoolMode), mode.intValue))
+                        mode.intValue = (int)BoolMode.True;
+                    mode.intValue = (int)(Condition.Mode)EditorGUI.EnumPopup(new Rect(3 * rect.width / 3 - 20, rect.y, 50, rect.height), (BoolMode)mode.intValue);
                 }
 
                 if (type.intValue == 1) //ParameterType.Float
