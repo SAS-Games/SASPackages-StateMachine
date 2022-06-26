@@ -16,7 +16,7 @@ namespace SAS.StateMachineGraph.Utilities
             actor.TryGetComponentInChildren(out _childActor, tag, true);
         }
 
-        public void Execute(Actor actor)
+        public void Execute()
         {
             IsCompleted = false;
             _onStateExit = (state) =>

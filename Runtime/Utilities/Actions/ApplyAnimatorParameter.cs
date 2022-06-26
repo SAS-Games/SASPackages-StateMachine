@@ -15,7 +15,7 @@ namespace SAS.StateMachineGraph.Utilities
 			actor.TryGet(out parameterConfig, key);
 		}
 
-		void IStateAction.Execute(Actor actor)
+		void IStateAction.Execute()
 		{
 			for (int i = 0; i < _animators.Length; ++i)
 				parameterConfig.ApplyParameters(_animators[i], in _key);

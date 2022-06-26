@@ -11,7 +11,7 @@
 			_key = key;
 		}
 
-		void IStateAction.Execute(Actor actor)
+		void IStateAction.Execute()
 		{
 			for (int i = 0; i < _actors.Length; ++i)
 			{

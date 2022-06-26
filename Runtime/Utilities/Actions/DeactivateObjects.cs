@@ -12,7 +12,7 @@ namespace SAS.StateMachineGraph.Utilities
                 Debug.LogError($"No GameObject with tag {tag} is found usder {actor}. Try assigning the Tag");
         }
 
-        void IStateAction.Execute(Actor actor)
+        void IStateAction.Execute()
         {
             foreach (IActivatable activatable in _activatables)
                 activatable.Deactivate();

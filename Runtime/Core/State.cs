@@ -42,7 +42,7 @@ namespace SAS.StateMachineGraph
             foreach (var stateEnterForCustomTrigger in _stateEnterEventForCustomeTriggers)
                 stateEnterForCustomTrigger.Invoke();
             for (int i = 0; i < _onEnter.Length; ++i)
-                _onEnter[i].Execute(_stateMachine.Actor);
+                _onEnter[i].Execute();
         }
 
         internal void OnExit()
@@ -51,7 +51,7 @@ namespace SAS.StateMachineGraph
             if (_onExit == null)
                 return;
             for (int i = 0; i < _onExit.Length; ++i)
-                _onExit[i].Execute(_stateMachine.Actor);
+                _onExit[i].Execute();
 
             foreach (var stateExitForCustomTrigger in _stateExitEventForCustomeTriggers)
                 stateExitForCustomTrigger.Invoke();
@@ -64,7 +64,7 @@ namespace SAS.StateMachineGraph
             if (_onFixedUpdate == null)
                 return;
             for (int i = 0; i < _onFixedUpdate.Length; ++i)
-                _onFixedUpdate[i].Execute(_stateMachine.Actor);
+                _onFixedUpdate[i].Execute();
         }
 
         internal void OnUpdate()
@@ -72,7 +72,7 @@ namespace SAS.StateMachineGraph
             if (_onUpdate == null)
                 return;
             for (int i = 0; i < _onUpdate.Length; ++i)
-                _onUpdate[i].Execute(_stateMachine.Actor);
+                _onUpdate[i].Execute();
         }
 
         internal void OnLateUpdate()
@@ -80,7 +80,7 @@ namespace SAS.StateMachineGraph
             if (_onLateUpdate == null)
                 return;
             for (int i = 0; i < _onLateUpdate?.Length; ++i)
-                _onLateUpdate[i].Execute(_stateMachine.Actor);
+                _onLateUpdate[i].Execute();
         }
 
         internal void TryTransition(StateChanged stateChanged)

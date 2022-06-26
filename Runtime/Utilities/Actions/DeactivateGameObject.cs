@@ -11,7 +11,7 @@ namespace SAS.StateMachineGraph.Utilities
             actor.TryGetComponentInChildren(out _transform, tag, true);
         }
 
-        void IStateAction.Execute(Actor actor)
+        void IStateAction.Execute()
         {
             _transform?.gameObject.SetActive(false);
         }

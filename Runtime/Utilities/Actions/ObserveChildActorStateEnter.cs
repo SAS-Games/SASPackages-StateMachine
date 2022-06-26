@@ -15,7 +15,7 @@ namespace SAS.StateMachineGraph.Utilities
             actor.TryGetComponentsInChildren(out _childActors, tag, true);
         }
 
-        public void Execute(Actor actor)
+        public void Execute()
         {
             IsCompleted = false;
             actorsStateEnterCount = 0;
