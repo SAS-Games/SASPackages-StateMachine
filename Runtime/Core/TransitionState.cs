@@ -49,10 +49,10 @@ namespace SAS.StateMachineGraph
             int count = Conditions.Length;
             for(int i =0; i < count; ++i)
             {
-                if (Conditions[i].CustomTrigger != null)
+                if (Conditions[i].Custom != null)
                 {
-                    stateEnterDelegates.Add(Conditions[i].CustomTrigger.OnStateEnter);
-                    stateExitDelegates.Add(Conditions[i].CustomTrigger.OnStateExit);
+                    stateEnterDelegates.Add(Conditions[i].Custom.OnStateEnter);
+                    stateExitDelegates.Add(Conditions[i].Custom.OnStateExit);
                 }
             }
 

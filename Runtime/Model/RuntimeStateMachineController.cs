@@ -32,7 +32,7 @@ namespace SAS.StateMachineGraph
             StateMachine stateMachine = new StateMachine(actor, _parameters, stateActionPairs);
             var cachedState = new Dictionary<ScriptableObject, object>();
             var cachedActions = new Dictionary<StateActionModel, object[]>();
-            var cachedTriggers = new Dictionary<string, ICustomTrigger>();
+            var cachedTriggers = new Dictionary<string, ICustomCondition>();
 
             var stateModels = m_BaseStateMachineModel.GetStatesRecursivily();
             stateModels.Add(m_AnyStateModel);

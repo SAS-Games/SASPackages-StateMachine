@@ -41,11 +41,11 @@ namespace SAS.StateMachineGraph.Editor
 
         private int _transitionCount;
         public static int SelectedTransitionIndex = -1;
-        private Type[] _allCustomtriggerTypes;
+        private Type[] _allCustomConditionTypes;
 
         private void OnEnable()
         {
-            _allCustomtriggerTypes = AppDomain.CurrentDomain.GetAllDerivedTypes<ICustomTrigger>().ToArray();
+            _allCustomConditionTypes = AppDomain.CurrentDomain.GetAllDerivedTypes<ICustomCondition>().ToArray();
             _stateTransitionModelSO = new SerializedObject(target);
             var runtimeStateMachineController = AssetDatabase.LoadMainAssetAtPath(AssetDatabase.GetAssetPath(target)) as RuntimeStateMachineController;
             _transitionConditions = new ReorderableList(_stateTransitionModelSO, _stateTransitionModelSO.FindProperty("m_Conditions"), true, true, true, true);
@@ -144,16 +144,16 @@ namespace SAS.StateMachineGraph.Editor
                 type.intValue = GetParameterType(curIndex);
                 var value = element.FindPropertyRelative("m_FloatValue");
 
-                if (type.intValue == 0) //ParameterType.CustomTrigger
+                if (type.intValue == 10) //ParameterType.Custom
                 {
-                    var customtrigger = element.FindPropertyRelative("m_CustomTrigger");
-                    var curActionIndex = Array.FindIndex(_allCustomtriggerTypes, ele => ele.AssemblyQualifiedName == customtrigger.stringValue);
+                    var customCondition = element.FindPropertyRelative("m_CustomCondition");
+                    var curActionIndex = Array.FindIndex(_allCustomConditionTypes, ele => ele.AssemblyQualifiedName == customCondition.stringValue);
                     var pos = new Rect(rect.width / 3 + 50, rect.y, rect.width - (rect.width / 3 + 20), rect.height);
                     int id = GUIUtility.GetControlID("customtrigger".GetHashCode(), FocusType.Keyboard, pos);
-                    if (curActionIndex != -1 || string.IsNullOrEmpty(customtrigger.stringValue))
-                        EditorUtility.DropDown(id, pos, _allCustomtriggerTypes.Select(ele => SerializedType.Sanitize(ele.ToString())).ToArray(), curActionIndex, selectedIndex => SetSelectedCustomTrigger(customtrigger, selectedIndex));
+                    if (curActionIndex != -1 || string.IsNullOrEmpty(customCondition.stringValue))
+                        EditorUtility.DropDown(id, pos, _allCustomConditionTypes.Select(ele => SerializedType.Sanitize(ele.ToString())).ToArray(), curActionIndex, selectedIndex => SetSelectedCustomTrigger(customCondition, selectedIndex));
                     else
-                        EditorUtility.DropDown(id, pos, _allCustomtriggerTypes.Select(ele => SerializedType.Sanitize(ele.ToString())).ToArray(), curActionIndex, customtrigger.stringValue, Color.red, selectedIndex => SetSelectedCustomTrigger(customtrigger, selectedIndex));
+                        EditorUtility.DropDown(id, pos, _allCustomConditionTypes.Select(ele => SerializedType.Sanitize(ele.ToString())).ToArray(), curActionIndex, customCondition.stringValue, Color.red, selectedIndex => SetSelectedCustomTrigger(customCondition, selectedIndex));
                 }
 
                 if (type.intValue == 1) //ParameterType.Float
@@ -176,7 +176,7 @@ namespace SAS.StateMachineGraph.Editor
                 {
                     if (!System.Enum.IsDefined(typeof(BoolMode), mode.intValue))
                         mode.intValue = (int)BoolMode.True;
-                    mode.intValue = (int)(Condition.Mode)EditorGUI.EnumPopup(new Rect(rect.width / 3 + 50, rect.y, rect.width - (rect.width / 3 + 15), rect.height), (BoolMode)mode.intValue);
+                    mode.intValue = (int)(Condition.Mode)EditorGUI.EnumPopup(new Rect(rect.width / 3 + 50, rect.y, rect.width - (rect.width / 3 + 20), rect.height), (BoolMode)mode.intValue);
                 }
 
                 _transitionConditions.serializedProperty.serializedObject.ApplyModifiedProperties();
@@ -201,17 +201,17 @@ namespace SAS.StateMachineGraph.Editor
             var parameters = _stateMachineSO.FindProperty("_parameters");
             try
             {
-                if (parameters.arraySize > 0)
+                if (parameters.arraySize > 0 && index < parameters.arraySize)
                 {
                     var element = parameters.GetArrayElementAtIndex(index);
                     var type = element.FindPropertyRelative("m_Type");
                     return type.intValue;
                 }
-                return 0;
+                return 10;
             }
             catch
             {
-                return 0;
+                return 10;
             }
         }
 
@@ -312,7 +312,7 @@ namespace SAS.StateMachineGraph.Editor
         private void SetSelectedCustomTrigger(SerializedProperty sp, int index)
         {
             if (index != -1)
-                sp.stringValue = _allCustomtriggerTypes[index].AssemblyQualifiedName;
+                sp.stringValue = _allCustomConditionTypes[index].AssemblyQualifiedName;
             serializedObject.ApplyModifiedProperties();
         }
     }
