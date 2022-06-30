@@ -10,9 +10,9 @@ namespace SAS.StateMachineGraph.Utilities
 
 		void IStateAction.OnInitialize(Actor actor, string tag, string key, State state)
 		{
-			actor.TryGetComponentInChildren(out _animators, tag, true);
+			actor.TryGetComponentsInChildren(out _animators, tag, true);
 			_key = key;
-			actor.TryGet(out parameterConfig, key);
+			actor.TryGet(out parameterConfig);
 		}
 
 		void IStateAction.Execute()
