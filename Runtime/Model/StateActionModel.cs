@@ -22,7 +22,7 @@ namespace SAS.StateMachineGraph
             return (Name + tag + key).GetHashCode();
         }
 
-        internal IStateAction[] GetActions(StateMachine stateMachine, State state, Dictionary<StateActionModel, object[]> createdInstances)
+        internal IStateAction[] GetActions(StateMachine stateMachine, Dictionary<StateActionModel, object[]> createdInstances)
         {
             IStateAction[] stateActions;
             if (createdInstances.TryGetValue(this, out var actions))
@@ -48,7 +48,7 @@ namespace SAS.StateMachineGraph
 
             createdInstances.Add(this, stateActions);
             foreach (var action in stateActions)
-                action?.OnInitialize(stateMachine.Actor, tag, key, state);
+                action?.OnInitialize(stateMachine.Actor, tag, key);
 
             return stateActions;
         }

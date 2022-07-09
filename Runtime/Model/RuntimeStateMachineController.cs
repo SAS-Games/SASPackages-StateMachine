@@ -45,8 +45,6 @@ namespace SAS.StateMachineGraph
                 else if (stateModel == m_AnyStateModel)
                     stateMachine.AnyState = state;
             }
-
-            stateMachine.CurrentState = stateMachine.DefaultState;
             return stateMachine;
         }
 

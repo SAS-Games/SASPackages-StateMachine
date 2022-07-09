@@ -9,7 +9,7 @@ namespace SAS.StateMachineGraph.Utilities
         private MessageRecieversConfig _messageRecieversConfig;
         private List<Actor> _messageRecievers = new List<Actor>();
         private Actor _actor;
-        void IStateAction.OnInitialize(Actor actor, string tag, string key, State state)
+        void IStateAction.OnInitialize(Actor actor, string tag, string key)
         {
             _actor = actor;
             actor.TryGet(out _messageRecieversConfig, key);
@@ -20,7 +20,7 @@ namespace SAS.StateMachineGraph.Utilities
             }
         }
 
-        void IStateAction.Execute()
+        void IStateAction.Execute(ActionExecuteEvent executeEvent)
         {
             foreach (var messageReciever in _messageRecievers)
                 messageReciever.SendMessage(_messageRecieversConfig.Message, _actor, SendMessageOptions.DontRequireReceiver);

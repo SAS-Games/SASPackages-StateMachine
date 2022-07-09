@@ -42,7 +42,7 @@ namespace SAS.StateMachineGraph
             foreach (var stateEnterForCustomTrigger in _stateEnterEventForCustomeTriggers)
                 stateEnterForCustomTrigger.Invoke();
             for (int i = 0; i < _onEnter.Length; ++i)
-                _onEnter[i].Execute();
+                _onEnter[i].Execute(ActionExecuteEvent.OnStateEnter);
         }
 
         internal void OnExit()
@@ -51,7 +51,7 @@ namespace SAS.StateMachineGraph
             if (_onExit == null)
                 return;
             for (int i = 0; i < _onExit.Length; ++i)
-                _onExit[i].Execute();
+                _onExit[i].Execute(ActionExecuteEvent.OnStateExit);
 
             foreach (var stateExitForCustomTrigger in _stateExitEventForCustomeTriggers)
                 stateExitForCustomTrigger.Invoke();
@@ -64,7 +64,7 @@ namespace SAS.StateMachineGraph
             if (_onFixedUpdate == null)
                 return;
             for (int i = 0; i < _onFixedUpdate.Length; ++i)
-                _onFixedUpdate[i].Execute();
+                _onFixedUpdate[i].Execute(ActionExecuteEvent.OnFixedUpdate);
         }
 
         internal void OnUpdate()
@@ -72,18 +72,18 @@ namespace SAS.StateMachineGraph
             if (_onUpdate == null)
                 return;
             for (int i = 0; i < _onUpdate.Length; ++i)
-                _onUpdate[i].Execute();
+                _onUpdate[i].Execute(ActionExecuteEvent.OnUpdate);
         }
 
         internal void OnLateUpdate()
         {
             if (_onLateUpdate == null)
                 return;
-            for (int i = 0; i < _onLateUpdate?.Length; ++i)
-                _onLateUpdate[i].Execute();
+            for (int i = 0; i < _onLateUpdate.Length; ++i)
+                _onLateUpdate[i].Execute(ActionExecuteEvent.OnLateUpdate);
         }
 
-        internal void TryTransition(StateChanged stateChanged)
+        internal void TryTransition()
         {
             if (_nextState == null || _nextState == this)
             {
@@ -107,9 +107,7 @@ namespace SAS.StateMachineGraph
                 }
                 else
                 {
-                    stateChanged.Invoke(_stateMachine.CurrentState, false);
                     _stateMachine.CurrentState = _nextState;
-                    stateChanged?.Invoke(_nextState, true);
                     _nextState = null;
                     _transitionState = null;
                 }

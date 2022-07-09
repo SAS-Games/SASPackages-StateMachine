@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-using static SAS.StateMachineGraph.Actor;
 
 namespace SAS.StateMachineGraph
 {
@@ -48,10 +47,10 @@ namespace SAS.StateMachineGraph
             CurrentState?.OnLateUpdate();
         }
 
-        internal void TryTransition(StateChanged stateChanged)
+        internal void TryTransition()
         {
-            CurrentState?.TryTransition(stateChanged);
-            AnyState?.TryTransition(stateChanged);
+            CurrentState?.TryTransition();
+            AnyState?.TryTransition();
         }
 
         public int GetInteger(string name)

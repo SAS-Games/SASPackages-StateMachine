@@ -74,7 +74,7 @@ namespace SAS.StateMachineGraph
 
 			for (int i = 0; i < count; i++)
 			{
-				var actions = scriptableActions[i].GetActions(stateMachine, state, createdInstances);
+				var actions = scriptableActions[i].GetActions(stateMachine, createdInstances);
 
 				int bits = (int)scriptableActions[i].whenToExecute;
 				if (actions[0] is IAwaitableStateAction)

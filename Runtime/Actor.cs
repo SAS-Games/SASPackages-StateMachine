@@ -7,13 +7,7 @@ using System.Linq;
 namespace SAS.StateMachineGraph
 {
     public sealed class Actor : MonoBehaviour, IActivatable
-    {
-        internal delegate void StateChanged(State state, bool entered);
-        private StateChanged OnStateChanged;
-
-        public Action<State> OnStateEnter;
-        public Action<State> OnStateExit;
-
+    { 
         [Serializable]
         public struct Config
         {
@@ -33,7 +27,6 @@ namespace SAS.StateMachineGraph
 
         private void Awake()
         {
-            OnStateChanged = InvokeEvent;
             Initialize();
         }
 
@@ -59,6 +52,7 @@ namespace SAS.StateMachineGraph
             controller.Initialize(m_Controller);
             m_Controller = controller;
             StateMachineController = m_Controller?.CreateStateMachine(this, stateMachineOverrideController);
+            StateMachineController.CurrentState = StateMachineController.DefaultState;
         }
 
         private void FixedUpdate()
@@ -74,7 +68,7 @@ namespace SAS.StateMachineGraph
         private void LateUpdate()
         {
             StateMachineController?.OnLateUpdate();
-            StateMachineController?.TryTransition(OnStateChanged);
+            StateMachineController?.TryTransition();
         }
 
         public void SetFloat(string name, float value)
@@ -148,15 +142,7 @@ namespace SAS.StateMachineGraph
                     break;
             }
         }
-
-        private void InvokeEvent(State state, bool isStateEntered)
-        {
-            if (isStateEntered)
-                OnStateEnter?.Invoke(state);
-            else
-                OnStateExit?.Invoke(state);
-        }
-
+         
         public bool TryGet<T>(out T config, string tag = "") where T : ScriptableObject
         {
             CacheConfig();

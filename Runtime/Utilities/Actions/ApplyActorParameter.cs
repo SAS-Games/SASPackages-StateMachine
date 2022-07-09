@@ -5,13 +5,13 @@
 		private Actor[] _actors;
 		private string _key; 
 
-		void IStateAction.OnInitialize(Actor actor, string tag, string key, State state)
+		void IStateAction.OnInitialize(Actor actor, string tag, string key)
 		{
 			actor.TryGetComponentsInChildren(out _actors, tag, true);
 			_key = key;
 		}
 
-		void IStateAction.Execute()
+		void IStateAction.Execute(ActionExecuteEvent executeEvent)
 		{
 			for (int i = 0; i < _actors.Length; ++i)
 			{

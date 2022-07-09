@@ -1,10 +1,10 @@
 ﻿
 namespace SAS.StateMachineGraph
 {
-    public interface IStateAction 
+    public interface IStateAction
     {
-        void OnInitialize(Actor actor, string tag, string key, State state);
-        void Execute();
+        void OnInitialize(Actor actor, string tag, string key);
+        void Execute(ActionExecuteEvent executeEvent);
     }
 
     public interface IAwaitableStateAction : IStateAction
