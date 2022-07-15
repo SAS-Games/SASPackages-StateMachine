@@ -109,29 +109,29 @@ namespace SAS.StateMachineGraph.Editor
                 rect.y += 2;
                 SerializedProperty type = element.FindPropertyRelative("m_Type");
                 SerializedProperty parameterName = element.FindPropertyRelative("m_Name");
-                string paramName = EditorGUI.DelayedTextField(new Rect(rect.x, rect.y, rect.width / 1.5f, rect.height), parameterName.stringValue);
-                if (parameterName.stringValue != paramName)
+                string paramName = EditorGUI.DelayedTextField(new Rect(rect.x, rect.y, rect.width / 1.5f, rect.height), parameterName?.stringValue);
+                if (parameterName?.stringValue != paramName)
                     parameterName.stringValue = Util.MakeUniqueName(paramName, UsedParameterNames);
 
-                if (type.intValue == 1)
+                if (type?.intValue == 1)
                 {
                     SerializedProperty value = element.FindPropertyRelative("m_DefaultFloat");
                     value.floatValue = EditorGUI.FloatField(new Rect(rect.x + rect.width / 1.5f + 10, rect.y, rect.width - 10 - rect.width / 1.5f, rect.height), value.floatValue);
                 }
 
-                if (type.intValue == 3)
+                if (type?.intValue == 3)
                 {
                     SerializedProperty value = element.FindPropertyRelative("m_DefaultInt");
                     value.intValue = EditorGUI.IntField(new Rect(rect.x + rect.width / 1.5f + 10, rect.y, rect.width - 10 - rect.width / 1.5f, rect.height), value.intValue);
                 }
 
-                if (type.intValue == 4)
+                if (type?.intValue == 4)
                 {
                     SerializedProperty value = element.FindPropertyRelative("m_DefaultBool");
                     value.boolValue = EditorGUI.Toggle(new Rect(rect.x + rect.width / 1.5f + 10, rect.y, rect.width - 10 - rect.width / 1.5f, rect.height), value.boolValue);
                 }
 
-                if (type.intValue == 9)
+                if (type?.intValue == 9)
                 {
                     SerializedProperty value = element.FindPropertyRelative("m_DefaultBool");
                     value.boolValue = EditorGUI.Toggle(new Rect(rect.x + rect.width / 1.5f + 10, rect.y, rect.width - 10 - rect.width / 1.5f, rect.height), value.boolValue, EditorStyles.radioButton);
