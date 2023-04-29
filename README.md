@@ -6,6 +6,10 @@ The State Machine Tool is a tool that allows you to create state machines for ru
 
 To get started, you will need to add the StateMachineTool package to your project. You can do this by using the unity package manager and this git hub packege into your project.
 
+Add the following Packages
+https://github.com/SAS-Games/SASPackages-Utilities.git
+https://github.com/SAS-Games/SASPackages-StateMachine.git 
+
 Once the package is imported, you can create a new state machine by right-clicking in the Project window and selecting "Create > State Machine Tool > State Machine". This will create a new state machine asset in your project.
 
 To edit the state machine, you can double-click on the asset to open it in the State Machine Tool window.
