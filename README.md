@@ -35,3 +35,4 @@ You can then attach the custom condition to a transition by clicking on the tran
 ## Conclusion
 
 The State Machine Tool is a powerful tool for creating state machines in your project. It allows you to easily attach actions and custom conditions to states and transitions, giving you full control over the behavior of your project.
+<img width="1280" alt="StateMachine" src="https://user-images.githubusercontent.com/16848724/235297044-09b6af2d-a64c-4cf8-889a-029af02ad57a.png">
