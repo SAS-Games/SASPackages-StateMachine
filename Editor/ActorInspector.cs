@@ -18,8 +18,8 @@ namespace SAS.StateMachineGraph.Editor
         {
             get
             {
-                _keys = TagList.Instance(TagList.KeysIdentifier).values;
-                _keys = _keys.AddRange(TagList.Instance().values);
+                _keys = KeyList.Instance().values;
+                _keys = _keys.AddRange(KeyList.Instance().values);
                 _keys = _keys.Distinct().ToArray();
                 return _keys;
             }

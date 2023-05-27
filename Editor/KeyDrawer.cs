@@ -10,7 +10,7 @@ namespace SAS.StateMachineGraph.Editor
     [CustomPropertyDrawer(typeof(KeyAttribute))]
     public class KeyDrawer : PropertyDrawer
     {
-        private string[] Key => TagList.GetList(TagList.KeysIdentifier);
+        private string[] Key => KeyList.GetList();
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             EditorGUI.BeginProperty(position, label, property);
@@ -30,8 +30,8 @@ namespace SAS.StateMachineGraph.Editor
             if (value == null)
                 return;
             value = GetUniqueName(value, Key);
-            TagList.Instance(TagList.KeysIdentifier).Add(value);
-            UnityEditor.EditorUtility.SetDirty(TagList.Instance(TagList.KeysIdentifier));
+            KeyList.Instance().Add(value);
+            UnityEditor.EditorUtility.SetDirty(KeyList.Instance());
         }
 
         private string GetUniqueName(string nameBase, string[] usedNames)

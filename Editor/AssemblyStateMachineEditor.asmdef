@@ -1,15 +1,17 @@
 {
     "name": "AssemblyStateMachineEditor",
+    "rootNamespace": "",
     "references": [
         "GUID:fb2987928b1890648860507dbbc6fe4a",
-        "GUID:7e1b3a59c945712438e35c6bf80ccd2d"
+        "GUID:7e1b3a59c945712438e35c6bf80ccd2d",
+        "GUID:13cf59ac3f7b5964191f0da506f45fe2"
     ],
     "includePlatforms": [],
     "excludePlatforms": [
         "Android",
-        "CloudRendering",
         "iOS",
         "LinuxStandalone64",
+        "CloudRendering",
         "Lumin",
         "macOSStandalone",
         "PS4",

@@ -9,7 +9,7 @@ namespace SAS.StateMachineGraph
     internal class StateActionModel : SerializedType
     {
         internal string Name => Sanitize(ToType().ToString());
-        [SerializeField] internal string tag = default;
+        [SerializeField] internal Tag tag = default;
         [SerializeField] internal string key = default;
         [SerializeField] internal ActionExecuteEvent whenToExecute = default;
         public override bool Equals(object obj)
@@ -19,7 +19,7 @@ namespace SAS.StateMachineGraph
 
         public override int GetHashCode()
         {
-            return (Name + tag + key).GetHashCode();
+            return (Name + tag.ToString() + key).GetHashCode();
         }
 
         internal IStateAction[] GetActions(StateMachine stateMachine, Dictionary<StateActionModel, object[]> createdInstances)

@@ -143,10 +143,10 @@ namespace SAS.StateMachineGraph
             }
         }
          
-        public bool TryGet<T>(out T config, string tag = "") where T : ScriptableObject
+        public bool TryGet<T>(out T config, string key = "") where T : ScriptableObject
         {
             CacheConfig();
-            var status = TryGet(typeof(T), out var result, tag);
+            var status = TryGet(typeof(T), out var result, key);
             config = (T)result;
             return status;
         }

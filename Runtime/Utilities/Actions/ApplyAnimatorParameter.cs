@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using SAS.Utilities.TagSystem;
 
 namespace SAS.StateMachineGraph.Utilities
 {
@@ -8,7 +9,7 @@ namespace SAS.StateMachineGraph.Utilities
 		private Animator[] _animators;
 		AnimatorParameterConfig parameterConfig;
 
-		void IStateAction.OnInitialize(Actor actor, string tag, string key)
+		void IStateAction.OnInitialize(Actor actor, Tag tag, string key)
 		{
 			actor.TryGetComponentsInChildren(out _animators, tag, true);
 			_key = key;

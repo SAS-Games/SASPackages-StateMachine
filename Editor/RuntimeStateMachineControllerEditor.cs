@@ -16,22 +16,18 @@ namespace SAS.StateMachineGraph.Editor
             if (GUILayout.Button("StateMachineGraphEditor"))
                 StateMachineEditorWindow.ShowBehaviourGraphEditor(target as RuntimeStateMachineController);
 
-            if (GUILayout.Button("Fix Tags and Keys"))
+            if (GUILayout.Button("Fix Keys"))
             {
                 var runtimeStateMachineController = target as RuntimeStateMachineController;
                 var stateModels = runtimeStateMachineController.GetAllStateModels();
-                var usedTags = new List<string>();
                 var usedKeys = new List<string>();
                 foreach (var stateModel in stateModels)
                 {
-                    usedTags.AddRange(stateModel.GetUsedTags());
                     usedKeys.AddRange(stateModel.GetUsedKeys());
                 }
 
-                usedTags = usedTags.Distinct().ToList();
                 usedKeys = usedKeys.Distinct().ToList();
-                TagList.Instance().AddRange(usedTags);
-                TagList.Instance(TagList.KeysIdentifier).AddRange(usedKeys);
+                KeyList.Instance().AddRange(usedKeys);
             }
         }
     }

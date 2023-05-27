@@ -1,3 +1,4 @@
+using SAS.Utilities.TagSystem;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,7 +10,7 @@ namespace SAS.StateMachineGraph.Utilities
         private MessageRecieversConfig _messageRecieversConfig;
         private List<Actor> _messageRecievers = new List<Actor>();
         private Actor _actor;
-        void IStateAction.OnInitialize(Actor actor, string tag, string key)
+        void IStateAction.OnInitialize(Actor actor, Tag tag, string key)
         {
             _actor = actor;
             actor.TryGet(out _messageRecieversConfig, key);

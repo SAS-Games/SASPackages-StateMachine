@@ -1,11 +1,13 @@
-﻿namespace SAS.StateMachineGraph.Utilities
+﻿using SAS.Utilities.TagSystem;
+
+namespace SAS.StateMachineGraph.Utilities
 {
 	public class ApplyActorParameter : IStateAction
 	{
 		private Actor[] _actors;
 		private string _key; 
 
-		void IStateAction.OnInitialize(Actor actor, string tag, string key)
+		void IStateAction.OnInitialize(Actor actor, Tag tag, string key)
 		{
 			actor.TryGetComponentsInChildren(out _actors, tag, true);
 			_key = key;

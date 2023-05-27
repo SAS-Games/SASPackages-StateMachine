@@ -5,6 +5,7 @@ using UnityEngine;
 using ReorderableList = UnityEditorInternal.ReorderableList;
 using EditorUtility = SAS.Utilities.Editor.EditorUtility;
 using SAS.Utilities.TagSystem.Editor;
+using SAS.Utilities.TagSystem;
 
 namespace SAS.StateMachineGraph.Editor
 {
@@ -15,8 +16,8 @@ namespace SAS.StateMachineGraph.Editor
         private ReorderableList _transitionStates;
         private Type[] _allActionTypes;
 
-        private string[] Tags => TagList.GetList();
-        private string[] Keys => TagList.GetList(TagList.KeysIdentifier);
+        //private string[] Tags => TagList.GetList();
+        private string[] Keys => KeyList.GetList();
         private GUIStyle _actionNotFoundStyle = new GUIStyle();
         new private SerializedObject serializedObject;
         private RuntimeStateMachineController _runtimeStateMachineController;
@@ -121,13 +122,15 @@ namespace SAS.StateMachineGraph.Editor
                 var width = Mathf.Min(80, rect.width / 5);
                 var rectEnd = rect.width - 2.5f * width;
                 pos = new Rect(rectEnd, rect.y - 2, width, rect.height - 2);
-                id = GUIUtility.GetControlID("Tag".GetHashCode(), FocusType.Keyboard, pos);
-                var tagIndex = Array.IndexOf(Tags, tag.stringValue);
-                if (tagIndex != -1 || string.IsNullOrEmpty(tag.stringValue))
-                    EditorUtility.DropDown(id, pos, Tags, tagIndex, selectedIndex => SetTagSerializedProperty(tag, selectedIndex), AddTag);
-                else
-                    EditorUtility.DropDown(id, pos, Tags, tagIndex, tag.stringValue, Color.red, selectedIndex => SetTagSerializedProperty(tag, selectedIndex), AddTag);
 
+                var newValue = (int)(Tag)EditorGUI.EnumPopup(pos, (Tag)tag.enumValueFlag);
+                if (tag.enumValueFlag != newValue)
+                {
+                    tag.enumValueFlag = newValue;
+                    serializedObject.ApplyModifiedProperties();
+                    UnityEditor.EditorUtility.SetDirty(target);
+                }
+               
                 rectEnd = rect.width - 1.5f * width;
                 pos = new Rect(rectEnd, rect.y - 2, width, rect.height);
                 id = GUIUtility.GetControlID("Key".GetHashCode(), FocusType.Keyboard, pos);
@@ -155,12 +158,6 @@ namespace SAS.StateMachineGraph.Editor
         {
             if (index != -1)
                 sp.stringValue = _allActionTypes[index].AssemblyQualifiedName;
-            serializedObject.ApplyModifiedProperties();
-        }
-
-        private void SetTagSerializedProperty(SerializedProperty sp, int index)
-        {
-            sp.stringValue = index != -1 ? Tags[index] : string.Empty;
             serializedObject.ApplyModifiedProperties();
         }
 
@@ -211,24 +208,14 @@ namespace SAS.StateMachineGraph.Editor
             };
         }
 
-        private void AddTag()
-        {
-            var value = EditorInputDialog.Show("Add Tag", "", "New Tag");
-            if (value == null)
-                return;
-            value = GetUniqueName(value, Tags);
-            TagList.Instance().Add(value);
-            UnityEditor.EditorUtility.SetDirty(TagList.Instance());
-        }
-
         private void AddKey()
         {
             var value = EditorInputDialog.Show("Add Key", "", "New Key");
             if (value == null)
                 return;
             value = GetUniqueName(value, Keys);
-            TagList.Instance(TagList.KeysIdentifier).Add(value);
-            UnityEditor.EditorUtility.SetDirty(TagList.Instance(TagList.KeysIdentifier));
+            KeyList.Instance().Add(value);
+            UnityEditor.EditorUtility.SetDirty(KeyList.Instance());
         }
 
         private string GetUniqueName(string nameBase, string[] usedNames)

@@ -7,18 +7,6 @@ namespace SAS.StateMachineGraph
 	{
 #if UNITY_EDITOR
 		[SerializeField] private Vector3 m_Position;
-		public List<string> GetUsedTags()
-		{
-			List<string> tags = new List<string>();
-			for (int i = 0; i < m_StateActions.Length; ++i)
-			{
-				if (!string.IsNullOrEmpty(m_StateActions[i].tag))
-					tags.Add(m_StateActions[i].tag);
-			}
-
-			return tags;
-		}
-
 		public List<string> GetUsedKeys()
 		{
 			List<string> keys = new List<string>();
