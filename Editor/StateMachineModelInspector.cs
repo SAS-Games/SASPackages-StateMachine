@@ -17,5 +17,9 @@ namespace SAS.StateMachineGraph.Editor
                 Selection.activeObject = AssetDatabase.LoadMainAssetAtPath(AssetDatabase.GetAssetPath(target));
             }
         }
+
+        public override void OnInspectorGUI()
+        {
+        }
     }
 }
