@@ -61,7 +61,7 @@ namespace SAS.StateMachineGraph
 
         internal void OnFixedUpdate()
         {
-            if (_onFixedUpdate == null)
+            if (_onFixedUpdate == null || exitActionsExecutionStarted)
                 return;
             for (int i = 0; i < _onFixedUpdate.Length; ++i)
                 _onFixedUpdate[i].Execute(ActionExecuteEvent.OnFixedUpdate);
@@ -69,7 +69,7 @@ namespace SAS.StateMachineGraph
 
         internal void OnUpdate()
         {
-            if (_onUpdate == null)
+            if (_onUpdate == null || exitActionsExecutionStarted)
                 return;
             for (int i = 0; i < _onUpdate.Length; ++i)
                 _onUpdate[i].Execute(ActionExecuteEvent.OnUpdate);
@@ -77,7 +77,7 @@ namespace SAS.StateMachineGraph
 
         internal void OnLateUpdate()
         {
-            if (_onLateUpdate == null)
+            if (_onLateUpdate == null || exitActionsExecutionStarted)
                 return;
             for (int i = 0; i < _onLateUpdate.Length; ++i)
                 _onLateUpdate[i].Execute(ActionExecuteEvent.OnLateUpdate);
