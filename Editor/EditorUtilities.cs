@@ -58,7 +58,7 @@ namespace SAS.StateMachineGraph.Editor
 
             var right = (end - start).normalized;
             var up = Vector3.Cross(Vector3.forward, right).normalized;
-            var size = HandleUtility.GetHandleSize(end);
+            var size = 20;//HandleUtility.GetHandleSize(end);
             var width = size * 0.3f;
             var height = size * 0.3f;
             var mid = Vector3.Lerp(start, end, 0.50f);
@@ -83,7 +83,7 @@ namespace SAS.StateMachineGraph.Editor
 
             var right = (end - start).normalized;
             var up = Vector3.Cross(Vector3.forward, right).normalized;
-            var size = HandleUtility.GetHandleSize(end);
+            var size = 20;// HandleUtility.GetHandleSize(end);
             var width = size * 0.3f;
             var height = size * 0.3f;
 

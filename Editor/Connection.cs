@@ -69,14 +69,14 @@ namespace SAS.StateMachineGraph.Editor
             }
         }
 
-        private static float DistanceToPolyLine(params Vector3[] points)
+        private static float DistanceToPolyLine(Vector3 mousePos, params Vector3[] points)
         {
             if (points == null)
                 throw new ArgumentNullException(nameof(points));
-            float dist = HandleUtility.DistanceToLine(points[0], points[1]);
+            float dist = HandleUtility.DistancePointToLineSegment(mousePos, points[0], points[1]);
             for (int i = 2; i < points.Length; i++)
             {
-                float d = HandleUtility.DistanceToLine(points[i - 1], points[i]);
+                float d = HandleUtility.DistancePointToLine(mousePos,points[i - 1], points[i]);
                 if (d < dist)
                     dist = d;
             }
@@ -95,7 +95,7 @@ namespace SAS.StateMachineGraph.Editor
 
         private void ProcessMouseEvent(Event e, Vector3[] points)
         {
-            if (DistanceToPolyLine(points) < 10)
+            if (DistanceToPolyLine(e.mousePosition,points) < 10)
 
                 switch (e.type)
                 {
