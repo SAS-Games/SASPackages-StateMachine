@@ -5,6 +5,6 @@
   "unity": "2019.1",
   "hideInEditor": true,
   "dependencies": {
-    "com.sas.utilities": "https://github.com/SAS-Games/SASPackages-Utilities.git#master"
+    "com.sas.utilities": "https://github.com/SAS-Games/SASPackages-Utilities.git"
   }
 }
