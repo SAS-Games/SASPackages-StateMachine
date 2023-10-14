@@ -34,7 +34,9 @@ namespace SAS.StateMachineGraph.Editor
         {
             EditorGUI.BeginChangeCheck();
             serializedObject.FindProperty("m_Controller").objectReferenceValue = EditorGUILayout.ObjectField("Controller", serializedObject.FindProperty("m_Controller").objectReferenceValue, typeof(RuntimeStateMachineController), false);
-
+            SerializedProperty autoInitializeProperty = serializedObject.FindProperty("m_AutoInitialize");
+            autoInitializeProperty.boolValue = EditorGUILayout.Toggle("Auto Initialize", autoInitializeProperty.boolValue);
+            
             if (EditorGUI.EndChangeCheck())
             {
                 _configsList = null;
