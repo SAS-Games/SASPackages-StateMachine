@@ -1,10 +1,10 @@
 {
   "name": "com.sas.statemachine",
-  "version": "0.0.3",
+  "version": "1.0.0",
   "displayName": "SAS State Machine",
   "unity": "2019.1",
   "hideInEditor": true,
   "dependencies": {
-    "com.sas.utilities": "0.0.1"
+    "com.sas.utilities": "0.0.6"
   }
 }

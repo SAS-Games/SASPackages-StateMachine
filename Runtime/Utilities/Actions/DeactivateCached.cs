@@ -1,21 +1,26 @@
 ﻿using SAS.Utilities.TagSystem;
 using UnityEngine;
+using UnityEngine.Scripting;
 
 namespace SAS.StateMachineGraph.Utilities
 {
-    public sealed class ActivateObjects : IStateAction
+    [Preserve]
+    public sealed class DeactivateCached : IStateAction
     {
-        private IActivatable[] _activatables;
+        IActivatable[] _activatables;
         void IStateAction.OnInitialize(Actor actor, Tag tag, string key)
         {
             if (!actor.TryGetComponentsInChildren(out _activatables, tag, true))
-                Debug.LogError($"No GameObject with tag {tag} is found usder {actor}. Try assigning the Tag");
+            {
+                Debug.LogError($"No Activatable Component found with tag {tag} is found usder {actor}. Try assigning the Tag");
+                return;
+            }
         }
 
         void IStateAction.Execute(ActionExecuteEvent executeEvent)
         {
             foreach (IActivatable activatable in _activatables)
-                activatable.Activate();
+                activatable.Deactivate();
         }
     }
 }
