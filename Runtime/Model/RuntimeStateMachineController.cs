@@ -37,14 +37,17 @@ namespace SAS.StateMachineGraph
             var stateModels = m_BaseStateMachineModel.GetStatesRecursivily();
             stateModels.Add(m_AnyStateModel);
 
+            List<State> states = new();   
             foreach (StateModel stateModel in stateModels)
             {
                 var state = stateModel.GetState(stateMachine, cachedState, cachedActions, cachedTriggers);
+                states.Add(state);
                 if (stateModel == m_DefaultStateModel)
                     stateMachine.DefaultState = state;
                 else if (stateModel == m_AnyStateModel)
                     stateMachine.AnyState = state;
             }
+            stateMachine.states.AddRange(states);
             return stateMachine;
         }
 

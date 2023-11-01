@@ -7,6 +7,7 @@ namespace SAS.StateMachineGraph
     {
         private Dictionary<string, StateMachineParameter> _parameters = new Dictionary<string, StateMachineParameter>();
         internal List<StateActionPair> stateActionPairs;
+        internal List<State> states = new List<State>();
         public StateMachine(Actor actor, StateMachineParameter[] parameters, List<StateActionPair> stateActionPairs)
         {
             Actor = actor;
@@ -151,6 +152,16 @@ namespace SAS.StateMachineGraph
             {
                 Debug.LogException(e);
             }
+        }
+
+        internal State GetStateByName(string name)
+        {
+            return states.Find(x => x.Name == name);
+        }
+
+        internal State GetStateByTag(string tag)
+        {
+            return states.Find(x => x.Tag == tag);
         }
     }
 }

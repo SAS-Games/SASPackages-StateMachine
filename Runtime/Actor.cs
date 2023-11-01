@@ -117,6 +117,16 @@ namespace SAS.StateMachineGraph
             return StateMachineController.GetBool(name);
         }
 
+        public State GetState(string name)
+        {
+           return StateMachineController.GetStateByName(name);
+        }
+
+        public State GetStateByTag(string name)
+        {
+            return StateMachineController.GetStateByTag(name);
+        }
+
         void IActivatable.Activate()
         {
             enabled = true;
