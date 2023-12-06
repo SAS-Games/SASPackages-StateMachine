@@ -6,7 +6,7 @@ namespace SAS.StateMachineGraph
 	public class StateModel : ScriptableObject
 	{
 #if UNITY_EDITOR
-		[SerializeField] private Vector3 m_Position;
+		[SerializeField] private Vector3Int m_Position;
 		public List<string> GetUsedKeys()
 		{
 			List<string> keys = new List<string>();

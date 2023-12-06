@@ -296,7 +296,7 @@ namespace SAS.StateMachineGraph.Editor
             if (_nodes != null)
             {
                 for (int i = 0; i < _nodes.Count; i++)
-                    _nodes[i].Drag(delta);
+                    _nodes[i].Drag(delta.ToVector2Int());
             }
             GUI.changed = true;
         }
@@ -343,7 +343,7 @@ namespace SAS.StateMachineGraph.Editor
             Action<StateNode> action = RemoveStateModelNode;
             if (isDefaultState)
                 action = RemoveDefaultStateModelNode;
-            node = new StateNode(stateModel, stateModel.GetPosition(), isDefaultState, StartTranstion, MakeTranstion, action, SetAsDefaultNode, DuplicateNode);
+            node = new StateNode(stateModel, (Vector2Int)stateModel.GetPosition(), isDefaultState, StartTranstion, MakeTranstion, action, SetAsDefaultNode, DuplicateNode);
             if (isDefaultState)
                 SetAsDefaultNode(node, false);
 
@@ -352,14 +352,14 @@ namespace SAS.StateMachineGraph.Editor
 
         private void CreateChildMachinelNode(StateMachineModel stateMachineModel)
         {
-            var node = new StateMachineNode(stateMachineModel, stateMachineModel.GetPosition(), _runtimeStateMachineController.IsDefaultStateMachine(stateMachineModel), MakeTranstion, StateMachineModelMouseUp, RemoveStateMachineNode, SelectStateMachineNode, DuplicateStateMachine);
+            var node = new StateMachineNode(stateMachineModel, (Vector2Int)stateMachineModel.GetPosition(), _runtimeStateMachineController.IsDefaultStateMachine(stateMachineModel), MakeTranstion, StateMachineModelMouseUp, RemoveStateMachineNode, SelectStateMachineNode, DuplicateStateMachine);
             _nodes.Add(node);
             Repaint();
         }
 
         private void CreateParentMachinelNode(StateMachineModel stateMachineModel)
         {
-            var node = new ParentStateMachineNode(stateMachineModel, stateMachineModel.GetPositionAsUpNode(), _runtimeStateMachineController.IsDefaultStateMachine(stateMachineModel), MakeTranstion, StateMachineModelMouseUp, GoToMachineNode);
+            var node = new ParentStateMachineNode(stateMachineModel, (Vector2Int)stateMachineModel.GetPositionAsUpNode(), _runtimeStateMachineController.IsDefaultStateMachine(stateMachineModel), MakeTranstion, StateMachineModelMouseUp, GoToMachineNode);
             _nodes.Add(node);
         }
 

@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
@@ -16,10 +15,10 @@ namespace SAS.StateMachineGraph.Editor
             stateModelSO.ApplyModifiedProperties();
         }
 
-        public static Vector3 GetPosition(this StateModel stateModel)
+        public static Vector3Int GetPosition(this StateModel stateModel)
         {
             var stateModelSO = new SerializedObject(stateModel);
-            return stateModelSO.FindProperty("m_Position").vector3Value;
+            return stateModelSO.FindProperty("m_Position").vector3IntValue;
         }
 
         public static SerializedProperty GetTransitionsProp(this StateModel stateModel)
@@ -156,7 +155,7 @@ namespace SAS.StateMachineGraph.Editor
             AssetDatabase.SaveAssets();
         }
 
-        internal static  void ResetTransitions(this StateModel stateModel)
+        internal static void ResetTransitions(this StateModel stateModel)
         {
             var stateTransitions = stateModel.GetTransitionsProp();
             stateTransitions.arraySize = 0;

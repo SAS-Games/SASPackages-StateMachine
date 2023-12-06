@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Text;
 using UnityEditor;
 using UnityEngine;
-using System.Linq;
 using Object = UnityEngine.Object;
 
 namespace SAS.StateMachineGraph.Editor
@@ -19,7 +16,7 @@ namespace SAS.StateMachineGraph.Editor
 
         public StateMachineModel Value => TargetObject as StateMachineModel;
 
-        public StateMachineNode(Object targetObject, Vector2 position, bool isDefault, Action<StateMachineNode, StateModel> makeTransition, Action<StateMachineNode> mouseup, Action<StateMachineNode> removeNode, Action<StateMachineNode> selectStateMachine, Action<StateMachineNode> duplicateNode) :
+        public StateMachineNode(Object targetObject, Vector2Int position, bool isDefault, Action<StateMachineNode, StateModel> makeTransition, Action<StateMachineNode> mouseup, Action<StateMachineNode> removeNode, Action<StateMachineNode> selectStateMachine, Action<StateMachineNode> duplicateNode) :
             base(targetObject, position, 190, 40)
         {
             _normalStyleName = isDefault ? "flow node hex 5" : "flow node hex 0";

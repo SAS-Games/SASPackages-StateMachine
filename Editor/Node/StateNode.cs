@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -18,7 +16,7 @@ namespace SAS.StateMachineGraph.Editor
         internal StateModel Value => TargetObject as StateModel;
         private bool _isDefaultNode;
        
-        public StateNode(Object targetObject, Vector2 position, bool isDefaultState, Action<BaseNode> startTransition, Action<BaseNode> makeTransition, Action<StateNode> removeNode, Action<StateNode, bool> setAsDefaultNode, Action<StateNode> duplicateNode) :
+        public StateNode(Object targetObject, Vector2Int position, bool isDefaultState, Action<BaseNode> startTransition, Action<BaseNode> makeTransition, Action<StateNode> removeNode, Action<StateNode, bool> setAsDefaultNode, Action<StateNode> duplicateNode) :
               base(targetObject, position)
         {
             _removeNode = removeNode;

@@ -10,7 +10,7 @@ namespace SAS.StateMachineGraph.Editor
         private Action<BaseNode> _startTransition;
         private StateMachineModel _stateMachineModel;
         internal StateModel Value => TargetObject as StateModel;
-        public AnyStateNode(StateMachineModel stateMachineModel, Object targetObject, Vector2 position, Action<BaseNode> startTransition) :
+        public AnyStateNode(StateMachineModel stateMachineModel, Object targetObject, Vector2Int position, Action<BaseNode> startTransition) :
                base(targetObject, position)
         {
             _normalStyleName = "flow node 2";
@@ -30,7 +30,7 @@ namespace SAS.StateMachineGraph.Editor
         {
         }
 
-        public override void Drag(Vector2 delta)
+        public override void Drag(Vector2Int delta)
         {
             base.Drag(delta);
             _stateMachineModel.SetAnyStatePosition(Value.GetPosition()); ;

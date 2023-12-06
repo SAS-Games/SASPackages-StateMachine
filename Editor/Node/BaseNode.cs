@@ -10,7 +10,7 @@ namespace SAS.StateMachineGraph.Editor
         protected string _normalStyleName = "flow node 0";
         protected string _focusedStyleName = "flow node 0 on";
         internal Object TargetObject { get; }
-        internal Rect rect;
+        internal RectInt rect;
         private bool _isDragged;
 
         private GUIStyle _normalStyle;
@@ -25,37 +25,37 @@ namespace SAS.StateMachineGraph.Editor
         private bool _isDoubleClicked = false;
         protected string Prefix { get; set; }
 
-        public BaseNode(Object targetObject, Vector2 position, float width, float height)
+        public BaseNode(Object targetObject, Vector2Int position, int width, int height)
         {
             TargetObject = targetObject;
-            Position = position;
-            rect = new Rect(position.x, position.y, width, height);
+            Position = (Vector3Int)position;
+            rect = new RectInt(position.x, position.y, width, height);
             endPort = new Port(this, 1);
             startPort = new Port(this, 2);
         }
 
-        public BaseNode(Object targetObject, Vector2 position) : this(targetObject, position, 180, 40) { }
+        public BaseNode(Object targetObject, Vector2Int position) : this(targetObject, position, 180, 40) { }
 
         public void Draw()
         {
             endPort.Draw();
             startPort.Draw();
-            GUI.Box(rect, $"{Prefix} {TargetObject?.name}", Style);
+            GUI.Box(rect.ToRect(), $"{Prefix} {TargetObject?.name}", Style);
         }
 
-        public virtual void Drag(Vector2 delta)
+        public virtual void Drag(Vector2Int delta)
         {
             rect.position += delta;
-            Position = rect.position;
+            Position = (Vector3Int)rect.position;
         }
 
-        public virtual Vector3 Position
+        public virtual Vector3Int Position
         {
-            get { return new SerializedObject(TargetObject).FindProperty("m_Position").vector3Value; }
+            get { return new SerializedObject(TargetObject).FindProperty("m_Position").vector3IntValue; }
             protected set
             {
                 var serializedObject = new SerializedObject(TargetObject);
-                serializedObject.FindProperty("m_Position").vector3Value = value;
+                serializedObject.FindProperty("m_Position").vector3IntValue = value;
                 serializedObject.ApplyModifiedProperties();
             }
         }
@@ -66,7 +66,7 @@ namespace SAS.StateMachineGraph.Editor
             {
                 case EventType.MouseDown:
 
-                    if (rect.Contains(e.mousePosition))
+                    if (rect.Contains(e.mousePosition.ToVector2Int()))
                     {
                         e.Use();
                         IsFocused = true;
@@ -89,7 +89,7 @@ namespace SAS.StateMachineGraph.Editor
 
                 case EventType.MouseUp:
                     _isDragged = false;
-                    if (rect.Contains(e.mousePosition))
+                    if (rect.Contains(e.mousePosition.ToVector2Int()))
                     {
                         if (e.button == 0)
                         {
@@ -114,7 +114,7 @@ namespace SAS.StateMachineGraph.Editor
                 case EventType.MouseDrag:
                     if (e.button == 0 && _isDragged)
                     {
-                        Drag(e.delta);
+                        Drag(e.delta.ToVector2Int());
                         return true;
                     }
                     break;

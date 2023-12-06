@@ -48,7 +48,7 @@ namespace SAS.StateMachineGraph.Editor
             stateModel.name = stateMachineModel.MakeUniqueStateName("Any State");
 
             runtimeStateMachineController.AddObjectToAsset(stateModel);
-            stateMachineModel.SetAnyStatePosition(new Vector3(300, 50, 0));
+            stateMachineModel.SetAnyStatePosition(new Vector3Int(300, 50, 0));
             runtimeStateMachineController.AddAnyState(stateModel);
         }
 
