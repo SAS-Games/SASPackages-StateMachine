@@ -13,6 +13,11 @@ public class NotNullDrawer : PropertyDrawer
         {
             label.text = "[!] " + label.text;
             GUI.color = Color.red;
+            if (Application.isPlaying)
+            {
+                if (EditorUtility.DisplayDialog("Value Not Assigned Error", $"{inProp.propertyPath} is not assigned", "OK"))
+                    EditorApplication.isPlaying = false;
+            }
         }
 
         EditorGUI.PropertyField(inRect, inProp, label);
