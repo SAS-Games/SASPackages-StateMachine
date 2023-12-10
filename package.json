@@ -1,6 +1,6 @@
 {
   "name": "com.sas.statemachine",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "displayName": "SAS State Machine",
   "unity": "2019.1",
   "hideInEditor": true,

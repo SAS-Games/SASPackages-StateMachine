@@ -26,6 +26,19 @@ namespace SAS.StateMachineGraph
         private Dictionary<string, List<object>> _configs = new Dictionary<string, List<object>>();
         private bool _isConfigsCached = false;
         private bool _initialized = false;
+        public RuntimeStateMachineController runtimeStateMachineController
+        {
+            get => m_Controller;
+            set
+            {
+                if (m_Controller != value)
+                {
+                    _initialized = false;
+                    m_Controller = value;
+                }
+                Initialize();
+            }
+        }
 
         private void Awake()
         {
@@ -119,7 +132,7 @@ namespace SAS.StateMachineGraph
 
         public State GetState(string name)
         {
-           return StateMachineController.GetStateByName(name);
+            return StateMachineController.GetStateByName(name);
         }
 
         public State GetStateByTag(string name)
