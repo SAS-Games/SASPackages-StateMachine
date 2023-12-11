@@ -8,10 +8,10 @@ namespace SAS.StateMachineGraph.Editor
     public static class StateModelExtensions
     {
         const string TransitionsVar = "m_Transitions";
-        public static void SetPosition(this StateModel stateModel, Vector3 position)
+        public static void SetPosition(this StateModel stateModel, Vector3Int position)
         {
             var stateModelSO = new SerializedObject(stateModel);
-            stateModelSO.FindProperty("m_Position").vector3Value = position;
+            stateModelSO.FindProperty("m_Position").vector3IntValue = position;
             stateModelSO.ApplyModifiedProperties();
         }
 
@@ -128,12 +128,6 @@ namespace SAS.StateMachineGraph.Editor
                 {
                     stateTransitions.DeleteArrayElementAtIndex(i);
                     stateTransitions.serializedObject.ApplyModifiedProperties();
-                    if (stateTransitions.GetArrayElementAtIndex(i) != null)
-                    {
-                        stateTransitions.DeleteArrayElementAtIndex(i);
-                        stateTransitions.serializedObject.ApplyModifiedProperties();
-                    }
-
                     i--;
                     stateTransitionModelsToDelete.Add(element);
                     sourceStateModel.serializedObject().ApplyModifiedProperties();

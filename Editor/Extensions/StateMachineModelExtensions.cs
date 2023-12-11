@@ -88,9 +88,6 @@ namespace SAS.StateMachineGraph.Editor
                 if (element.objectReferenceValue == null || element.objectReferenceValue == stateModel)
                 {
                     stateModelsProp.DeleteArrayElementAtIndex(i);
-                    if (stateModelsProp.GetArrayElementAtIndex(i) != null)
-                        stateModelsProp.DeleteArrayElementAtIndex(i);
-
                     stateModelsProp.serializedObject.ApplyModifiedProperties();
                     break;
                 }

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
-using System.Linq;
 
 namespace SAS.StateMachineGraph.Editor
 {
@@ -316,7 +316,7 @@ namespace SAS.StateMachineGraph.Editor
 
         private void AddState(Vector2 mousePosition)
         {
-            var stateModel = _runtimeStateMachineController.AddState(SelectedStateMachineModel, "New State", mousePosition);
+            var stateModel = _runtimeStateMachineController.AddState(SelectedStateMachineModel, "New State", mousePosition.ToVector3Int());
             CreateStateModelNode(stateModel);
         }
 
