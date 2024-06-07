@@ -48,8 +48,8 @@ namespace SAS.StateMachineGraph.Editor
                 if ((childStateMachineModels.GetArrayElementAtIndex(i).objectReferenceValue as StateMachineModel) == stateMachineModel)
                 {
                     childStateMachineModels.DeleteArrayElementAtIndex(i);
-                    if (childStateMachineModels.GetArrayElementAtIndex(i) != null)
-                        childStateMachineModels.DeleteArrayElementAtIndex(i);
+                    //if (childStateMachineModels.GetArrayElementAtIndex(i) != null)
+                    //    childStateMachineModels.DeleteArrayElementAtIndex(i);
                     break;
                 }
             }
@@ -88,9 +88,6 @@ namespace SAS.StateMachineGraph.Editor
                 if (element.objectReferenceValue == null || element.objectReferenceValue == stateModel)
                 {
                     stateModelsProp.DeleteArrayElementAtIndex(i);
-                    if (stateModelsProp.GetArrayElementAtIndex(i) != null)
-                        stateModelsProp.DeleteArrayElementAtIndex(i);
-
                     stateModelsProp.serializedObject.ApplyModifiedProperties();
                     break;
                 }

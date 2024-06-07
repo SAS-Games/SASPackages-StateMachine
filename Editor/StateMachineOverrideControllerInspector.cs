@@ -211,7 +211,6 @@ namespace SAS.StateMachineGraph.Editor
 
         private void SetSelectedAction(int elementIndex, int selectedIndex)
         {
-            Debug.Log($"{elementIndex}    {selectedIndex}");
             var overrideAction = "";
             if (selectedIndex == -1)
                 overrideAction = null;

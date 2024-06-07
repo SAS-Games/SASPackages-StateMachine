@@ -1,8 +1,8 @@
 ﻿using System;
 using UnityEngine;
-using SAS.StateMachineGraph.Utilities;
 using System.Collections.Generic;
 using System.Linq;
+using SAS.StateMachineGraph.Utilities;
 
 namespace SAS.StateMachineGraph
 {

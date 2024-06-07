@@ -279,11 +279,11 @@ namespace SAS.StateMachineGraph.Editor
                     {
                         allTranstionFromThisState.DeleteArrayElementAtIndex(i);
                         allTranstionFromThisState.serializedObject.ApplyModifiedProperties();
-                        if (allTranstionFromThisState.GetArrayElementAtIndex(i) != null)
-                        {
-                            allTranstionFromThisState.DeleteArrayElementAtIndex(i);
-                            allTranstionFromThisState.serializedObject.ApplyModifiedProperties();
-                        }
+                        //if (allTranstionFromThisState.GetArrayElementAtIndex(i) != null)
+                        //{
+                        //    allTranstionFromThisState.DeleteArrayElementAtIndex(i);
+                        //    allTranstionFromThisState.serializedObject.ApplyModifiedProperties();
+                        //}
 
                         stateModelSO.ApplyModifiedProperties();
                         selectedStateTransitionModel.DestroyImmediate();

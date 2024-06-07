@@ -6,6 +6,7 @@ using ReorderableList = UnityEditorInternal.ReorderableList;
 using EditorUtility = SAS.Utilities.Editor.EditorUtility;
 using SAS.Utilities.TagSystem.Editor;
 using SAS.Utilities.TagSystem;
+using UnityEditor.Experimental.GraphView;
 
 namespace SAS.StateMachineGraph.Editor
 {
@@ -184,11 +185,11 @@ namespace SAS.StateMachineGraph.Editor
 
                 allTranstionFromThisState.DeleteArrayElementAtIndex(list.index);
                 allTranstionFromThisState.serializedObject.ApplyModifiedProperties();
-                if (allTranstionFromThisState.GetArrayElementAtIndex(list.index) != null)
-                {
-                    allTranstionFromThisState.DeleteArrayElementAtIndex(list.index);
-                    allTranstionFromThisState.serializedObject.ApplyModifiedProperties();
-                }
+                //if (allTranstionFromThisState.GetArrayElementAtIndex(list.index) != null)
+                //{
+                //    allTranstionFromThisState.DeleteArrayElementAtIndex(list.index);
+                //    allTranstionFromThisState.serializedObject.ApplyModifiedProperties();
+                //}
 
                 serializedObject.ApplyModifiedProperties();
                 selectedStateTransitionModel.DestroyImmediate();
@@ -205,6 +206,13 @@ namespace SAS.StateMachineGraph.Editor
                     EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight), val + property.objectReferenceValue.name);
                 else
                     EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight), val + "None");
+            };
+
+            _transitionStates.onMouseUpCallback = list =>
+            {
+                var stateTransitionModel = (StateTransitionModel)_transitionStates.serializedProperty.GetArrayElementAtIndex(list.index).objectReferenceValue;
+                StateTransitionInspector.SelectedTransitionIndex = list.index;
+                Selection.activeObject = stateTransitionModel;
             };
         }
 
