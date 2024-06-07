@@ -5,7 +5,7 @@ using UnityEngine.Scripting;
 namespace SAS.StateMachineGraph.Utilities
 {
     [Preserve]
-    public sealed class DeactivateGameObject : IStateAction
+    public sealed class Activate : IStateAction
     {
         private Actor _actor;
         private Tag _tag;
@@ -17,8 +17,14 @@ namespace SAS.StateMachineGraph.Utilities
 
         void IStateAction.Execute(ActionExecuteEvent executeEvent)
         {
-            _actor.TryGetComponentInChildren(out Transform _transform, _tag, true);
-            _transform?.gameObject.SetActive(false);
+            if (!_actor.TryGetComponentsInChildren(out IActivatable[] activatables, _tag, true))
+            {
+                Debug.LogError($"No GameObject with tag {_tag} is found usder {_actor}. Try assigning the Tag");
+                return;
+            }
+
+            foreach (IActivatable activatable in activatables)
+                activatable.Activate();
         }
     }
 }

@@ -48,7 +48,7 @@ namespace SAS.StateMachineGraph.Editor
             stateModel.name = stateMachineModel.MakeUniqueStateName("Any State");
 
             runtimeStateMachineController.AddObjectToAsset(stateModel);
-            stateMachineModel.SetAnyStatePosition(new Vector3(300, 50, 0));
+            stateMachineModel.SetAnyStatePosition(new Vector3Int(300, 50, 0));
             runtimeStateMachineController.AddAnyState(stateModel);
         }
 
@@ -131,12 +131,12 @@ namespace SAS.StateMachineGraph.Editor
         {
             var clone = Object.Instantiate(stateModel);
             clone.name = stateMachineModel.MakeUniqueStateName(stateModel.name);
-            runtimeStateMachineController.CreateStateModelAsset(stateMachineModel, clone, stateModel.GetPosition() + new Vector3(35, 65));
+            runtimeStateMachineController.CreateStateModelAsset(stateMachineModel, clone, stateModel.GetPosition() + new Vector3Int(35, 65));
             clone.ResetTransitions();
             return clone;
         }
 
-        public static StateModel AddState(this RuntimeStateMachineController runtimeStateMachineController, StateMachineModel stateMachineModel, string name, Vector3 position)
+        public static StateModel AddState(this RuntimeStateMachineController runtimeStateMachineController, StateMachineModel stateMachineModel, string name, Vector3Int position)
         {
             var stateModel = ScriptableObject.CreateInstance<StateModel>();
             stateModel.name = stateMachineModel.MakeUniqueStateName(name);
@@ -146,7 +146,7 @@ namespace SAS.StateMachineGraph.Editor
             return stateModel;
         }
 
-        private static void CreateStateModelAsset(this RuntimeStateMachineController runtimeStateMachineController, StateMachineModel stateMachineModel, StateModel stateModel, Vector3 position)
+        private static void CreateStateModelAsset(this RuntimeStateMachineController runtimeStateMachineController, StateMachineModel stateMachineModel, StateModel stateModel, Vector3Int position)
         {
             runtimeStateMachineController.AddObjectToAsset(stateModel);
             stateModel.SetPosition(position);

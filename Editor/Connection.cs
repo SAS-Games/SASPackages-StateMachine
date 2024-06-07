@@ -29,6 +29,8 @@ namespace SAS.StateMachineGraph.Editor
         private void DrwaConnection()
         {
             bool inverted = false;
+            if (StartNode == null || EndNode == null)
+                return;
             if (StartNode.Position.y < EndNode.Position.y)
             {
                 _startPos = StartNode.startPort.rect.center;

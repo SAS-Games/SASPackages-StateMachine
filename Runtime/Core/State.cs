@@ -22,10 +22,17 @@ namespace SAS.StateMachineGraph
 
         private State _nextState;
         private TransitionState _transitionState;
-        public Action OnEnterEvent, OnExitEvent;
+        /// <summary>
+        /// Trigger as soon as State Enter get called, before any action get executed
+        /// </summary>
+        public Action OnEnterEvent;
+        /// <summary>
+        /// Trigger as soon as State Exit get called, before any action get executed
+        /// </summary>
+        public Action OnExitEvent;
         private bool exitActionsExecutionStarted;
 
-        internal State(StateMachine stateMachine, string name,string tag)
+        internal State(StateMachine stateMachine, string name, string tag)
         {
             _stateMachine = stateMachine;
             Name = name;

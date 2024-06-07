@@ -7,7 +7,7 @@ using SAS.StateMachineGraph.Utilities;
 namespace SAS.StateMachineGraph
 {
     public sealed class Actor : MonoBehaviour, IActivatable
-    { 
+    {
         [Serializable]
         public struct Config
         {
@@ -17,6 +17,7 @@ namespace SAS.StateMachineGraph
 
         [SerializeField] private RuntimeStateMachineController m_Controller = default;
         [SerializeField] private Config[] m_Configs = default;
+        [SerializeField] private bool m_AutoInitialize = true;
 
         internal StateMachine StateMachineController { get; private set; }
         public string CurrentStateName => StateMachineController?.CurrentState?.Name;
@@ -24,10 +25,25 @@ namespace SAS.StateMachineGraph
 
         private Dictionary<string, List<object>> _configs = new Dictionary<string, List<object>>();
         private bool _isConfigsCached = false;
+        private bool _initialized = false;
+        public RuntimeStateMachineController runtimeStateMachineController
+        {
+            get => m_Controller;
+            set
+            {
+                if (m_Controller != value)
+                {
+                    _initialized = false;
+                    m_Controller = value;
+                }
+                Initialize();
+            }
+        }
 
         private void Awake()
         {
-            Initialize();
+            if (m_AutoInitialize)
+                Initialize();
         }
 
         private void CacheConfig()
@@ -41,14 +57,17 @@ namespace SAS.StateMachineGraph
         }
 
 
-        private void Initialize()
+        public void Initialize()
         {
+            if (_initialized)
+                return;
+            _initialized = true;
             var controller = ScriptableObject.CreateInstance<RuntimeStateMachineController>();
             if (m_Controller == null)
                 return;
             var stateMachineOverrideController = m_Controller as StateMachineOverrideController;
             m_Controller = (m_Controller is StateMachineOverrideController) ? stateMachineOverrideController.runtimeStateMachineController : m_Controller;
-            
+
             controller.Initialize(m_Controller);
             m_Controller = controller;
             StateMachineController = m_Controller?.CreateStateMachine(this, stateMachineOverrideController);
@@ -111,6 +130,16 @@ namespace SAS.StateMachineGraph
             return StateMachineController.GetBool(name);
         }
 
+        public State GetState(string name)
+        {
+            return StateMachineController.GetStateByName(name);
+        }
+
+        public State GetStateByTag(string name)
+        {
+            return StateMachineController.GetStateByTag(name);
+        }
+
         void IActivatable.Activate()
         {
             enabled = true;
@@ -137,12 +166,12 @@ namespace SAS.StateMachineGraph
                 case ParameterType.Trigger:
                     if (!parameter.BoolValue)
                         SetTrigger(parameter.Name);
-                    else 
+                    else
                         ResetSetTrigger(parameter.Name);
                     break;
             }
         }
-         
+
         public bool TryGet<T>(out T config, string key = "") where T : ScriptableObject
         {
             CacheConfig();

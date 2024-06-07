@@ -21,7 +21,7 @@ namespace SAS.StateMachineGraph.Editor
 
             childStateMachine.SetPosition(position);
             runtimeStateMachineController.AddObjectToAsset(childStateMachine);
-            childStateMachine.SetAnyStatePosition(new Vector3(300, 50, 0));
+            childStateMachine.SetAnyStatePosition(new Vector3Int(300, 50, 0));
             stateMachineModel.AddChildStateMachine(childStateMachine);
             return childStateMachine;
         }
@@ -114,17 +114,17 @@ namespace SAS.StateMachineGraph.Editor
         }
 
 
-        internal static void SetAnyStatePosition(this StateMachineModel stateMachineModel, Vector3 position)
+        internal static void SetAnyStatePosition(this StateMachineModel stateMachineModel, Vector3Int position)
         {
             var stateMachineModelSO = new SerializedObject(stateMachineModel);
-            stateMachineModelSO.FindProperty(AnyStatePositionVar).vector3Value = position;
+            stateMachineModelSO.FindProperty(AnyStatePositionVar).vector3IntValue = position;
             stateMachineModelSO.ApplyModifiedProperties();
         }
 
-        internal static Vector3 GetAnyStatePosition(this StateMachineModel stateMachineModel)
+        internal static Vector2Int GetAnyStatePosition(this StateMachineModel stateMachineModel)
         {
             var stateMachineModelSO = new SerializedObject(stateMachineModel);
-            return stateMachineModelSO.FindProperty(AnyStatePositionVar).vector3Value;
+            return (Vector2Int)stateMachineModelSO.FindProperty(AnyStatePositionVar).vector3IntValue;
         }
 
         public static void SetPosition(this StateMachineModel stateMachineModel, Vector3 position)
@@ -134,16 +134,16 @@ namespace SAS.StateMachineGraph.Editor
             stateMachineModelSO.ApplyModifiedProperties();
         }
 
-        public static Vector3 GetPosition(this StateMachineModel stateMachineModel)
+        public static Vector3Int GetPosition(this StateMachineModel stateMachineModel)
         {
             var stateMachineModelSO = new SerializedObject(stateMachineModel);
-            return stateMachineModelSO.FindProperty(PositionVar).vector3Value;
+            return stateMachineModelSO.FindProperty(PositionVar).vector3IntValue;
         }
 
-        public static Vector3 GetPositionAsUpNode(this StateMachineModel stateMachineModel)
+        public static Vector3Int GetPositionAsUpNode(this StateMachineModel stateMachineModel)
         {
             var stateMachineModelSO = new SerializedObject(stateMachineModel);
-            return stateMachineModelSO.FindProperty(PositionAsUpNodeVar).vector3Value;
+            return stateMachineModelSO.FindProperty(PositionAsUpNodeVar).vector3IntValue;
         }
 
         public static void Rename(this StateMachineModel stateMachineModel, string name)

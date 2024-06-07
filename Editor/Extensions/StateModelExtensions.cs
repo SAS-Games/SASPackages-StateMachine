@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
@@ -9,17 +8,17 @@ namespace SAS.StateMachineGraph.Editor
     public static class StateModelExtensions
     {
         const string TransitionsVar = "m_Transitions";
-        public static void SetPosition(this StateModel stateModel, Vector3 position)
+        public static void SetPosition(this StateModel stateModel, Vector3Int position)
         {
             var stateModelSO = new SerializedObject(stateModel);
-            stateModelSO.FindProperty("m_Position").vector3Value = position;
+            stateModelSO.FindProperty("m_Position").vector3IntValue = position;
             stateModelSO.ApplyModifiedProperties();
         }
 
-        public static Vector3 GetPosition(this StateModel stateModel)
+        public static Vector3Int GetPosition(this StateModel stateModel)
         {
             var stateModelSO = new SerializedObject(stateModel);
-            return stateModelSO.FindProperty("m_Position").vector3Value;
+            return stateModelSO.FindProperty("m_Position").vector3IntValue;
         }
 
         public static SerializedProperty GetTransitionsProp(this StateModel stateModel)
@@ -129,12 +128,6 @@ namespace SAS.StateMachineGraph.Editor
                 {
                     stateTransitions.DeleteArrayElementAtIndex(i);
                     stateTransitions.serializedObject.ApplyModifiedProperties();
-                    //if (stateTransitions.GetArrayElementAtIndex(i) != null)
-                    //{
-                    //    stateTransitions.DeleteArrayElementAtIndex(i);
-                    //    stateTransitions.serializedObject.ApplyModifiedProperties();
-                    //}
-
                     i--;
                     stateTransitionModelsToDelete.Add(element);
                     sourceStateModel.serializedObject().ApplyModifiedProperties();
@@ -156,7 +149,7 @@ namespace SAS.StateMachineGraph.Editor
             AssetDatabase.SaveAssets();
         }
 
-        internal static  void ResetTransitions(this StateModel stateModel)
+        internal static void ResetTransitions(this StateModel stateModel)
         {
             var stateTransitions = stateModel.GetTransitionsProp();
             stateTransitions.arraySize = 0;

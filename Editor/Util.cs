@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace SAS.StateMachineGraph.Editor
 {
@@ -16,6 +17,21 @@ namespace SAS.StateMachineGraph.Editor
             }
             usedNames.Add(name);
             return name;
+        }
+
+        public static Vector2Int ToVector2Int(this Vector2 vector2)
+        {
+            return new Vector2Int((int)Mathf.RoundToInt(vector2.x), (int)Mathf.RoundToInt(vector2.y));
+        }
+
+        public static Vector3Int ToVector3Int(this Vector2 vector2)
+        {
+            return new Vector3Int((int)Mathf.RoundToInt(vector2.x), (int)Mathf.RoundToInt(vector2.y), 0);
+        }
+
+        public static Rect ToRect(this RectInt rectInt)
+        {
+            return new Rect(rectInt.x, rectInt.y, rectInt.width, rectInt.height);
         }
     }
 }
