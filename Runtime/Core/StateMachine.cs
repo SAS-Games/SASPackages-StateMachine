@@ -1,19 +1,20 @@
-﻿using UnityEngine;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace SAS.StateMachineGraph
 {
     internal class StateMachine
     {
-        private Dictionary<string, StateMachineParameter> _parameters = new Dictionary<string, StateMachineParameter>();
+        private Dictionary<int, StateMachineParameter> _parameters = new Dictionary<int, StateMachineParameter>();
         internal List<StateActionPair> stateActionPairs;
         internal List<State> states = new List<State>();
+
         public StateMachine(Actor actor, StateMachineParameter[] parameters, List<StateActionPair> stateActionPairs)
         {
             Actor = actor;
             this.stateActionPairs = stateActionPairs;
             foreach (StateMachineParameter parameter in parameters)
-                _parameters.Add(parameter.name, parameter);
+                _parameters.Add(Animator.StringToHash(parameter.name), parameter);
         }
 
         public Actor Actor { get; }
@@ -21,6 +22,8 @@ namespace SAS.StateMachineGraph
         internal State DefaultState { get; set; }
 
         private State _currentState;
+        internal State nextState;
+
         internal State CurrentState
         {
             get => _currentState;
@@ -29,6 +32,11 @@ namespace SAS.StateMachineGraph
                 _currentState = value;
                 _currentState?.OnEnter();
             }
+        }
+        internal void OnEarlyUpdate()
+        {
+            if (_currentState != nextState)
+                CurrentState = nextState;
         }
 
         internal void OnFixedUpdate()
@@ -56,102 +64,110 @@ namespace SAS.StateMachineGraph
 
         public int GetInteger(string name)
         {
-            try
-            {
-                return _parameters[name].IntValue;
-            }
-            catch (KeyNotFoundException e)
-            {
-                Debug.LogException(e);
-                return 0;
-            }
+            return GetInteger(Animator.StringToHash(name));
+        }
+
+        public int GetInteger(int id)
+        {
+            if (_parameters.TryGetValue(id, out StateMachineParameter parameter))
+                return parameter.IntValue;
+
+            Debug.LogError($"Parameter hash {id} not defined for the actor {this.Actor.name}");
+            return 0;
+
         }
 
         public float GetFloat(string name)
         {
-            try
-            {
-                return _parameters[name].FloatValue;
-            }
-            catch (KeyNotFoundException e)
-            {
-                Debug.LogException(e);
-                return 0f;
-            }
+            return GetFloat(Animator.StringToHash(name));
+        }
+
+        public float GetFloat(int id)
+        {
+            if (_parameters.TryGetValue(id, out StateMachineParameter parameter))
+                return parameter.FloatValue;
+
+            Debug.LogError($"Parameter hash {id} not defined for the actor {this.Actor.name}");
+            return 0;
         }
 
         public bool GetBool(string name)
         {
-            try
-            {
-                return _parameters[name].BoolValue;
-            }
-            catch (KeyNotFoundException e)
-            {
-                Debug.LogError($"{name} parameter not defined for the actor {Actor.name} {e}");
-                return false;
-            }
+            return GetBool(Animator.StringToHash(name));
         }
 
+        public bool GetBool(int id)
+        {
+            if (_parameters.TryGetValue(id, out StateMachineParameter parameter))
+                return parameter.BoolValue;
+
+            Debug.LogError($"Parameter hash {id} not defined for the actor {this.Actor.name}");
+            return false;
+        }
 
         public void SetInteger(string name, int value)
         {
-            try
-            {
-                _parameters[name].IntValue = value;
-            }
-            catch (KeyNotFoundException e)
-            {
-                Debug.LogError($"{name} parameter not defined for the actor {Actor.name} {e}");
-            }
+            SetInteger(Animator.StringToHash(name), value);
+        }
+
+        public void SetInteger(int id, int value)
+        {
+            if (_parameters.TryGetValue(id, out StateMachineParameter parameter))
+                parameter.IntValue = value;
+            else
+                Debug.LogError($"Parameter hash {id} not defined for the actor {this.Actor.name}");
         }
 
         public void SetFloat(string name, float value)
         {
-            try
-            {
-                _parameters[name].FloatValue = value;
-            }
-            catch (KeyNotFoundException e)
-            {
-                Debug.LogError($"{name} parameter not defined for the actor {Actor.name} {e}");
-            }
+            SetFloat(Animator.StringToHash(name), value);
+        }
+
+        public void SetFloat(int id, float value)
+        {
+            if (_parameters.TryGetValue(id, out StateMachineParameter parameter))
+                parameter.FloatValue = value;
+            else
+                Debug.LogError($"Parameter hash {id} not defined for the actor {this.Actor.name}");
         }
 
         public void SetBool(string name, bool value)
         {
-            try
-            {
-                _parameters[name].BoolValue = value;
-            }
-            catch (KeyNotFoundException e)
-            {
-                Debug.LogError($"{name} parameter not defined for the actor {Actor.name} {e}");
-            }
+            SetBool(Animator.StringToHash(name), value);
+        }
+
+        public void SetBool(int id, bool value)
+        {
+            if (_parameters.TryGetValue(id, out StateMachineParameter parameter))
+                parameter.BoolValue = value;
+            else
+                Debug.LogError($"Parameter hash {id} not defined for the actor {this.Actor.name}");
         }
 
         public void SetTrigger(string name)
         {
-            try
-            {
-                _parameters[name].BoolValue = true;
-            }
-            catch (KeyNotFoundException e)
-            {
-                Debug.LogException(e);
-            }
+            SetTrigger(Animator.StringToHash(name));
+        }
+
+        public void SetTrigger(int id)
+        {
+            if (_parameters.TryGetValue(id, out StateMachineParameter parameter))
+                parameter.BoolValue = true;
+            else
+                Debug.LogError($"Parameter hash {id} not defined for the actor {this.Actor.name}");
         }
 
         public void ResetSetTrigger(string name)
         {
-            try
-            {
-                _parameters[name].BoolValue = false;
-            }
-            catch (KeyNotFoundException e)
-            {
-                Debug.LogException(e);
-            }
+            ResetSetTrigger(Animator.StringToHash(name));
+        }
+
+        public void ResetSetTrigger(int id)
+        {
+            if (_parameters.TryGetValue(id, out StateMachineParameter parameter))
+                parameter.BoolValue = false;
+            else
+                Debug.LogError($"Parameter hash {id} not defined for the actor {this.Actor.name}");
         }
 
         internal State GetStateByName(string name)

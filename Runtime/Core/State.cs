@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using static SAS.StateMachineGraph.Actor;
 
 namespace SAS.StateMachineGraph
 {
@@ -17,19 +16,22 @@ namespace SAS.StateMachineGraph
         internal IStateAction[] _onLateUpdate = default;
         private List<IAwaitableStateAction> _awaitableStateAction = new List<IAwaitableStateAction>();
         internal TransitionState[] _transitionStates;
-        internal HashSet<StateEvent> _stateEnterEventForCustomeTriggers = new HashSet<StateEvent>();
-        internal HashSet<StateEvent> _stateExitEventForCustomeTriggers = new HashSet<StateEvent>();
+        internal HashSet<StateEvent> _stateEnterEventForCustomTriggers = new HashSet<StateEvent>();
+        internal HashSet<StateEvent> _stateExitEventForCustomTriggers = new HashSet<StateEvent>();
 
         private State _nextState;
         private TransitionState _transitionState;
+
         /// <summary>
         /// Trigger as soon as State Enter get called, before any action get executed
         /// </summary>
         public Action OnEnterEvent;
+
         /// <summary>
         /// Trigger as soon as State Exit get called, before any action get executed
         /// </summary>
         public Action OnExitEvent;
+
         private bool exitActionsExecutionStarted;
 
         internal State(StateMachine stateMachine, string name, string tag)
@@ -46,24 +48,26 @@ namespace SAS.StateMachineGraph
             FilterAwaitableAction(_onEnter);
             if (_onEnter == null)
                 return;
-            foreach (var stateEnterForCustomTrigger in _stateEnterEventForCustomeTriggers)
+            foreach (var stateEnterForCustomTrigger in _stateEnterEventForCustomTriggers)
                 stateEnterForCustomTrigger.Invoke();
             for (int i = 0; i < _onEnter.Length; ++i)
                 _onEnter[i].Execute(ActionExecuteEvent.OnStateEnter);
         }
 
-        internal void OnExit()
+        internal bool OnExit()
         {
             FilterAwaitableAction(_onExit);
+            var result = _awaitableStateAction.Count == 0;
             if (_onExit == null)
-                return;
+                return true;
             for (int i = 0; i < _onExit.Length; ++i)
                 _onExit[i].Execute(ActionExecuteEvent.OnStateExit);
 
-            foreach (var stateExitForCustomTrigger in _stateExitEventForCustomeTriggers)
+            foreach (var stateExitForCustomTrigger in _stateExitEventForCustomTriggers)
                 stateExitForCustomTrigger.Invoke();
 
             OnExitEvent?.Invoke();
+            return result;
         }
 
         internal void OnFixedUpdate()
@@ -109,12 +113,18 @@ namespace SAS.StateMachineGraph
             {
                 if (!exitActionsExecutionStarted)
                 {
-                    OnExit();
+                    bool immediateExit = OnExit();
                     exitActionsExecutionStarted = true;
+                    if (immediateExit)
+                    {
+                        _stateMachine.nextState = _nextState;
+                        _nextState = null;
+                        _transitionState = null;
+                    }
                 }
                 else
                 {
-                    _stateMachine.CurrentState = _nextState;
+                    _stateMachine.nextState = _nextState;
                     _nextState = null;
                     _transitionState = null;
                 }

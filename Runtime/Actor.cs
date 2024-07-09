@@ -1,8 +1,8 @@
-﻿using System;
-using UnityEngine;
+﻿using SAS.StateMachineGraph.Utilities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using SAS.StateMachineGraph.Utilities;
+using UnityEngine;
 
 namespace SAS.StateMachineGraph
 {
@@ -26,6 +26,8 @@ namespace SAS.StateMachineGraph
         private Dictionary<string, List<object>> _configs = new Dictionary<string, List<object>>();
         private bool _isConfigsCached = false;
         private bool _initialized = false;
+        internal bool _isActiveAndEnabled =false;
+
         public RuntimeStateMachineController runtimeStateMachineController
         {
             get => m_Controller;
@@ -42,8 +44,31 @@ namespace SAS.StateMachineGraph
 
         private void Awake()
         {
+            _isActiveAndEnabled = true;
+            ActorEarlyUpdateManager.Register(this);
             if (m_AutoInitialize)
                 Initialize();
+        }
+
+        void OnDestroy()
+        {
+            ActorEarlyUpdateManager.Unregister(this);
+        }
+
+        void OnEnable()
+        {
+            _isActiveAndEnabled = true;
+        }
+
+        void OnDisable()
+        {
+            _isActiveAndEnabled = false;
+        }
+
+        private void Start()
+        {
+            StateMachineController.nextState = StateMachineController.DefaultState;
+            StateMachineController.CurrentState = StateMachineController.DefaultState;
         }
 
         private void CacheConfig()
@@ -55,7 +80,6 @@ namespace SAS.StateMachineGraph
                 _isConfigsCached = true;
             }
         }
-
 
         public void Initialize()
         {
@@ -71,7 +95,11 @@ namespace SAS.StateMachineGraph
             controller.Initialize(m_Controller);
             m_Controller = controller;
             StateMachineController = m_Controller?.CreateStateMachine(this, stateMachineOverrideController);
-            StateMachineController.CurrentState = StateMachineController.DefaultState;
+        }
+
+        public void EarlyUpdate()
+        {
+            StateMachineController?.OnEarlyUpdate();
         }
 
         private void FixedUpdate()
@@ -95,9 +123,19 @@ namespace SAS.StateMachineGraph
             StateMachineController?.SetFloat(name, value);
         }
 
+        public void SetFloat(int id, float value)
+        {
+            StateMachineController?.SetFloat(id, value);
+        }
+
         public void SetInteger(string name, int value)
         {
             StateMachineController?.SetInteger(name, value);
+        }
+
+        public void SetInteger(int id, int value)
+        {
+            StateMachineController?.SetInteger(id, value);
         }
 
         public void SetBool(string name, bool value)
@@ -105,9 +143,19 @@ namespace SAS.StateMachineGraph
             StateMachineController?.SetBool(name, value);
         }
 
+        public void SetBool(int id, bool value)
+        {
+            StateMachineController?.SetBool(id, value);
+        }
+
         public void SetTrigger(string name)
         {
             StateMachineController?.SetTrigger(name);
+        }
+
+        public void SetTrigger(int id)
+        {
+            StateMachineController?.SetTrigger(id);
         }
 
         public void ResetSetTrigger(string name)
@@ -115,9 +163,19 @@ namespace SAS.StateMachineGraph
             StateMachineController?.ResetSetTrigger(name);
         }
 
+        public void ResetSetTrigger(int id)
+        {
+            StateMachineController?.ResetSetTrigger(id);
+        }
+
         public int GetInteger(string name)
         {
             return StateMachineController.GetInteger(name);
+        }
+
+        public int GetInteger(int id)
+        {
+            return StateMachineController.GetInteger(id);
         }
 
         public float GetFloat(string name)
@@ -125,9 +183,19 @@ namespace SAS.StateMachineGraph
             return StateMachineController.GetFloat(name);
         }
 
+        public float GetFloat(int id)
+        {
+            return StateMachineController.GetFloat(id);
+        }
+
         public bool GetBool(string name)
         {
             return StateMachineController.GetBool(name);
+        }
+
+        public bool GetBool(int id)
+        {
+            return StateMachineController.GetBool(id);
         }
 
         public State GetState(string name)
@@ -157,12 +225,15 @@ namespace SAS.StateMachineGraph
                 case ParameterType.Bool:
                     SetBool(parameter.Name, parameter.BoolValue);
                     break;
+
                 case ParameterType.Int:
                     SetInteger(parameter.Name, parameter.IntValue);
                     break;
+
                 case ParameterType.Float:
                     SetFloat(parameter.Name, parameter.FloatValue);
                     break;
+
                 case ParameterType.Trigger:
                     if (!parameter.BoolValue)
                         SetTrigger(parameter.Name);

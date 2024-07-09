@@ -37,7 +37,7 @@ namespace SAS.StateMachineGraph
 			CreateGetActions(m_StateActions, stateMachine, state, cachedActions);
 			state._transitionStates = GetTransitions(m_Transitions, stateMachine, cachedStates, cachedActions, cachedConditions);
 			foreach(var transitionState in state._transitionStates)
-				transitionState.StateEventForCustomTrigger(ref state._stateEnterEventForCustomeTriggers, ref state._stateExitEventForCustomeTriggers);
+				transitionState.StateEventForCustomTrigger(ref state._stateEnterEventForCustomTriggers, ref state._stateExitEventForCustomTriggers);
 			return state;
 		}
 
