@@ -9,7 +9,7 @@ namespace SAS.StateMachineGraph
     {
         private State TargetState { get; }
         private bool HasExitTime { get; }
-        private float ExitTime{ get; }
+        private float ExitTime { get; }
         public bool WaitForAwaitableActionsToComplete { get; }
         private Condition[] Conditions { get; }
 
@@ -34,6 +34,12 @@ namespace SAS.StateMachineGraph
             return true;
         }
 
+        internal void ResetTriggers(StateMachine stateMachine)
+        {
+            for (int i = 0; i < Conditions.Length; ++i)
+                Conditions[i].ResetTrigger(stateMachine);
+        }
+
         internal TransitionState(State state, in Condition[] conditions, bool haxExitTime, float exitTime, bool waitForAwaitableActionsToComplete)
         {
             TargetState = state;
@@ -47,7 +53,7 @@ namespace SAS.StateMachineGraph
         internal void StateEventForCustomTrigger(ref HashSet<StateEvent> stateEnterDelegates, ref HashSet<StateEvent> stateExitDelegates)
         {
             int count = Conditions.Length;
-            for(int i =0; i < count; ++i)
+            for (int i = 0; i < count; ++i)
             {
                 if (Conditions[i].Custom != null)
                 {

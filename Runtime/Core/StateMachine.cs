@@ -35,31 +35,34 @@ namespace SAS.StateMachineGraph
         }
         internal void OnEarlyUpdate()
         {
-            if (_currentState != nextState)
+            if (_currentState != nextState && nextState != null)
                 CurrentState = nextState;
         }
 
         internal void OnFixedUpdate()
         {
-            CurrentState?.OnFixedUpdate();
+            CurrentState.OnFixedUpdate();
         }
 
         internal State AnyState { get; set; }
 
         internal void OnUpdate()
         {
-            CurrentState?.OnUpdate();
+            CurrentState.OnUpdate();
         }
 
         internal void OnLateUpdate()
         {
-            CurrentState?.OnLateUpdate();
+            CurrentState.OnLateUpdate();
         }
 
         internal void TryTransition()
         {
-            CurrentState?.TryTransition();
-            AnyState?.TryTransition();
+            CurrentState.TryTransition();
+            AnyState.TryTransition();
+            CurrentState.ResetTrigger();
+            AnyState.ResetTrigger();
+
         }
 
         public int GetInteger(string name)

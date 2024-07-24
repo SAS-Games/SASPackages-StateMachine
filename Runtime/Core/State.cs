@@ -137,6 +137,12 @@ namespace SAS.StateMachineGraph
                 _transitionStates[i].TimeElapsed = 0;
         }
 
+        internal void ResetTrigger()
+        {
+            for (int i = 0; i < _transitionStates.Length; ++i)
+                _transitionStates[i].ResetTriggers(_stateMachine);
+        }
+
         private bool IsAllAwaitableActionCompleted()
         {
             if (_transitionState != null && !_transitionState.WaitForAwaitableActionsToComplete)
