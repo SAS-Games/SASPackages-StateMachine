@@ -26,7 +26,7 @@ namespace SAS.StateMachineGraph
         private Dictionary<string, List<object>> _configs = new Dictionary<string, List<object>>();
         private bool _isConfigsCached = false;
         private bool _initialized = false;
-        internal bool _isActiveAndEnabled =false;
+        internal bool _isActiveAndEnabled = false;
 
         public RuntimeStateMachineController runtimeStateMachineController
         {
@@ -285,6 +285,11 @@ namespace SAS.StateMachineGraph
 
             foreach (var baseType in baseTypes)
                 Add(baseType, service, tag);
+        }
+
+        public void SetState(string name)
+        {
+            StateMachineController.SetState(name);
         }
     }
 }

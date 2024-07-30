@@ -182,5 +182,17 @@ namespace SAS.StateMachineGraph
         {
             return states.Find(x => x.Tag == tag);
         }
+
+        internal void SetState(string stateName)
+        {
+            var state = GetStateByName(stateName);
+            if (state != null)
+            {
+                CurrentState = state;
+                nextState = state;
+            }
+            else
+                Debug.LogError($"No State Found with name {stateName}");
+        }
     }
 }

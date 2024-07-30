@@ -18,7 +18,7 @@ namespace SAS.StateMachineGraph
 
         [SerializeField] private string m_Name;
         [SerializeField] private Mode m_Mode;
-        [SerializeField] private StateMachineParameter.ParameterType m_Type;
+        [SerializeField] internal StateMachineParameter.ParameterType m_Type;
         [SerializeField] private float m_FloatValue;
         [SerializeField] internal string m_CustomCondition;
 
