@@ -48,6 +48,8 @@ namespace SAS.StateMachineGraph
             ActorEarlyUpdateManager.Register(this);
             if (m_AutoInitialize)
                 Initialize();
+            else
+                enabled = false;
         }
 
         void OnDestroy()
@@ -63,12 +65,6 @@ namespace SAS.StateMachineGraph
         void OnDisable()
         {
             _isActiveAndEnabled = false;
-        }
-
-        private void Start()
-        {
-            StateMachineController.nextState = StateMachineController.DefaultState;
-            StateMachineController.CurrentState = StateMachineController.DefaultState;
         }
 
         private void CacheConfig()
@@ -95,6 +91,9 @@ namespace SAS.StateMachineGraph
             controller.Initialize(m_Controller);
             m_Controller = controller;
             StateMachineController = m_Controller?.CreateStateMachine(this, stateMachineOverrideController);
+            StateMachineController.nextState = StateMachineController.DefaultState;
+            StateMachineController.CurrentState = StateMachineController.DefaultState;
+            enabled = true;
         }
 
         public void EarlyUpdate()
