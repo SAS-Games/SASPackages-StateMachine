@@ -98,6 +98,11 @@ namespace SAS.StateMachineGraph
 
         public void EarlyUpdate()
         {
+#if UNITY_EDITOR || DEBUG
+            _startTime = Time.realtimeSinceStartup;
+            LogState(CurrentStateName);
+#endif
+
             StateMachineController?.OnEarlyUpdate();
         }
 
@@ -115,6 +120,9 @@ namespace SAS.StateMachineGraph
         {
             StateMachineController?.OnLateUpdate();
             StateMachineController?.TryTransition();
+#if UNITY_EDITOR || DEBUG
+            _frameTime = (Time.realtimeSinceStartup - _startTime) * 1000f; // In milliseconds
+#endif
         }
 
         public void SetFloat(string name, float value)
@@ -250,17 +258,17 @@ namespace SAS.StateMachineGraph
             return status;
         }
 
-        private bool TryGet(Type type, out object config, string tag = "")
+        private bool TryGet(Type type, out object config, string key = "")
         {
-            var key = $"{type.Name}{tag}";
-            if (!_configs.TryGetValue(key, out var configs))
+            var configKey = $"{type.Name}{key}";
+            if (!_configs.TryGetValue(configKey, out var configs))
             {
                 config = null;
                 return false;
             }
 
             if (configs.Count > 1)
-                Debug.LogError($"There is more than one Config that implements {type.Name} with tag {tag} is found under actor {name}");
+                Debug.LogWarning($"There are more than one Config of type {type.Name} with key {key} is found under actor {name}");
 
             config = configs[0];
             return true;
@@ -290,5 +298,105 @@ namespace SAS.StateMachineGraph
         {
             StateMachineController.SetState(name);
         }
+
+#if UNITY_EDITOR || DEBUG
+
+        public enum CornerPosition { TopLeft, TopRight, BottomLeft, BottomRight }
+        [HideInInspector] public bool ShowStateLog = false;
+        [HideInInspector] public CornerPosition LogPosition = CornerPosition.TopLeft;
+
+        private string _previousStateName;
+        private Rect _logWindowRect = new Rect(10, 10, 300, 100);
+        private bool _isResizing = false;
+        private Vector2 _resizeStartMousePosition;
+        private Vector2 _resizeStartWindowSize;
+        private float _startTime;
+        private float _frameTime;
+        private List<string> _states = new List<string>();
+        private const int MaxStatesCount = 5;
+        private const float ResizeHandleSize = 10f;
+
+        private void OnGUI()
+        {
+            if (ShowStateLog)
+            {
+                switch (LogPosition)
+                {
+                    case CornerPosition.TopLeft:
+                        _logWindowRect.position = new Vector2(10, 10);
+                        break;
+                    case CornerPosition.TopRight:
+                        _logWindowRect.position = new Vector2(Screen.width - _logWindowRect.width - 10, 10);
+                        break;
+                    case CornerPosition.BottomLeft:
+                        _logWindowRect.position = new Vector2(10, Screen.height - _logWindowRect.height - 10);
+                        break;
+                    case CornerPosition.BottomRight:
+                        _logWindowRect.position = new Vector2(Screen.width - _logWindowRect.width - 10, Screen.height - _logWindowRect.height - 10);
+                        break;
+                }
+
+                _logWindowRect = GUI.Window(0, _logWindowRect, DrawLogWindow, "Actor Log");
+                ResizeWindowHandle();
+            }
+        }
+
+        private void DrawLogWindow(int windowID)
+        {
+            GUIStyle logStyle = new GUIStyle
+            {
+                fontSize = 14,
+                normal = { textColor = Color.white }
+            };
+
+            string logContent = string.Join("\n", _states.ToArray());
+            GUILayout.Label(logContent, logStyle);
+            GUILayout.Label("Frame Time: " + _frameTime.ToString("F4") + " ms", logStyle); // Display actor frame time
+
+            GUI.DragWindow(new Rect(0, 0, _logWindowRect.width, 20));
+        }
+
+        private void ResizeWindowHandle()
+        {
+            Rect resizeHandleRect = new Rect(_logWindowRect.xMax - ResizeHandleSize, _logWindowRect.yMax - ResizeHandleSize, ResizeHandleSize, ResizeHandleSize);
+            GUI.DrawTexture(resizeHandleRect, Texture2D.whiteTexture);
+
+            if (Event.current.type == EventType.MouseDown && resizeHandleRect.Contains(Event.current.mousePosition))
+            {
+                _isResizing = true;
+                _resizeStartMousePosition = Event.current.mousePosition;
+                _resizeStartWindowSize = _logWindowRect.size;
+                Event.current.Use();
+            }
+
+            if (_isResizing)
+            {
+                if (Event.current.type == EventType.MouseDrag)
+                {
+                    Vector2 mouseDelta = (Vector2)Event.current.mousePosition - _resizeStartMousePosition;
+                    _logWindowRect.size = new Vector2(Mathf.Max(100, _resizeStartWindowSize.x + mouseDelta.x), Mathf.Max(50, _resizeStartWindowSize.y + mouseDelta.y));
+                    Event.current.Use();
+                }
+
+                if (Event.current.type == EventType.MouseUp)
+                {
+                    _isResizing = false;
+                    Event.current.Use();
+                }
+            }
+        }
+
+        public void LogState(string stateName)
+        {
+            if (_previousStateName != stateName)
+            {
+                _previousStateName = stateName;
+                _states.Add(stateName);
+
+                if (_states.Count > MaxStatesCount)
+                    _states.RemoveAt(0);
+            }
+        }
+#endif
     }
 }

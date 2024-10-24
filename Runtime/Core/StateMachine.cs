@@ -33,6 +33,7 @@ namespace SAS.StateMachineGraph
                 _currentState?.OnEnter();
             }
         }
+
         internal void OnEarlyUpdate()
         {
             if (_currentState != nextState && nextState != null)
