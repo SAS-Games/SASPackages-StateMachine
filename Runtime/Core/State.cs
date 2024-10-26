@@ -100,7 +100,7 @@ namespace SAS.StateMachineGraph
             {
                 for (int i = 0; i < _transitionStates.Length; ++i)
                 {
-                    if (_transitionStates[i].TryGetTransiton(_stateMachine, out _nextState))
+                    if (_transitionStates[i].TryGetTransition(_stateMachine, out _nextState))
                     {
                         _transitionState = _transitionStates[i];
                         ResetExitTime();

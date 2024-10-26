@@ -15,7 +15,7 @@ namespace SAS.StateMachineGraph
 
         internal float TimeElapsed = 0;
 
-        internal bool TryGetTransiton(StateMachine stateMachine, out State state)
+        internal bool TryGetTransition(StateMachine stateMachine, out State state)
         {
             var timeElapsed = !HasExitTime || TimeElapsed > ExitTime;
             TimeElapsed += Time.deltaTime;

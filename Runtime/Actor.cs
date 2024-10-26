@@ -349,7 +349,7 @@ namespace SAS.StateMachineGraph
                 normal = { textColor = Color.white }
             };
 
-            string logContent = string.Join("\n", _states.ToArray());
+            string logContent = string.Join("\n", _states.AsEnumerable().Reverse());
             GUILayout.Label(logContent, logStyle);
             GUILayout.Label("Frame Time: " + _frameTime.ToString("F4") + " ms", logStyle); // Display actor frame time
 
