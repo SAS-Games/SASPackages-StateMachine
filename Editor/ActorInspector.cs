@@ -6,6 +6,7 @@ using SAS.Utilities.TagSystem.Editor;
 using EditorUtility = SAS.Utilities.Editor.EditorUtility;
 using SAS.StateMachineGraph.Utilities;
 using System.Linq;
+using SAS.Utilities.BlackboardSystem;
 
 namespace SAS.StateMachineGraph.Editor
 {
@@ -34,9 +35,10 @@ namespace SAS.StateMachineGraph.Editor
         {
             EditorGUI.BeginChangeCheck();
             serializedObject.FindProperty("m_Controller").objectReferenceValue = EditorGUILayout.ObjectField("Controller", serializedObject.FindProperty("m_Controller").objectReferenceValue, typeof(RuntimeStateMachineController), false);
+            serializedObject.FindProperty("m_BlackboardData").objectReferenceValue = EditorGUILayout.ObjectField("BlackboardData", serializedObject.FindProperty("m_BlackboardData").objectReferenceValue, typeof(BlackboardData), false);
             SerializedProperty autoInitializeProperty = serializedObject.FindProperty("m_AutoInitialize");
             autoInitializeProperty.boolValue = EditorGUILayout.Toggle("Auto Initialize", autoInitializeProperty.boolValue);
-            
+
             if (EditorGUI.EndChangeCheck())
             {
                 _configsList = null;
