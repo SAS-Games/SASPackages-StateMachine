@@ -1,4 +1,5 @@
 ﻿using SAS.StateMachineGraph.Utilities;
+using SAS.Utilities.BlackboardSystem;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,6 +7,7 @@ using UnityEngine;
 
 namespace SAS.StateMachineGraph
 {
+    [DefaultExecutionOrder(-1)]
     public sealed class Actor : MonoBehaviour, IActivatable
     {
         [Serializable]
@@ -16,6 +18,7 @@ namespace SAS.StateMachineGraph
         }
 
         [SerializeField] private RuntimeStateMachineController m_Controller = default;
+        [SerializeField] private BlackboardData m_BlackboardData = default;
         [SerializeField] private Config[] m_Configs = default;
         [SerializeField] private bool m_AutoInitialize = true;
 
@@ -23,6 +26,7 @@ namespace SAS.StateMachineGraph
         public string CurrentStateName => StateMachineController?.CurrentState?.Name;
         public State CurrentState => StateMachineController?.CurrentState;
 
+        private Blackboard _blackboard = new Blackboard();
         private Dictionary<string, List<object>> _configs = new Dictionary<string, List<object>>();
         private bool _isConfigsCached = false;
         private bool _initialized = false;
@@ -46,6 +50,7 @@ namespace SAS.StateMachineGraph
         {
             _isActiveAndEnabled = true;
             ActorEarlyUpdateManager.Register(this);
+            m_BlackboardData?.SetValuesOnBlackboard(_blackboard);
             if (m_AutoInitialize)
                 Initialize();
             else
@@ -248,6 +253,26 @@ namespace SAS.StateMachineGraph
                         ResetSetTrigger(parameter.Name);
                     break;
             }
+        }
+
+        public bool TryGet<T>(BlackboardKey key, out T value)
+        {
+            return _blackboard.TryGetValue(key, out value);
+        }
+
+        public T GetValue<T>(BlackboardKey key)
+        {
+            return _blackboard.GetValue<T>(key);
+        }
+
+        public BlackboardKey GetOrRegisterKey(string keyName)
+        {
+            return _blackboard.GetOrRegisterKey(keyName);
+        }
+
+        public void SetValue<T>(BlackboardKey key, T v)
+        {
+            _blackboard.SetValue(key, v);
         }
 
         public bool TryGet<T>(out T config, string key = "") where T : ScriptableObject
