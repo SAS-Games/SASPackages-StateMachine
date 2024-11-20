@@ -416,7 +416,7 @@ namespace SAS.StateMachineGraph
             if (_previousStateName != stateName)
             {
                 _previousStateName = stateName;
-                _states.Add(stateName);
+                _states.Add($"{stateName}:{Time.frameCount}");
 
                 if (_states.Count > MaxStatesCount)
                     _states.RemoveAt(0);
