@@ -10,6 +10,7 @@ namespace SAS.Utilities.DeveloperConsole
 
         public override bool Process(string[] args, DeveloperConsoleBehaviour developerConsole)
         {
+#if DEBUG
             if (args.Length == 0)
                 return false;
             if (bool.TryParse(args[0], out var show))
@@ -26,6 +27,7 @@ namespace SAS.Utilities.DeveloperConsole
 
                 return true;
             }
+#endif
             return false;
         }
     }
