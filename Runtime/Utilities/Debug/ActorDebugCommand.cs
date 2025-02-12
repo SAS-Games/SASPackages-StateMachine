@@ -8,14 +8,19 @@ namespace SAS.Utilities.DeveloperConsole
     {
         public override string HelpText => $"Usage: {CommandWord} [true/false] [0/1/2/3]. Show or hide the OnScreen actor debug window at desire corner.";
 
-        public override bool Process(string[] args, DeveloperConsoleBehaviour developerConsole)
+        public override bool Process(DeveloperConsoleBehaviour developerConsole, string[] args)
         {
 #if DEBUG
-            if (args.Length == 0)
-                return false;
+            string showStateLog = "false";
+            var actor = FindFirstObjectByType<Actor>();
+            if (actor)
+                showStateLog = actor.ShowStateLog ? "false" : "true";
+            if (args == null || args.Length == 0)
+                args = new string[] { showStateLog, "1" };
+
             if (bool.TryParse(args[0], out var show))
             {
-                var actor = FindFirstObjectByType<Actor>();
+
                 if (actor != null)
                     actor.ShowStateLog = show;
                 if (show)
