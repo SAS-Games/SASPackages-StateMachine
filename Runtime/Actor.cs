@@ -331,7 +331,7 @@ namespace SAS.StateMachineGraph
         [HideInInspector] public CornerPosition LogPosition = CornerPosition.TopLeft;
 
         private string _previousStateName;
-        private Rect _logWindowRect = new Rect(10, 10, 300, 100);
+        private Rect _logWindowRect = new Rect(10, 10, 300, 120);
         private bool _isResizing = false;
         private Vector2 _resizeStartMousePosition;
         private Vector2 _resizeStartWindowSize;
