@@ -3,6 +3,10 @@
   "version": "1.4.0",
   "displayName": "SAS State Machine",
   "unity": "2022.1",
+  "author": {
+    "name": "SAS",
+    "email": "sonkar.abhi86@gmail.com"
+  },
   "hideInEditor": true,
   "dependencies": {
     "com.sas.utilities": "1.0.0"
