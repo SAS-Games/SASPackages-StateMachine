@@ -36,8 +36,11 @@ namespace SAS.StateMachineGraph
 
         internal void OnEarlyUpdate()
         {
-            if (_currentState != nextState && nextState != null)
+            if (nextState != null)
+            {
                 CurrentState = nextState;
+                nextState = null;
+            }
         }
 
         internal void OnFixedUpdate()
