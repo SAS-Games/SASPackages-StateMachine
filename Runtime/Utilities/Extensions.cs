@@ -45,7 +45,10 @@ namespace SAS.StateMachineGraph.Utilities
                     animator.SetFloat(parameter.Name, parameter.FloatValue);
                     break;
                 case ParameterType.Trigger:
-                    animator.SetTrigger(parameter.Name);
+                    if (!parameter.BoolValue)
+                         animator.SetTrigger(parameter.Name);
+                     else
+                         animator.ResetTrigger(parameter.Name);
                     break;
             }
         }
