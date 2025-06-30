@@ -6,9 +6,9 @@ namespace SAS.Utilities.DeveloperConsole
     [CreateAssetMenu(fileName = "New Actor Debug Command", menuName = "SAS/Utilities/DeveloperConsole/Commands/Actor Debug Command")]
     public class ActorDebugCommand : ConsoleCommand
     {
-        public override string HelpText => $"Usage: {CommandWord} [true/false] [0/1/2/3]. Show or hide the OnScreen actor debug window at desire corner.";
+        public override string HelpText => $"Usage: {Name} [true/false] [0/1/2/3]. Show or hide the OnScreen actor debug window at desire corner.";
 
-        public override bool Process(DeveloperConsoleBehaviour developerConsole, string[] args)
+        public override bool Process(DeveloperConsoleBehaviour developerConsole, string command, string[] args)
         {
 #if DEBUG
             string showStateLog = "false";
