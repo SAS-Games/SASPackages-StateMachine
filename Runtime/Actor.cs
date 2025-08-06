@@ -275,6 +275,11 @@ namespace SAS.StateMachineGraph
             _blackboard.SetValue(key, v);
         }
 
+        public void SetValue<T>(string key, T v)
+        {
+            _blackboard.SetValue(_blackboard.GetOrRegisterKey(key), v);
+        }
+
         public bool TryGet<T>(out T config, string key = "") where T : ScriptableObject
         {
             CacheConfig();
