@@ -13,7 +13,8 @@ namespace SAS.StateMachineGraph.Utilities.Editor
 			var height = EditorGUIUtility.singleLineHeight;
 
 			EditorGUI.BeginProperty(position, label, property);
-			label.text = "Parameter";
+			if (IsDrawnInCustomEditor(property))
+				label.text = "Parameter";
 
 			position = EditorGUI.PrefixLabel(position, GUIUtility.GetControlID(FocusType.Passive), label);
 
@@ -51,5 +52,11 @@ namespace SAS.StateMachineGraph.Utilities.Editor
         {
 			return base.GetPropertyHeight(property, label) * 3 + 5;
         }
+
+  		bool IsDrawnInCustomEditor(SerializedProperty property)
+		{
+			return property.serializedObject.targetObject is AnimatorParameterConfig ||
+			       property.serializedObject.targetObject is ParameterConfigBase;
+		}
     }
 }
