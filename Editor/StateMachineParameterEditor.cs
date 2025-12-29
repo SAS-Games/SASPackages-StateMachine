@@ -56,7 +56,7 @@ namespace SAS.StateMachineGraph.Editor
             GUI.DrawTexture(new Rect(0, 0, rect.xMax, rect.yMax), Settings.GreyTexture, ScaleMode.StretchToFill);
         }
 
-        public bool ProcessEvents(Event e)
+        public bool ProcessEvents(Event e, bool isReadOnlyMode)
         {
             switch (e.type)
             {
@@ -68,7 +68,8 @@ namespace SAS.StateMachineGraph.Editor
                             GUI.changed = true;
                         if (e.button == 1)
                         {
-                            ProcessContextMenu();
+                            if(!isReadOnlyMode)
+                                ProcessContextMenu();
                             e.Use();
                         }
                     }
@@ -78,9 +79,9 @@ namespace SAS.StateMachineGraph.Editor
             return false;
         }
 
-        public void DrawParametersWindow(int windowId)
+        public void DrawParametersWindow(int windowId, bool isReadOnlyMode)
         {
-            ProcessEvents(Event.current);
+            ProcessEvents(Event.current,isReadOnlyMode);
             _parametersList?.DoList(rect);
             if (_runtimeStateMachineController)
                 _parametersList?.serializedProperty?.serializedObject?.ApplyModifiedProperties();

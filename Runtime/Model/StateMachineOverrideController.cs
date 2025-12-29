@@ -20,10 +20,10 @@ namespace SAS.StateMachineGraph
     public class StateMachineOverrideController : RuntimeStateMachineController
     {
         [SerializeField] private RuntimeStateMachineController m_Controller;
-        
+
         [SerializeField] private List<ActionOverride> m_ActionOverrides;
         [SerializeField] private List<StateOverride> m_StateOverrides;
-        
+
         internal List<ActionOverride> actionOverrides => m_ActionOverrides;
         internal List<StateOverride> stateOverrides => m_StateOverrides;
 
@@ -32,7 +32,7 @@ namespace SAS.StateMachineGraph
             get => m_Controller;
             set => m_Controller = value;
         }
-        
+
         internal string GetOverrideAction(string originalAction)
         {
             if (string.IsNullOrEmpty(originalAction) || m_ActionOverrides == null)
@@ -41,14 +41,16 @@ namespace SAS.StateMachineGraph
             var pair = m_ActionOverrides.Find(p => p.original == originalAction);
             return pair?.overridden;
         }
-        
-        internal StateModel GetOverrideState(StateModel originalState)
+
+        public bool TryGetOverrideState(StateModel originalState, out StateModel overridden)
         {
+            overridden = null;
             if (originalState == null || m_StateOverrides == null)
-                return null;
+                return false;
 
             var pair = m_StateOverrides.Find(p => p.original == originalState);
-            return pair?.overridden;
+            overridden = pair?.overridden;
+            return overridden != null;
         }
     }
 }

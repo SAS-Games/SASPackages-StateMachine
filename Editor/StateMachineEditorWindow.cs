@@ -27,6 +27,9 @@ namespace SAS.StateMachineGraph.Editor
             }
         }
 
+        public static StateMachineOverrideController SelectedStateMachineOverrideController;
+        public static bool IsReadOnlyMode => SelectedStateMachineOverrideController != null;
+
         public static void ShowBehaviourGraphEditor(RuntimeStateMachineController target)
         {
             var detailsWindow = GetWindow<StateMachineEditorWindow>(typeof(SceneView));
@@ -50,10 +53,18 @@ namespace SAS.StateMachineGraph.Editor
 
         void OnSelectionChange()
         {
-            if (Selection.activeObject == null || Selection.activeObject is StateMachineOverrideController)
+            if (Selection.activeObject == null)
                 return;
-
+            
             var stateMachineModel = Selection.activeObject as RuntimeStateMachineController;
+            if (Selection.activeObject is StateMachineOverrideController)
+            {
+                SelectedStateMachineOverrideController = (stateMachineModel as StateMachineOverrideController);
+                stateMachineModel = (stateMachineModel as StateMachineOverrideController).runtimeStateMachineController;
+            }
+            else if (Selection.activeObject is RuntimeStateMachineController)
+                SelectedStateMachineOverrideController = null;
+
             if (stateMachineModel == null)
             {
                 if (Actor != null)
@@ -61,7 +72,12 @@ namespace SAS.StateMachineGraph.Editor
                     var actorSO = new SerializedObject(Actor);
                     stateMachineModel = actorSO.FindProperty("m_Controller").objectReferenceValue as RuntimeStateMachineController;
                     if (stateMachineModel is StateMachineOverrideController)
+                    {
+                        SelectedStateMachineOverrideController = (stateMachineModel as StateMachineOverrideController);
                         stateMachineModel = (stateMachineModel as StateMachineOverrideController).runtimeStateMachineController;
+                    }
+                    else if (Selection.activeObject is RuntimeStateMachineController)
+                        SelectedStateMachineOverrideController = null;
                 }
             }
             else
@@ -193,8 +209,21 @@ namespace SAS.StateMachineGraph.Editor
 
             DrawToolBar();
             DrawParameterWindow();
+            
+
+            if (IsReadOnlyMode)
+                DrawOverrideReadOnlyOverlay();
+
             EditorUtilities.VerticalLine(new Rect(Mathf.Max(200, position.width / 5) - 2, 1, position.width, position.height), 2, Color.black);
         }
+        
+        private void DrawOverrideReadOnlyOverlay()
+        {
+            var rect = new Rect(0, 0, position.width, 24);
+            EditorGUI.DrawRect(rect, new Color(0f, 0f, 0f, 0.25f));
+            GUI.Label(rect, "Override Controller – Read Only", EditorStyles.boldLabel);
+        }
+
 
         void OnInspectorUpdate()
         {
@@ -230,7 +259,7 @@ namespace SAS.StateMachineGraph.Editor
             if (Application.isPlaying && _runtimeStateMachineController != null)
                 _parameterEditor = new StateMachineParameterEditor(_runtimeStateMachineController);
 
-            var windowRect = GUI.Window(1, new Rect(0, -2, Mathf.Max(200, position.width / 5), position.height - 2), _parameterEditor.DrawParametersWindow, "", new GUIStyle());
+            var windowRect = GUI.Window(1, new Rect(0, -2, Mathf.Max(200, position.width / 5), position.height - 2), id=>_parameterEditor.DrawParametersWindow(id, IsReadOnlyMode), "", new GUIStyle());
             _parameterEditor.DrawRect(windowRect);
             EndWindows();
         }
@@ -274,7 +303,7 @@ namespace SAS.StateMachineGraph.Editor
             {
                 for (int i = _nodes.Count - 1; i >= 0 && i < _nodes.Count; i--)
                 {
-                    if (_nodes[i].ProcessEvents(e))
+                    if (_nodes[i].ProcessEvents(e, IsReadOnlyMode))
                     {
                         Selection.activeObject = _nodes[i].TargetObject;
                         GUI.changed = true;
@@ -303,6 +332,8 @@ namespace SAS.StateMachineGraph.Editor
 
         private void ProcessContextMenu(Vector2 mousePosition)
         {
+            if (IsReadOnlyMode)
+                return;
             GenericMenu genericMenu = new GenericMenu();
             genericMenu.AddItem(new GUIContent("Create State"), false, () => AddState(mousePosition));
             genericMenu.ShowAsContext();

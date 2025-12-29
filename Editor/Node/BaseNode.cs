@@ -60,7 +60,7 @@ namespace SAS.StateMachineGraph.Editor
             }
         }
 
-        public bool ProcessEvents(Event e)
+        public bool ProcessEvents(Event e, bool isReadOnlyMode)
         {
             switch (e.type)
             {
@@ -104,6 +104,8 @@ namespace SAS.StateMachineGraph.Editor
                         }
                         else if (e.button == 1)
                         {
+                            if (isReadOnlyMode)
+                                return false;
                             ProcessContextMenu();
                             e.Use();
                         }

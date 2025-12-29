@@ -25,7 +25,7 @@ namespace SAS.StateMachineGraph.Editor
         private void OnEnable()
         {
             _runtimeStateMachineController = AssetDatabase.LoadMainAssetAtPath(AssetDatabase.GetAssetPath(target)) as RuntimeStateMachineController;
-            serializedObject = ((StateModel)target).serializedObject();
+            serializedObject = ResolveEffectiveSerializedObject();
             _actionNotFoundStyle.normal.textColor = Color.red;
             SetupTransitions();
             _allActionTypes = AppDomain.CurrentDomain.GetAllDerivedTypes<IStateAction>().ToArray();
@@ -59,8 +59,14 @@ namespace SAS.StateMachineGraph.Editor
         public override void OnInspectorGUI()
         {
             if (!target.name.Equals(Util.AnyStateModelName))
-                _stateActions.DoLayoutList();
-            _transitionStates.DoLayoutList();
+            {
+                using (new EditorGUI.DisabledScope(StateMachineEditorWindow.IsReadOnlyMode))
+                {
+                    _stateActions.DoLayoutList();
+                    _transitionStates.DoLayoutList();
+                }
+            }
+
             EditorGUI.BeginChangeCheck();
          
             serializedObject.ApplyModifiedProperties();
@@ -246,5 +252,22 @@ namespace SAS.StateMachineGraph.Editor
             OnStateEnter = 1 << 0,
             OnStateExit = 1 << 4
         }
+        
+        private SerializedObject ResolveEffectiveSerializedObject()
+        {
+            var original = (StateModel)target;
+
+            var controller = StateMachineEditorWindow.SelectedStateMachineOverrideController;
+            if (controller != null &&
+                controller.TryGetOverrideState(original, out var overridden))
+            {
+                return new SerializedObject(overridden);
+            }
+
+            // Fallback: original
+            return new SerializedObject(original);
+        }
+
+
     }
 }
