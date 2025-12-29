@@ -10,26 +10,31 @@ namespace SAS.StateMachineGraph
         [SerializeField, HideInInspector] private StateModel m_DefaultStateModel = default;
         [SerializeField, HideInInspector] private StateModel m_AnyStateModel = default;
 
-        internal int GetOriginalClipsCount { get; }
-
         private void Awake()
         {
 #if UNITY_EDITOR
-           var controller =  (this is StateMachineOverrideController) ? (this as StateMachineOverrideController).runtimeStateMachineController : this;
+            var controller = (this is StateMachineOverrideController)
+                ? (this as StateMachineOverrideController).runtimeStateMachineController
+                : this;
             var assetPath = UnityEditor.AssetDatabase.GetAssetPath(this);
             var fileName = System.IO.Path.GetFileNameWithoutExtension(assetPath);
             name = fileName;
 #endif
         }
 
-        internal StateMachine CreateStateMachine(Actor actor, StateMachineOverrideController stateMachineOverrideController)
+        internal StateMachine CreateStateMachine(Actor actor,
+            StateMachineOverrideController stateMachineOverrideController)
         {
-            List<StateActionPair> stateActionPairs = new List<StateActionPair>();
+            var actionOverrides = new List<ActionOverride>();
+            var stateOverrides = new List<StateOverride>();
+
             if (stateMachineOverrideController != null)
             {
-                stateActionPairs = stateMachineOverrideController.stateActionPairs;
+                actionOverrides = stateMachineOverrideController.actionOverrides;
+                stateOverrides = stateMachineOverrideController.stateOverrides;
             }
-            StateMachine stateMachine = new StateMachine(actor, _parameters, stateActionPairs);
+
+            StateMachine stateMachine = new StateMachine(actor, _parameters, stateOverrides, actionOverrides);
             var cachedState = new Dictionary<ScriptableObject, object>();
             var cachedActions = new Dictionary<StateActionModel, object[]>();
             var cachedTriggers = new Dictionary<string, ICustomCondition>();
@@ -37,7 +42,7 @@ namespace SAS.StateMachineGraph
             var stateModels = m_BaseStateMachineModel.GetStatesRecursivily();
             stateModels.Add(m_AnyStateModel);
 
-            List<State> states = new();   
+            List<State> states = new();
             foreach (StateModel stateModel in stateModels)
             {
                 var state = stateModel.GetState(stateMachine, cachedState, cachedActions, cachedTriggers);
@@ -47,6 +52,7 @@ namespace SAS.StateMachineGraph
                 else if (stateModel == m_AnyStateModel)
                     stateMachine.AnyState = state;
             }
+
             stateMachine.states.AddRange(states);
             return stateMachine;
         }

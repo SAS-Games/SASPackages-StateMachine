@@ -6,13 +6,16 @@ namespace SAS.StateMachineGraph
     internal class StateMachine
     {
         private Dictionary<int, StateMachineParameter> _parameters = new Dictionary<int, StateMachineParameter>();
-        internal List<StateActionPair> stateActionPairs;
         internal List<State> states = new List<State>();
+        
+        internal List<ActionOverride> actionOverrides;
+        internal List<StateOverride> stateOverrides;
 
-        public StateMachine(Actor actor, StateMachineParameter[] parameters, List<StateActionPair> stateActionPairs)
+        public StateMachine(Actor actor, StateMachineParameter[] parameters, List<StateOverride> stateOverrides, List<ActionOverride> actionOverrides)
         {
             Actor = actor;
-            this.stateActionPairs = stateActionPairs;
+            this.actionOverrides = actionOverrides;
+            this.stateOverrides = stateOverrides;
             foreach (StateMachineParameter parameter in parameters)
                 _parameters.Add(Animator.StringToHash(parameter.name), parameter);
         }

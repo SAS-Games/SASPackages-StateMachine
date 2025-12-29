@@ -28,14 +28,22 @@ namespace SAS.StateMachineGraph
 
 		internal State GetState(StateMachine stateMachine, Dictionary<ScriptableObject, object> cachedStates, Dictionary<StateActionModel, object[]> cachedActions, Dictionary<string, ICustomCondition> cachedConditions)
 		{
-			if (cachedStates.TryGetValue(this, out var obj))
+			StateModel originalModel = this;
+			StateModel effectiveModel = this;
+
+			var stateOverride = stateMachine.stateOverrides?.Find(p => p.original == this);
+
+			if (stateOverride != null && stateOverride.overridden != null)
+				effectiveModel = stateOverride.overridden;
+			
+			if (cachedStates.TryGetValue(effectiveModel, out var obj))
 				return (State)obj;
 
-			var state = new State(stateMachine, name, m_Tag);
-			State = state;
-			cachedStates.Add(this, state);
-			CreateGetActions(m_StateActions, stateMachine, state, cachedActions);
-			state._transitionStates = GetTransitions(m_Transitions, stateMachine, cachedStates, cachedActions, cachedConditions);
+			var state = new State(stateMachine, effectiveModel.name, effectiveModel.m_Tag);
+			effectiveModel.State = state;
+			cachedStates.Add(effectiveModel, state);
+			CreateGetActions(effectiveModel.m_StateActions, stateMachine, state, cachedActions);
+			state._transitionStates = GetTransitions(originalModel.m_Transitions, stateMachine, cachedStates, cachedActions, cachedConditions);
 			foreach(var transitionState in state._transitionStates)
 				transitionState.StateEventForCustomTrigger(ref state._stateEnterEventForCustomTriggers, ref state._stateExitEventForCustomTriggers);
 			return state;

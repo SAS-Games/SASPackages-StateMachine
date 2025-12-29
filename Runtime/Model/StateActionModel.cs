@@ -55,11 +55,11 @@ namespace SAS.StateMachineGraph
 
         private IStateAction[] CreateStateActionInstance(StateMachine stateMachine)
         {
-            StateActionPair stateActionPair = stateMachine.stateActionPairs.Find(ele => ele.original.Equals(fullName));
-            if(stateActionPair != null)
+            ActionOverride actionOverride = stateMachine.actionOverrides.Find(ele => ele.original.Equals(fullName));
+            if(actionOverride != null)
             {
-                if (!string.IsNullOrEmpty(stateActionPair.overridden))
-                    return new IStateAction[] { Activator.CreateInstance(Type.GetType(stateActionPair.overridden)) as IStateAction };
+                if (!string.IsNullOrEmpty(actionOverride.overridden))
+                    return new IStateAction[] { Activator.CreateInstance(Type.GetType(actionOverride.overridden)) as IStateAction };
             }
 
             return new IStateAction[] { Activator.CreateInstance(ToType()) as IStateAction };

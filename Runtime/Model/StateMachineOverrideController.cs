@@ -1,37 +1,54 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 namespace SAS.StateMachineGraph
 {
     [System.Serializable]
-    internal class StateActionPair
+    internal class ActionOverride
     {
         [SerializeField] internal string original;
         [SerializeField] internal string overridden;
     }
 
+    [System.Serializable]
+    internal class StateOverride
+    {
+        [SerializeField] internal StateModel original;
+        [SerializeField] internal StateModel overridden;
+    }
+
     public class StateMachineOverrideController : RuntimeStateMachineController
     {
         [SerializeField] private RuntimeStateMachineController m_Controller;
-        [SerializeField] private List<StateActionPair> m_StateActionPairs;
-        internal List<StateActionPair> stateActionPairs => m_StateActionPairs;
-        public RuntimeStateMachineController runtimeStateMachineController { get => m_Controller; set => m_Controller = value; }
+        
+        [SerializeField] private List<ActionOverride> m_ActionOverrides;
+        [SerializeField] private List<StateOverride> m_StateOverrides;
+        
+        internal List<ActionOverride> actionOverrides => m_ActionOverrides;
+        internal List<StateOverride> stateOverrides => m_StateOverrides;
 
-        internal int overridesCount
+        public RuntimeStateMachineController runtimeStateMachineController
         {
-            get
-            {
-                if (m_Controller == null)
-                    return 0;
-                return m_Controller.GetOriginalClipsCount;
-            }
+            get => m_Controller;
+            set => m_Controller = value;
         }
-
+        
         internal string GetOverrideAction(string originalAction)
         {
-            var stateActionPair = m_StateActionPairs.Find(ele => ele.original.Equals(originalAction));
-            return stateActionPair?.overridden;
+            if (string.IsNullOrEmpty(originalAction) || m_ActionOverrides == null)
+                return null;
+
+            var pair = m_ActionOverrides.Find(p => p.original == originalAction);
+            return pair?.overridden;
+        }
+        
+        internal StateModel GetOverrideState(StateModel originalState)
+        {
+            if (originalState == null || m_StateOverrides == null)
+                return null;
+
+            var pair = m_StateOverrides.Find(p => p.original == originalState);
+            return pair?.overridden;
         }
     }
 }

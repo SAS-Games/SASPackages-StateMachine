@@ -6,7 +6,7 @@ namespace SAS.StateMachineGraph.Editor
 {
     public class StateMachineControllerAssetMenu
     {
-        [MenuItem("Assets/Create/SAS/State Machine Controller")]
+        [MenuItem("Assets/Create/SAS/FSM/State Machine Controller")]
         public static void CreateStateMachineController(MenuCommand context)
         {
             string filePath;

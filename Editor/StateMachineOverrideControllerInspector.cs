@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEditorInternal;
@@ -8,217 +7,231 @@ using EditorUtility = SAS.Core.Editor.EditorUtility;
 
 namespace SAS.StateMachineGraph.Editor
 {
-    internal class StateActionOverrideComparer : IComparer<KeyValuePair<SerializedType, SerializedType>>
-    {
-        public int Compare(KeyValuePair<SerializedType, SerializedType> x, KeyValuePair<SerializedType, SerializedType> y)
-        {
-            return string.Compare(x.Key.GetType().AssemblyQualifiedName, y.Key.GetType().AssemblyQualifiedName, System.StringComparison.OrdinalIgnoreCase);
-        }
-    }
-
     [CustomEditor(typeof(StateMachineOverrideController))]
-    [CanEditMultipleObjects]
     public class StateMachineOverrideControllerInspector : UnityEditor.Editor
     {
-        SerializedProperty m_Controller;
-       
-        private List<KeyValuePair<string, string>> m_Actions;
-        private ReorderableList m_ActionList;
-        private string[] allUniqueAction;
+        private SerializedProperty m_Controller;
+        private SerializedProperty m_ActionPairs;
+        private SerializedProperty m_StatePairs;
+        private ReorderableList _stateList;
+        private StateModel[] _runtimeStates;
+
+
+        private RuntimeStateMachineController _runtime;
         private Type[] _allActionTypes;
 
-        internal int overridesCount
+        private ReorderableList _actionList;
+
+        private void OnEnable()
         {
-            get
-            {
-                if (m_Controller == null)
-                    return 0;
-                if (allUniqueAction == null)
-                {
-                    var stateMachineOverrideController = m_Controller.hasMultipleDifferentValues ? null : (target as StateMachineOverrideController);
-                    if (stateMachineOverrideController != null)
-                    {
-                        var runtimeStateMachineController = stateMachineOverrideController.runtimeStateMachineController;
-                        if (runtimeStateMachineController != null)
-                        {
-                            allUniqueAction = runtimeStateMachineController.GetAllUniqueActions();
-                            return allUniqueAction.Length;
-                        }
-                    }
-                    allUniqueAction = new string[] { };
-                
-                }
-
-                return allUniqueAction.Length;
-            }
-        }
-
-        void OnEnable()
-        {
-            _allActionTypes = AppDomain.CurrentDomain.GetAllDerivedTypes<IStateAction>().ToArray();
-            StateMachineOverrideController stateMachineOverrideController = target as StateMachineOverrideController;
-
             m_Controller = serializedObject.FindProperty("m_Controller");
+            m_ActionPairs = serializedObject.FindProperty("m_ActionOverrides");
+            m_StatePairs = serializedObject.FindProperty("m_StateOverrides");
 
-            if (m_Actions == null)
-                m_Actions = new List<KeyValuePair<string, string>>();
+            _allActionTypes = AppDomain.CurrentDomain
+                .GetAssemblies()
+                .SelectMany(a => a.GetTypes())
+                .Where(t => typeof(IStateAction).IsAssignableFrom(t) && !t.IsAbstract)
+                .ToArray();
 
-            if (m_ActionList == null)
-            {
-                GetOverrides(m_Actions);
-
-                m_ActionList = new ReorderableList(m_Actions, typeof(KeyValuePair<string, string>), false, true, false, false);
-                m_ActionList.drawElementCallback = DrawStateActionPairElement;
-                m_ActionList.elementHeight = EditorGUIUtility.singleLineHeight * 3f;
-
-                m_ActionList.drawHeaderCallback = DrawHeader;
-            }
+            BuildActionList();
+            BuildStateList();
         }
 
         public override void OnInspectorGUI()
         {
-            bool isEditingMultipleObjects = targets.Length > 1;
-            bool changeCheck = false;
-            serializedObject.UpdateIfRequiredOrScript();
+            serializedObject.Update();
 
-            var stateMachineOverrideController = target as StateMachineOverrideController;
-            var runtimeStateMachineController = m_Controller.hasMultipleDifferentValues ? null : stateMachineOverrideController.runtimeStateMachineController;
+            DrawControllerField();
+            GUILayout.Space(10);
+
+            DrawActionOverridesSection();
+            GUILayout.Space(14);
+            DrawStateOverridesSection();
+
+            serializedObject.ApplyModifiedProperties();
+        }
+
+        private void DrawControllerField()
+        {
             EditorGUI.BeginChangeCheck();
-            runtimeStateMachineController = EditorGUILayout.ObjectField("Controller", runtimeStateMachineController, typeof(RuntimeStateMachineController), false) as RuntimeStateMachineController;
+            var controller = EditorGUILayout.ObjectField("Controller", m_Controller.objectReferenceValue,
+                typeof(RuntimeStateMachineController), false);
+
+            if (EditorGUI.EndChangeCheck())
+                m_Controller.objectReferenceValue = controller;
+
+            _runtime = controller as RuntimeStateMachineController;
+        }
+
+        private void DrawActionOverridesSection()
+        {
+            EditorGUILayout.LabelField("Action Overrides", EditorStyles.boldLabel);
+
+            using (new EditorGUI.DisabledScope(_runtime == null))
+            {
+                _actionList.DoLayoutList();
+            }
+        }
+
+        private void BuildActionList()
+        {
+            _actionList = new ReorderableList(serializedObject, m_ActionPairs, draggable: false, displayHeader: false,
+                displayAddButton: true, displayRemoveButton: true);
+            _actionList.elementHeight = (EditorGUIUtility.singleLineHeight * 2) + 14;
+
+            _actionList.onAddCallback = list =>
+            {
+                int index = list.serializedProperty.arraySize;
+                list.serializedProperty.InsertArrayElementAtIndex(index);
+
+                var element = list.serializedProperty.GetArrayElementAtIndex(index);
+                element.FindPropertyRelative("original").stringValue = null;
+                element.FindPropertyRelative("overridden").stringValue = null;
+            };
+
+            _actionList.drawElementCallback = DrawActionElement;
+        }
+
+        private void DrawActionElement(Rect rect, int index, bool active, bool focused)
+        {
+            var element = m_ActionPairs.GetArrayElementAtIndex(index);
+            var original = element.FindPropertyRelative("original");
+            var overridden = element.FindPropertyRelative("overridden");
+
+            rect.y += 4;
+            rect.height = EditorGUIUtility.singleLineHeight;
+
+            const float labelWidth = 120f;
+
+            var labelRect = new Rect(rect.x, rect.y, labelWidth, rect.height);
+            var fieldRect = new Rect(rect.x + labelWidth, rect.y, rect.width - labelWidth, rect.height);
+
+            EditorGUI.LabelField(labelRect, "Original Action");
+
+            string[] originalOptions = _runtime != null ? _runtime.GetAllUniqueActions() : Array.Empty<string>();
+            string[] originalDisplay = originalOptions.Select(SerializedType.Sanitize).ToArray();
+            int originalIndex = Array.IndexOf(originalOptions, original.stringValue);
+            int originalId = GUIUtility.GetControlID(FocusType.Keyboard);
+
+            EditorUtility.DropDown(originalId, fieldRect, fieldRect, originalOptions, originalDisplay, originalIndex,
+                "Select Action", Color.white, selected =>
+                {
+                    original.stringValue =
+                        selected < 0 ? null : originalOptions[selected];
+
+                    overridden.stringValue = null;
+                    serializedObject.ApplyModifiedProperties();
+                }
+            );
+
+            rect.y += EditorGUIUtility.singleLineHeight + 6;
+
+            labelRect = new Rect(rect.x, rect.y, labelWidth, rect.height);
+            fieldRect = new Rect(rect.x + labelWidth, rect.y, rect.width - labelWidth, rect.height);
+
+            EditorGUI.LabelField(labelRect, "Override Action");
+
+            string[] overrideOptions = _allActionTypes.Select(t => t.AssemblyQualifiedName).ToArray();
+            string[] overrideDisplay = _allActionTypes.Select(t => SerializedType.Sanitize(t.FullName)).ToArray();
+
+            int overrideIndex = Array.FindIndex(overrideOptions, x => x == overridden.stringValue);
+            int overrideId = GUIUtility.GetControlID(FocusType.Keyboard);
+
+            EditorUtility.DropDown(overrideId, fieldRect, fieldRect, overrideOptions, overrideDisplay, overrideIndex,
+                "None", Color.white, selected =>
+                {
+                    overridden.stringValue =
+                        selected < 0 ? null : overrideOptions[selected];
+
+                    serializedObject.ApplyModifiedProperties();
+                }
+            );
+        }
+
+        private void DrawStateOverridesSection()
+        {
+            EditorGUILayout.LabelField("State Overrides", EditorStyles.boldLabel);
+
+            using (new EditorGUI.DisabledScope(_runtime == null))
+            {
+                _stateList.DoLayoutList();
+            }
+        }
+
+        private void BuildStateList()
+        {
+            _stateList = new ReorderableList(serializedObject, m_StatePairs, draggable: false, displayHeader: false,
+                displayAddButton: true, displayRemoveButton: true);
+
+            _stateList.elementHeight =
+                (EditorGUIUtility.singleLineHeight * 2) + 14;
+
+            _stateList.onAddCallback = list =>
+            {
+                int index = list.serializedProperty.arraySize;
+                list.serializedProperty.InsertArrayElementAtIndex(index);
+
+                var element = list.serializedProperty.GetArrayElementAtIndex(index);
+                element.FindPropertyRelative("original").objectReferenceValue = null;
+                element.FindPropertyRelative("overridden").objectReferenceValue = null;
+            };
+
+            _stateList.drawElementCallback = DrawStateElement;
+        }
+
+        private void DrawStateElement(Rect rect, int index, bool active, bool focused)
+        {
+            var element = m_StatePairs.GetArrayElementAtIndex(index);
+            var original = element.FindPropertyRelative("original");
+            var overridden = element.FindPropertyRelative("overridden");
+
+            rect.y += 4;
+            rect.height = EditorGUIUtility.singleLineHeight;
+
+            const float labelWidth = 120f;
+
+            _runtimeStates = _runtime != null ? _runtime.GetAllStateModels().ToArray() : Array.Empty<StateModel>();
+
+            var labelRect = new Rect(rect.x, rect.y, labelWidth, rect.height);
+            var fieldRect = new Rect(rect.x + labelWidth, rect.y, rect.width - labelWidth, rect.height);
+
+            EditorGUI.LabelField(labelRect, "Original State");
+
+            string[] stateNames = _runtimeStates.Select(s => s.name).ToArray();
+            int selectedIndex = Array.IndexOf(_runtimeStates, original.objectReferenceValue);
+
+            int id = GUIUtility.GetControlID(FocusType.Keyboard);
+
+            EditorUtility.DropDown(id, fieldRect, fieldRect, stateNames, stateNames, selectedIndex, "Select State",
+                Color.white, selected =>
+                {
+                    original.objectReferenceValue =
+                        selected < 0 ? null : _runtimeStates[selected];
+                    overridden.objectReferenceValue = null;
+                    serializedObject.ApplyModifiedProperties();
+                }
+            );
+
+            rect.y += EditorGUIUtility.singleLineHeight + 6;
+
+            labelRect = new Rect(rect.x, rect.y, labelWidth, rect.height);
+            fieldRect = new Rect(rect.x + labelWidth, rect.y, rect.width - labelWidth, rect.height);
+
+            EditorGUI.LabelField(labelRect, "Override State");
+
+            EditorGUI.BeginChangeCheck();
+            var newOverride = EditorGUI.ObjectField(
+                fieldRect,
+                overridden.objectReferenceValue,
+                typeof(StateModel),
+                false);
+
             if (EditorGUI.EndChangeCheck())
             {
-                for (int i = 0; i < targets.Length; i++)
-                {
-                    var controller = targets[i] as StateMachineOverrideController;
-                    controller.runtimeStateMachineController = runtimeStateMachineController;
-                }
-
-                changeCheck = true;
-            }
-
-            using (new EditorGUI.DisabledScope(m_Controller == null || (isEditingMultipleObjects && m_Controller.hasMultipleDifferentValues) || runtimeStateMachineController == null))
-            {
-                EditorGUI.BeginChangeCheck();
-                GetOverrides(m_Actions);
-
-                m_ActionList.list = m_Actions;
-                m_ActionList.DoLayoutList();
-
-                if (EditorGUI.EndChangeCheck())
-                {
-                    for (int i = 0; i < targets.Length; i++)
-                    {
-                        var controller = targets[i] as StateMachineOverrideController;
-                        ApplyOverrides(controller, m_Actions);
-                    }
-                    changeCheck = true;
-                }
-            }
-
-            if (changeCheck)
+                overridden.objectReferenceValue = newOverride;
                 serializedObject.ApplyModifiedProperties();
-        }
-
-        internal void GetOverrides(List<KeyValuePair<string, string>> overrides)
-        {
-            if (overrides == null)
-                throw new System.ArgumentNullException("overrides");
-
-            int count = overridesCount;
-            if (overrides.Capacity < count)
-                overrides.Capacity = count;
-
-            overrides.Clear();
-            for (int i = 0; i < count; ++i)
-            {
-                var originalAction = GetOriginalAction(i);
-                overrides.Add(new KeyValuePair<string, string>(originalAction, GetOverrideAction(originalAction)));
             }
-        }
-
-
-        private string GetOriginalAction(int index)
-        {
-            return allUniqueAction[index];
-        }
-
-        private string GetOverrideAction(string originalAction)
-        {
-            var stateActionPairs = serializedObject.FindProperty("m_StateActionPairs");
-            for (int i = 0; i < stateActionPairs.arraySize; ++i)
-            {
-                SerializedProperty serializedProperty = stateActionPairs.GetArrayElementAtIndex(i);
-                var actionName = serializedProperty.FindPropertyRelative("original").stringValue;
-                if (actionName.Equals(originalAction))
-                    return stateActionPairs.GetArrayElementAtIndex(i).FindPropertyRelative("overridden").stringValue;
-            }
-
-            return null;
-        }
-
-        private void ApplyOverrides(StateMachineOverrideController stateMachineOverrideController, IList<KeyValuePair<string, string>> overrides)
-        {
-            if (overrides == null)
-                throw new System.ArgumentNullException("overrides");
-            var stateActionPairs = new SerializedObject(stateMachineOverrideController).FindProperty("m_StateActionPairs");
-            stateActionPairs.ClearArray();
-            for (int i = 0; i < overrides.Count; i++)
-                SetAction(stateActionPairs, overrides[i].Key, overrides[i].Value);
-        }
-
-        private void SetAction(SerializedProperty stateActionPairs, string originalAction, string overrideAction)
-        {
-            Debug.Log(stateActionPairs.arraySize);
-            var index = stateActionPairs.arraySize;
-            stateActionPairs.InsertArrayElementAtIndex(index);
-            SerializedProperty serializedProperty = stateActionPairs.GetArrayElementAtIndex(index);
-            serializedProperty.FindPropertyRelative("original").stringValue = originalAction;
-            serializedProperty.FindPropertyRelative("overridden").stringValue = overrideAction;
-            serializedProperty.serializedObject.ApplyModifiedProperties();
-        }
-
-        private void DrawHeader(Rect rect)
-        {
-            GUI.Label(rect, "Overridden Actions", EditorStyles.label);
-        }
-
-        private void DrawStateActionPairElement(Rect rect, int index, bool selected, bool focused)
-        {
-            rect.y -= 10;
-            string originalAction = m_Actions[index].Key;
-            string overrideAction = m_Actions[index].Value;
-            var style = new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleLeft, fontStyle = FontStyle.Bold };
-            EditorGUI.LabelField(rect, "Original:", style);
-            rect.x += 70;
-        
-            EditorGUI.LabelField(rect, SerializedType.Sanitize(originalAction), new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleLeft });
-            rect.y += EditorGUIUtility.singleLineHeight;
-
-            rect.x -= 70;
-            EditorGUI.LabelField(rect, "Override:", style);
-            rect.x += 70;
-            rect.width -= 65;
-            var curActionIndex = Array.FindIndex(_allActionTypes, ele => ele.AssemblyQualifiedName == overrideAction);
-            rect.y += EditorGUIUtility.singleLineHeight;
-            var pos = new Rect(rect.x, rect.y - 25, rect.width, rect.height);
-            int id = GUIUtility.GetControlID("actionFullName".GetHashCode(), FocusType.Keyboard, rect);
-            if (curActionIndex != -1 || string.IsNullOrEmpty(overrideAction))
-                EditorUtility.DropDown(id, rect, pos, _allActionTypes.Select(ele => SerializedType.Sanitize(ele.ToString())).ToArray(), curActionIndex, selectedIndex => SetSelectedAction(index, selectedIndex));
-            else
-                EditorUtility.DropDown(id, rect, pos, _allActionTypes.Select(ele => SerializedType.Sanitize(ele.ToString())).ToArray(), curActionIndex, overrideAction, Color.red, selectedIndex => SetSelectedAction(index, selectedIndex));
-           
-        }
-
-        private void SetSelectedAction(int elementIndex, int selectedIndex)
-        {
-            var overrideAction = "";
-            if (selectedIndex == -1)
-                overrideAction = null;
-            else
-                overrideAction = _allActionTypes[selectedIndex].AssemblyQualifiedName;
-
-            m_Actions[elementIndex] = new KeyValuePair<string, string>(m_Actions[elementIndex].Key,overrideAction);
-            ApplyOverrides(target as StateMachineOverrideController, m_Actions);
         }
     }
 }
