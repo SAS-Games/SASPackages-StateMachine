@@ -70,23 +70,28 @@ namespace SAS.StateMachineGraph.Editor
 
         public override void OnInspectorGUI()
         {
-            _allTranstionsToTargetState?.DoLayoutList();
+            using (new EditorGUI.DisabledScope(StateMachineEditorWindow.IsReadOnlyMode))
+            {
+                _allTranstionsToTargetState?.DoLayoutList();
 
-            var hasExitTime = _stateTransitionModelSO.FindProperty("m_HasExitTime");
-            var exitTime = _stateTransitionModelSO.FindProperty("m_ExitTime");
+                var hasExitTime = _stateTransitionModelSO.FindProperty("m_HasExitTime");
+                var exitTime = _stateTransitionModelSO.FindProperty("m_ExitTime");
 
-            hasExitTime.boolValue = EditorGUILayout.Toggle("Has Exit Time", hasExitTime.boolValue);
+                hasExitTime.boolValue = EditorGUILayout.Toggle("Has Exit Time", hasExitTime.boolValue);
 
-            EditorGUI.BeginDisabledGroup(hasExitTime.boolValue == false);
-            exitTime.floatValue = EditorGUILayout.FloatField("Exit Time", exitTime.floatValue);
-            EditorGUI.EndDisabledGroup();
-            
-            var waitForAwaitableActionsToComplete = _stateTransitionModelSO.FindProperty("m_WaitForAwaitableActionsToComplete");
-            waitForAwaitableActionsToComplete.boolValue = EditorGUILayout.Toggle("Wait For Awaitable Actions To Complete", waitForAwaitableActionsToComplete.boolValue);
-            _stateTransitionModelSO.ApplyModifiedProperties();
+                EditorGUI.BeginDisabledGroup(hasExitTime.boolValue == false);
+                exitTime.floatValue = EditorGUILayout.FloatField("Exit Time", exitTime.floatValue);
+                EditorGUI.EndDisabledGroup();
 
-            EditorGUILayout.Space(10);
-            _transitionConditions.DoLayoutList();
+                var waitForAwaitableActionsToComplete =
+                    _stateTransitionModelSO.FindProperty("m_WaitForAwaitableActionsToComplete");
+                waitForAwaitableActionsToComplete.boolValue = EditorGUILayout.Toggle(
+                    "Wait For Awaitable Actions To Complete", waitForAwaitableActionsToComplete.boolValue);
+                _stateTransitionModelSO.ApplyModifiedProperties();
+
+                EditorGUILayout.Space(10);
+                _transitionConditions.DoLayoutList();
+            }
         }
 
         private ReorderableList DrawConditionBlock()

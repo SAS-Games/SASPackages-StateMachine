@@ -18,7 +18,7 @@ namespace SAS.StateMachineGraph.Editor
         //private string[] Tags => TagList.GetList();
         private string[] Keys => KeyList.GetList();
         private GUIStyle _actionNotFoundStyle = new GUIStyle();
-        new private SerializedObject serializedObject;
+        private new SerializedObject serializedObject;
         private RuntimeStateMachineController _runtimeStateMachineController;
         private string[] _actionFullNames;
         private string[] _actionClassNames;
@@ -37,22 +37,31 @@ namespace SAS.StateMachineGraph.Editor
 
         protected override void OnHeaderGUI()
         {
-            base.OnHeaderGUI();
-
-            var curName = EditorGUI.DelayedTextField(new Rect(180, 5, EditorGUIUtility.currentViewWidth - 220, EditorGUIUtility.singleLineHeight), new GUIContent(""), target.name);
-            if (curName != target.name)
+            using (new EditorGUI.DisabledScope(StateMachineEditorWindow.IsReadOnlyMode))
             {
-                var runtimeStateMachineController = AssetDatabase.LoadMainAssetAtPath(AssetDatabase.GetAssetPath(target)) as RuntimeStateMachineController;
-                ((StateModel)target).Rename(runtimeStateMachineController, curName);
-                Selection.activeObject = AssetDatabase.LoadMainAssetAtPath(AssetDatabase.GetAssetPath(target));
-            }
+                base.OnHeaderGUI();
 
-            var tag = serializedObject.FindProperty("m_Tag");
-            var curTag = EditorGUI.DelayedTextField(new Rect(70, 28, EditorGUIUtility.currentViewWidth - 110, EditorGUIUtility.singleLineHeight), new GUIContent("Tag"), tag.stringValue);
-            if (curTag != tag.stringValue)
-            {
-                tag.stringValue = curTag;
-                serializedObject.ApplyModifiedProperties();
+                var curName = EditorGUI.DelayedTextField(
+                    new Rect(225, 5, EditorGUIUtility.currentViewWidth - 280, EditorGUIUtility.singleLineHeight),
+                    new GUIContent(""), target.name);
+                if (curName != target.name)
+                {
+                    var runtimeStateMachineController =
+                        AssetDatabase.LoadMainAssetAtPath(AssetDatabase.GetAssetPath(target)) as
+                            RuntimeStateMachineController;
+                    ((StateModel)target).Rename(runtimeStateMachineController, curName);
+                    Selection.activeObject = AssetDatabase.LoadMainAssetAtPath(AssetDatabase.GetAssetPath(target));
+                }
+
+                var tag = serializedObject.FindProperty("m_Tag");
+                var curTag = EditorGUI.DelayedTextField(
+                    new Rect(72, 28, EditorGUIUtility.currentViewWidth - 127, EditorGUIUtility.singleLineHeight),
+                    new GUIContent("Tag"), tag.stringValue);
+                if (curTag != tag.stringValue)
+                {
+                    tag.stringValue = curTag;
+                    serializedObject.ApplyModifiedProperties();
+                }
             }
         }
 
