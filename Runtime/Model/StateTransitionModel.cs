@@ -7,7 +7,7 @@ namespace SAS.StateMachineGraph
     [Serializable]
     public sealed class StateTransitionModel : ScriptableObject
     {
-        [SerializeField] private StateModel m_SourceState = default;
+        [SerializeField] private StateModel m_SourceState;
         [SerializeField] private StateModel m_TargetState = default;
         [SerializeField] private bool m_HasExitTime = false;
         [SerializeField] private float m_ExitTime = 0;

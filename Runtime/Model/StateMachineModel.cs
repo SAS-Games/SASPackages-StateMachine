@@ -9,8 +9,8 @@ namespace SAS.StateMachineGraph
 #if UNITY_EDITOR
         [SerializeField] private Vector3Int m_Position = new Vector3Int(300, 50, 0);
         [SerializeField] private Vector3Int m_PositionAsUpNode = new Vector3Int(700, 100);
-        [SerializeField] private Vector3Int m_AnyStatePosition = default;
-        [SerializeField] private StateMachineModel m_ParentStateMachine = default;
+        [SerializeField] private Vector3Int m_AnyStatePosition;
+        [SerializeField] private StateMachineModel m_ParentStateMachine;
 #endif
         [SerializeField] private StateMachineModel[] m_ChildStateMachines = default;
         [SerializeField] private StateModel[] m_StateModels = default;

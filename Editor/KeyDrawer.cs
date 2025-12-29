@@ -1,8 +1,8 @@
 using System;
 using UnityEditor;
 using UnityEngine;
-using SAS.Utilities.TagSystem.Editor;
-using EditorUtility = SAS.Utilities.Editor.EditorUtility;
+using SAS.Core.TagSystem.Editor;
+using EditorUtility = SAS.Core.Editor.EditorUtility;
 using System.Linq;
 
 namespace SAS.StateMachineGraph.Editor

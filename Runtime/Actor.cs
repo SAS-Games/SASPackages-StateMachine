@@ -1,5 +1,5 @@
 ﻿using SAS.StateMachineGraph.Utilities;
-using SAS.Utilities.BlackboardSystem;
+using SAS.Core.BlackboardSystem;
 using System;
 using System.Collections.Generic;
 using System.Linq;

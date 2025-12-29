@@ -1,6 +1,6 @@
 {
   "name": "com.sas.statemachine",
-  "version": "1.4.5",
+  "version": "1.5.0",
   "displayName": "SAS State Machine",
   "unity": "2022.1",
   "author": {
@@ -9,6 +9,6 @@
   },
   "hideInEditor": true,
   "dependencies": {
-    "com.sas.utilities": "1.0.0"
+    "com.sas.core": "1.0.0"
   }
 }

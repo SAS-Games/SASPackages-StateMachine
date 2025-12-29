@@ -322,13 +322,13 @@ namespace SAS.StateMachineGraph.Editor
 
         private void AddChildStateMachine(Vector2 mousePosition)
         {
-            var stateMachineModel = _runtimeStateMachineController.AddChildStateMachine(SelectedStateMachineModel, "New StateMachine", mousePosition);
+            var stateMachineModel = _runtimeStateMachineController.AddChildStateMachine(SelectedStateMachineModel, "New StateMachine", new Vector3Int((int)mousePosition.x,(int)mousePosition.y, 0));
             CreateChildMachinelNode(stateMachineModel);
         }
 
         private void DuplicateCurrentStateMachine(Vector2 mousePosition)
         {
-            CreateChildMachinelNode(SelectedStateMachineModel.CloneMachineRecursivily(_runtimeStateMachineController, SelectedStateMachineModel, mousePosition));
+            CreateChildMachinelNode(SelectedStateMachineModel.CloneMachineRecursivily(_runtimeStateMachineController, SelectedStateMachineModel, new Vector3Int((int)mousePosition.x,(int)mousePosition.y, 0)));
         }
 
         private void DuplicateStateMachine(StateMachineNode stateMachineNode)

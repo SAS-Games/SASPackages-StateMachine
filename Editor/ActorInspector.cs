@@ -2,11 +2,11 @@
 using UnityEditor;
 using UnityEditorInternal;
 using System;
-using SAS.Utilities.TagSystem.Editor;
-using EditorUtility = SAS.Utilities.Editor.EditorUtility;
+using SAS.Core.TagSystem.Editor;
+using EditorUtility = SAS.Core.Editor.EditorUtility;
 using SAS.StateMachineGraph.Utilities;
 using System.Linq;
-using SAS.Utilities.BlackboardSystem;
+using SAS.Core.BlackboardSystem;
 
 namespace SAS.StateMachineGraph.Editor
 {

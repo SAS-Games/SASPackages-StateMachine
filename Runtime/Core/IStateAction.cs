@@ -1,5 +1,5 @@
 ﻿
-using SAS.Utilities.TagSystem;
+using SAS.Core.TagSystem;
 
 namespace SAS.StateMachineGraph
 {

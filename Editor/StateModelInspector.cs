@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Linq;
+using SAS.Core.TagSystem.Editor;
 using UnityEditor;
 using UnityEngine;
 using ReorderableList = UnityEditorInternal.ReorderableList;
-using EditorUtility = SAS.Utilities.Editor.EditorUtility;
-using SAS.Utilities.TagSystem.Editor;
-using SAS.Utilities.TagSystem;
-using UnityEditor.Experimental.GraphView;
+using EditorUtility = SAS.Core.Editor.EditorUtility;
 
 namespace SAS.StateMachineGraph.Editor
 {
@@ -22,7 +20,8 @@ namespace SAS.StateMachineGraph.Editor
         private GUIStyle _actionNotFoundStyle = new GUIStyle();
         new private SerializedObject serializedObject;
         private RuntimeStateMachineController _runtimeStateMachineController;
-
+        private string[] _actionFullNames;
+        private string[] _actionClassNames;
         private void OnEnable()
         {
             _runtimeStateMachineController = AssetDatabase.LoadMainAssetAtPath(AssetDatabase.GetAssetPath(target)) as RuntimeStateMachineController;
@@ -31,6 +30,8 @@ namespace SAS.StateMachineGraph.Editor
             SetupTransitions();
             _allActionTypes = AppDomain.CurrentDomain.GetAllDerivedTypes<IStateAction>().ToArray();
             _stateActions = new ReorderableList(serializedObject, serializedObject.FindProperty("m_StateActions"), true, true, true, true);
+            _actionFullNames = _allActionTypes.Select(t => SerializedType.Sanitize(t.ToString())).ToArray();
+            _actionClassNames = _allActionTypes.Select(t => t.Name).ToArray();
             HandleReorderableActionsList(_stateActions, "State Actions");
         }
 
@@ -116,7 +117,8 @@ namespace SAS.StateMachineGraph.Editor
                 var pos = new Rect(rect.x + 30, rect.y - 2, Mathf.Max(rect.width - 280, 40), rect.height - 2);
                 int id = GUIUtility.GetControlID("actionFullName".GetHashCode(), FocusType.Keyboard, pos);
                 if (curActionIndex != -1 || string.IsNullOrEmpty(actionFullName.stringValue))
-                    EditorUtility.DropDown(id, pos, _allActionTypes.Select(ele => SerializedType.Sanitize(ele.ToString())).ToArray(), curActionIndex, selectedIndex => SetSelectedAction(actionFullName, selectedIndex));
+                    EditorUtility.DropDown(id, pos, pos, _actionFullNames,_actionClassNames, curActionIndex, actionFullName.stringValue, Color.white, selectedIndex => SetSelectedAction(actionFullName, selectedIndex));
+                    //EditorUtility.DropDown(id, pos, _allActionTypes.Select(ele => SerializedType.Sanitize(ele.ToString())).ToArray(), curActionIndex, selectedIndex => SetSelectedAction(actionFullName, selectedIndex));
                 else
                     EditorUtility.DropDown(id, pos, _allActionTypes.Select(ele => SerializedType.Sanitize(ele.ToString())).ToArray(), curActionIndex, actionFullName.stringValue, Color.red, selectedIndex => SetSelectedAction(actionFullName, selectedIndex));
 
@@ -124,10 +126,10 @@ namespace SAS.StateMachineGraph.Editor
                 var rectEnd = rect.width - 2.5f * width;
                 pos = new Rect(rectEnd, rect.y - 2, width, rect.height - 2);
 
-                var newValue = (int)(Tag)EditorGUI.EnumPopup(pos, (Tag)tag.enumValueFlag);
-                if (tag.enumValueFlag != newValue)
+                bool changed = TagEditorUtility.DrawTagPopup(pos, tag, GUIContent.none);
+                
+                if (changed)
                 {
-                    tag.enumValueFlag = newValue;
                     serializedObject.ApplyModifiedProperties();
                     UnityEditor.EditorUtility.SetDirty(target);
                 }
@@ -238,7 +240,7 @@ namespace SAS.StateMachineGraph.Editor
             return name;
         }
 
-        [System.Flags]
+        [Flags]
         public enum AwaitableActionExecuteEvent
         {
             OnStateEnter = 1 << 0,

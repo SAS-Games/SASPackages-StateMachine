@@ -14,7 +14,7 @@ namespace SAS.StateMachineGraph.Editor
         const string ChildStateMachinesVar = "m_ChildStateMachines";
         const string StateModelsVar = "m_StateModels";
 
-        public static StateMachineModel AddChildStateMachine(this RuntimeStateMachineController runtimeStateMachineController, StateMachineModel stateMachineModel, string name, Vector3 position)
+        public static StateMachineModel AddChildStateMachine(this RuntimeStateMachineController runtimeStateMachineController, StateMachineModel stateMachineModel, string name, Vector3Int position)
         {
             StateMachineModel childStateMachine = ScriptableObject.CreateInstance<StateMachineModel>();
             childStateMachine.name = stateMachineModel.MakeUniqueStateMachineName(name);
@@ -127,10 +127,10 @@ namespace SAS.StateMachineGraph.Editor
             return (Vector2Int)stateMachineModelSO.FindProperty(AnyStatePositionVar).vector3IntValue;
         }
 
-        public static void SetPosition(this StateMachineModel stateMachineModel, Vector3 position)
+        public static void SetPosition(this StateMachineModel stateMachineModel, Vector3Int position)
         {
             var stateMachineModelSO = new SerializedObject(stateMachineModel);
-            stateMachineModelSO.FindProperty(PositionVar).vector3Value = position;
+            stateMachineModelSO.FindProperty(PositionVar).vector3IntValue = position;
             stateMachineModelSO.ApplyModifiedProperties();
         }
 
@@ -239,7 +239,7 @@ namespace SAS.StateMachineGraph.Editor
             return stateModels;
         }
 
-        internal static StateMachineModel CloneMachineRecursivily(this StateMachineModel stateMachineModel, RuntimeStateMachineController runtimeStateMachineController, StateMachineModel parentStateModel, Vector3 position)
+        internal static StateMachineModel CloneMachineRecursivily(this StateMachineModel stateMachineModel, RuntimeStateMachineController runtimeStateMachineController, StateMachineModel parentStateModel, Vector3Int position)
         {
             var childStateMachines = stateMachineModel.GetChildStateMachines();
             var clonedStateMachine = runtimeStateMachineController.AddChildStateMachine(parentStateModel, stateMachineModel.name, position);
@@ -253,7 +253,7 @@ namespace SAS.StateMachineGraph.Editor
 
         internal static StateMachineModel CloneMachineRecursivily(this StateMachineModel stateMachineModel, RuntimeStateMachineController runtimeStateMachineController, StateMachineModel parentStateModel)
         {
-            var position = stateMachineModel.GetPosition() + new Vector3(35, 65);
+            var position = stateMachineModel.GetPosition() + new Vector3Int(35, 65);
             return stateMachineModel.CloneMachineRecursivily(runtimeStateMachineController, parentStateModel, position);
         }
 

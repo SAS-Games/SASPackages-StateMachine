@@ -5,7 +5,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
-using EditorUtility = SAS.Utilities.Editor.EditorUtility;
+using EditorUtility = SAS.Core.Editor.EditorUtility;
 
 namespace SAS.StateMachineGraph.Editor
 {
