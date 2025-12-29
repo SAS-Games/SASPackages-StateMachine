@@ -29,25 +29,44 @@ namespace SAS.StateMachineGraph
 		internal State GetState(StateMachine stateMachine, Dictionary<ScriptableObject, object> cachedStates, Dictionary<StateActionModel, object[]> cachedActions, Dictionary<string, ICustomCondition> cachedConditions)
 		{
 			StateModel originalModel = this;
-			StateModel effectiveModel = this;
 
+			// Resolve override data source (read-only)
+			StateModel overrideModel = null;
 			var stateOverride = stateMachine.stateOverrides?.Find(p => p.original == this);
+			if (stateOverride != null)
+				overrideModel = stateOverride.overridden;
 
-			if (stateOverride != null && stateOverride.overridden != null)
-				effectiveModel = stateOverride.overridden;
-			
-			if (cachedStates.TryGetValue(effectiveModel, out var obj))
+			// Cache by ORIGINAL model identity
+			if (cachedStates.TryGetValue(originalModel, out var obj))
 				return (State)obj;
 
-			var state = new State(stateMachine, effectiveModel.name, effectiveModel.m_Tag);
-			effectiveModel.State = state;
-			cachedStates.Add(effectiveModel, state);
-			CreateGetActions(effectiveModel.m_StateActions, stateMachine, state, cachedActions);
-			state._transitionStates = GetTransitions(originalModel.m_Transitions, stateMachine, cachedStates, cachedActions, cachedConditions);
-			foreach(var transitionState in state._transitionStates)
-				transitionState.StateEventForCustomTrigger(ref state._stateEnterEventForCustomTriggers, ref state._stateExitEventForCustomTriggers);
+			// Choose data sources
+			var actionsSource = overrideModel != null ? overrideModel.m_StateActions : originalModel.m_StateActions;
+			var tagSource = overrideModel != null ? overrideModel.m_Tag : originalModel.m_Tag;
+			var nameSource = originalModel.name;
+
+			// Build state
+			var state = new State(stateMachine, nameSource, tagSource);
+			originalModel.State = state;
+			cachedStates.Add(originalModel, state);
+
+			// Actions from selected source
+			CreateGetActions(actionsSource, stateMachine, state, cachedActions);
+
+			// Transitions ALWAYS from original
+			state._transitionStates = originalModel.GetTransitions(originalModel.m_Transitions, stateMachine, cachedStates, cachedActions, cachedConditions);
+
+			foreach (var transitionState in state._transitionStates)
+			{
+				transitionState.StateEventForCustomTrigger(
+					ref state._stateEnterEventForCustomTriggers,
+					ref state._stateExitEventForCustomTriggers
+				);
+			}
+
 			return state;
 		}
+
 
 		private TransitionState[] GetTransitions(StateTransitionModel[] transitionModels, StateMachine stateMachine, Dictionary<ScriptableObject, object> cachedStates, Dictionary<StateActionModel, object[]> cachedActions, Dictionary<string, ICustomCondition> cachedConditions)
 		{
