@@ -33,7 +33,7 @@ namespace SAS.StateMachineGraph
             set => m_Controller = value;
         }
 
-        internal string GetOverrideAction(string originalAction)
+        public string GetOverrideAction(string originalAction)
         {
             if (string.IsNullOrEmpty(originalAction) || m_ActionOverrides == null)
                 return null;

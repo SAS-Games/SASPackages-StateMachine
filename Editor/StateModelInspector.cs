@@ -131,9 +131,24 @@ namespace SAS.StateMachineGraph.Editor
                 var curActionIndex = Array.FindIndex(_allActionTypes, ele => ele.AssemblyQualifiedName == actionFullName.stringValue);
                 var pos = new Rect(rect.x + 30, rect.y - 2, Mathf.Max(rect.width - 280, 40), rect.height - 2);
                 int id = GUIUtility.GetControlID("actionFullName".GetHashCode(), FocusType.Keyboard, pos);
+                
+                string originalAction = actionFullName.stringValue;
+                string effectiveAction = ResolveEffectiveAction(originalAction);
+
+                bool isOverridden = !string.IsNullOrEmpty(originalAction) && effectiveAction != originalAction;
+                
+                string[] displayOptions = _actionClassNames;
+                string tooltip = null;
+
+                if (isOverridden && curActionIndex >= 0)
+                {
+                    displayOptions = (string[])_actionClassNames.Clone();
+                    displayOptions[curActionIndex] = $"{SerializedType.Sanitize(Type.GetType(effectiveAction)?.Name)}";
+                    tooltip = $"{SerializedType.Sanitize(effectiveAction)}";
+                }
+
                 if (curActionIndex != -1 || string.IsNullOrEmpty(actionFullName.stringValue))
-                    EditorUtility.DropDown(id, pos, pos, _actionFullNames,_actionClassNames, curActionIndex, actionFullName.stringValue, Color.white, selectedIndex => SetSelectedAction(actionFullName, selectedIndex));
-                    //EditorUtility.DropDown(id, pos, _allActionTypes.Select(ele => SerializedType.Sanitize(ele.ToString())).ToArray(), curActionIndex, selectedIndex => SetSelectedAction(actionFullName, selectedIndex));
+                    EditorUtility.DropDown(id, pos, pos, _actionFullNames,displayOptions, curActionIndex, effectiveAction, isOverridden ? Color.blue : Color.white, selectedIndex => SetSelectedAction(actionFullName, selectedIndex), forcedTooltip: tooltip);
                 else
                     EditorUtility.DropDown(id, pos, _allActionTypes.Select(ele => SerializedType.Sanitize(ele.ToString())).ToArray(), curActionIndex, actionFullName.stringValue, Color.red, selectedIndex => SetSelectedAction(actionFullName, selectedIndex));
 
@@ -276,7 +291,15 @@ namespace SAS.StateMachineGraph.Editor
             // Fallback: original
             return new SerializedObject(original);
         }
+        
+        private string ResolveEffectiveAction(string originalAction)
+        {
+            var controller = StateMachineEditorWindow.SelectedStateMachineOverrideController;
+            if (controller == null)
+                return originalAction;
 
-
+            var overridden = controller.GetOverrideAction(originalAction);
+            return string.IsNullOrEmpty(overridden) ? originalAction : overridden;
+        }
     }
 }
