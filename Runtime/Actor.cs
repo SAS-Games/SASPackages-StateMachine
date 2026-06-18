@@ -259,6 +259,13 @@ namespace SAS.StateMachineGraph
         {
             return _blackboard.TryGetValue(key, out value);
         }
+        
+        public bool TryGetEntry<T>(BlackboardKey key, out Blackboard.BlackboardEntry<T> entry)
+        {
+            entry = _blackboard.GetEntry<T>(key);
+            return entry != null;
+        }
+
 
         public T GetValue<T>(BlackboardKey key)
         {
