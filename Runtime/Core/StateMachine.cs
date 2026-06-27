@@ -7,6 +7,7 @@ namespace SAS.StateMachineGraph
     {
         private Dictionary<int, StateMachineParameter> _parameters = new Dictionary<int, StateMachineParameter>();
         internal List<State> states = new List<State>();
+        internal List<ITransitionNode> nodes = new List<ITransitionNode>();
         
         internal List<ActionOverride> actionOverrides;
         internal List<StateOverride> stateOverrides;
@@ -23,52 +24,53 @@ namespace SAS.StateMachineGraph
         public Actor Actor { get; }
 
         internal State DefaultState { get; set; }
+        internal ITransitionNode DefaultNode { get; set; }
+        internal RuntimeStateGraph RootGraph { get; private set; }
 
-        private State _currentState;
-        internal State nextState;
+        internal ITransitionNode CurrentNode => RootGraph?.CurrentNode;
 
         internal State CurrentState
         {
-            get => _currentState;
+            get => RootGraph?.CurrentState;
             set
             {
-                _currentState = value;
-                _currentState?.OnEnter();
+                RootGraph?.SetCurrentNode(value);
             }
+        }
+
+        internal void SetRootGraph(RuntimeStateGraph graph)
+        {
+            RootGraph = graph;
         }
 
         internal void OnEarlyUpdate()
         {
-            if (nextState != null)
-            {
-                CurrentState = nextState;
-                nextState = null;
-            }
+            RootGraph?.OnEarlyUpdate();
         }
 
         internal void OnFixedUpdate()
         {
-            CurrentState.OnFixedUpdate();
+            RootGraph?.OnFixedUpdate();
         }
 
         internal State AnyState { get; set; }
 
         internal void OnUpdate()
         {
-            CurrentState.OnUpdate();
+            RootGraph?.OnUpdate();
         }
 
         internal void OnLateUpdate()
         {
-            CurrentState.OnLateUpdate();
+            RootGraph?.OnLateUpdate();
         }
 
         internal void TryTransition()
         {
-            CurrentState.TryTransition();
-            AnyState.TryTransition();
-            CurrentState.ResetTrigger();
-            AnyState.ResetTrigger();
+            RootGraph?.TryTransition();
+            AnyState?.TryTransition();
+            RootGraph?.ResetTrigger();
+            AnyState?.ResetTrigger();
 
         }
 
@@ -195,8 +197,7 @@ namespace SAS.StateMachineGraph
             var state = GetStateByName(stateName);
             if (state != null)
             {
-                CurrentState = state;
-                nextState = state;
+                RootGraph?.SetCurrentNode(state);
             }
             else
                 Debug.LogError($"No State Found with name {stateName}");

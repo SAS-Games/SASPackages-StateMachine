@@ -230,12 +230,11 @@ namespace SAS.StateMachineGraph.Editor
 
             _transitionStates.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
             {
-                var element = ((StateTransitionModel)_transitionStates.serializedProperty.GetArrayElementAtIndex(index).objectReferenceValue).serializedObject();
+                var transition = (StateTransitionModel)_transitionStates.serializedProperty.GetArrayElementAtIndex(index).objectReferenceValue;
                 rect.y += 2;
-                SerializedProperty property = element.FindProperty("m_TargetState");
                 string val = serializedObject.targetObject.name + "  ->  ";
-                if (property != null && property.objectReferenceValue != null)
-                    EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight), val + property.objectReferenceValue.name);
+                if (transition != null && transition.TargetNodeModel != null)
+                    EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight), val + transition.TargetNodeModel.name);
                 else
                     EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight), val + "None");
             };

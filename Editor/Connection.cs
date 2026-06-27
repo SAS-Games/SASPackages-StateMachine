@@ -9,20 +9,20 @@ namespace SAS.StateMachineGraph.Editor
         public BaseNode StartNode { get; }
         public BaseNode EndNode { get; }
 
-        public StateModel SourceStateModel { get; }
-        public StateModel TargetStateModel { get; }
+        public TransitionNodeModel SourceNodeModel { get; }
+        public TransitionNodeModel TargetNodeModel { get; }
 
         private Vector2 _startPos;
         private Vector2 _endPos;
 
         private Action<Connection> _removeConnection;
 
-        public Connection(BaseNode start, BaseNode end, StateModel sourceStateModel, StateModel targetStateModel, Action<Connection> removeConnection)
+        public Connection(BaseNode start, BaseNode end, TransitionNodeModel sourceNodeModel, TransitionNodeModel targetNodeModel, Action<Connection> removeConnection)
         {
             StartNode = start;
             EndNode = end;
-            SourceStateModel = sourceStateModel;
-            TargetStateModel = targetStateModel;
+            SourceNodeModel = sourceNodeModel;
+            TargetNodeModel = targetNodeModel;
             _removeConnection = removeConnection;
         }
 
@@ -55,16 +55,16 @@ namespace SAS.StateMachineGraph.Editor
             }
 
             EditorUtilities.DrawLine(_startPos, _endPos);
-            if (SourceStateModel != null && TargetStateModel != null)
+            if (SourceNodeModel != null && TargetNodeModel != null)
             {
-                if (SourceStateModel == TargetStateModel)
+                if (SourceNodeModel == TargetNodeModel)
                 {
                     _startPos.x = StartNode.rect.x + StartNode.rect.width / 2;
                     _startPos.y = StartNode.rect.y + StartNode.rect.height / 2;
                     _endPos = _startPos;
                     _endPos.y += StartNode.rect.height + 20;
                 }
-                if (SourceStateModel.GetTransitionCount(TargetStateModel) <= 1)
+                if (SourceNodeModel.GetTransitionCount(TargetNodeModel) <= 1)
                     EditorUtilities.DrawArrow(_startPos, _endPos, inverted);
                 else
                     EditorUtilities.DrawTrippleArrow(_startPos, _endPos, inverted);
@@ -105,8 +105,8 @@ namespace SAS.StateMachineGraph.Editor
 
                         if (e.button == 0)
                         {
-                            StateTransitionInspector.SelectedTransitionIndex = SourceStateModel.GetTransitionStateIndex(TargetStateModel);
-                            Selection.activeObject = SourceStateModel.GetTransitionStateModel(TargetStateModel);
+                            StateTransitionInspector.SelectedTransitionIndex = SourceNodeModel.GetTransitionStateIndex(TargetNodeModel);
+                            Selection.activeObject = SourceNodeModel.GetTransitionStateModel(TargetNodeModel);
                             StartNode.IsFocused = false;
                             e.Use();
                         }

@@ -5,9 +5,9 @@ using UnityEngine;
 namespace SAS.StateMachineGraph
 {
     [System.Serializable]
-    internal class TransitionState
+    public class TransitionState
     {
-        private State TargetState { get; }
+        private ITransitionNode TargetNode { get; }
         private bool HasExitTime { get; }
         private float ExitTime { get; }
         public bool WaitForAwaitableActionsToComplete { get; }
@@ -15,16 +15,19 @@ namespace SAS.StateMachineGraph
 
         internal float TimeElapsed = 0;
 
-        internal bool TryGetTransition(StateMachine stateMachine, out State state)
+        internal bool TryGetTransition(StateMachine stateMachine, out ITransitionNode node)
         {
             var timeElapsed = !HasExitTime || TimeElapsed > ExitTime;
             TimeElapsed += Time.deltaTime;
-            state = timeElapsed && ShouldTransition(stateMachine) ? TargetState : null;
-            return state != null;
+            node = timeElapsed && ShouldTransition(stateMachine) ? TargetNode : null;
+            return node != null;
         }
 
         private bool ShouldTransition(StateMachine stateMachine)
         {
+            if (Conditions == null)
+                return true;
+
             for (int i = 0; i < Conditions.Length; ++i)
             {
                 if (!Conditions[i].IsValid(stateMachine))
@@ -36,13 +39,16 @@ namespace SAS.StateMachineGraph
 
         internal void ResetTriggers(StateMachine stateMachine)
         {
+            if (Conditions == null)
+                return;
+
             for (int i = 0; i < Conditions.Length; ++i)
                 Conditions[i].ResetTrigger(stateMachine);
         }
 
-        internal TransitionState(State state, in Condition[] conditions, bool haxExitTime, float exitTime, bool waitForAwaitableActionsToComplete)
+        internal TransitionState(ITransitionNode node, in Condition[] conditions, bool haxExitTime, float exitTime, bool waitForAwaitableActionsToComplete)
         {
-            TargetState = state;
+            TargetNode = node;
             HasExitTime = haxExitTime;
             ExitTime = exitTime;
             Conditions = conditions;
@@ -52,6 +58,9 @@ namespace SAS.StateMachineGraph
 
         internal void StateEventForCustomTrigger(ref HashSet<StateEvent> stateEnterDelegates, ref HashSet<StateEvent> stateExitDelegates)
         {
+            if (Conditions == null)
+                return;
+
             int count = Conditions.Length;
             for (int i = 0; i < count; ++i)
             {

@@ -10,8 +10,8 @@ namespace SAS.StateMachineGraph.Editor
         private Port _endPort;
         private Port _startPort;
 
-        public StateModel SourceStateModel { get; private set; }
-        public StateModel TargetStateModel { get; private set; }
+        public TransitionNodeModel SourceNodeModel { get; private set; }
+        public TransitionNodeModel TargetNodeModel { get; private set; }
         RuntimeStateMachineController _runtimeStateMachineController;
         public StateTransitionEditor(RuntimeStateMachineController runtimeStateMachineController)
         {
@@ -51,16 +51,16 @@ namespace SAS.StateMachineGraph.Editor
             }
         }
 
-        public void Start(BaseNode node, StateModel sourceStateModel)
+        public void Start(BaseNode node, TransitionNodeModel sourceNodeModel)
         {
             ClearConnectionSelection();
             _startPort = node.startPort;
-            SourceStateModel = sourceStateModel;
+            SourceNodeModel = sourceNodeModel;
         }
 
-        public void Make(BaseNode node, StateModel targetStateModel)
+        public void Make(BaseNode node, TransitionNodeModel targetNodeModel)
         {
-            TargetStateModel = targetStateModel;
+            TargetNodeModel = targetNodeModel;
             if (_startPort != null)
             {
                 _endPort = node.endPort;
@@ -70,20 +70,20 @@ namespace SAS.StateMachineGraph.Editor
             ClearConnectionSelection();
         }
 
-        public void Add(BaseNode sourceNode, BaseNode targetNode, StateModel sourceStateModel, StateModel targetStateModel)
+        public void Add(BaseNode sourceNode, BaseNode targetNode, TransitionNodeModel sourceNodeModel, TransitionNodeModel targetNodeModel)
         {
-            _transitions.Add(new Connection(sourceNode, targetNode, sourceStateModel, targetStateModel, RemoveTransition));
+            _transitions.Add(new Connection(sourceNode, targetNode, sourceNodeModel, targetNodeModel, RemoveTransition));
         }
 
         private void AddTransition()
         {
-            _transitions.Add(new Connection(_startPort.node, _endPort.node, SourceStateModel, TargetStateModel, RemoveTransition));
-            SourceStateModel.AddStateTransition(_runtimeStateMachineController, TargetStateModel);
+            _transitions.Add(new Connection(_startPort.node, _endPort.node, SourceNodeModel, TargetNodeModel, RemoveTransition));
+            SourceNodeModel.AddStateTransition(_runtimeStateMachineController, TargetNodeModel);
         }
 
         private void RemoveTransition(Connection connection)
         {
-            connection.SourceStateModel.ClearConnection(connection.TargetStateModel);
+            connection.SourceNodeModel.ClearConnection(connection.TargetNodeModel);
             _transitions.Remove(connection);
         }
 
@@ -108,8 +108,8 @@ namespace SAS.StateMachineGraph.Editor
         {
             _endPort = null;
             _startPort = null;
-            SourceStateModel = null;
-            TargetStateModel = null;
+            SourceNodeModel = null;
+            TargetNodeModel = null;
         }
 
         public void Clear()

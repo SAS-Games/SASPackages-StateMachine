@@ -3,12 +3,13 @@ using System.Collections.Generic;
 
 namespace SAS.StateMachineGraph
 {
-    public class State
+    public class State : ITransitionNode
     {
         public string Name { get; private set; }
         public string Tag { get; private set; }
 
         private StateMachine _stateMachine;
+        private RuntimeStateGraph _graph;
         internal IStateAction[] _onEnter = default;
         internal IStateAction[] _onExit = default;
         internal IStateAction[] _onFixedUpdate = default;
@@ -19,7 +20,7 @@ namespace SAS.StateMachineGraph
         internal HashSet<StateEvent> _stateEnterEventForCustomTriggers = new HashSet<StateEvent>();
         internal HashSet<StateEvent> _stateExitEventForCustomTriggers = new HashSet<StateEvent>();
 
-        private State _nextState;
+        private ITransitionNode _nextNode;
         private TransitionState _transitionState;
 
         /// <summary>
@@ -34,11 +35,20 @@ namespace SAS.StateMachineGraph
 
         private bool exitActionsExecutionStarted;
 
-        internal State(StateMachine stateMachine, string name, string tag)
+        internal State(StateMachine stateMachine, RuntimeStateGraph graph, string name, string tag)
         {
             _stateMachine = stateMachine;
+            _graph = graph;
             Name = name;
             Tag = tag;
+        }
+
+        RuntimeStateGraph ITransitionNode.Graph => _graph;
+        State ITransitionNode.ActiveState => this;
+        TransitionState[] ITransitionNode.TransitionStates
+        {
+            get => _transitionStates;
+            set => _transitionStates = value;
         }
 
         internal void OnEnter()
@@ -96,20 +106,12 @@ namespace SAS.StateMachineGraph
 
         internal void TryTransition()
         {
-            if (_nextState == null || _nextState == this)
+            if (_nextNode == null || _nextNode == this)
             {
-                for (int i = 0; i < _transitionStates.Length; ++i)
-                {
-                    if (_transitionStates[i].TryGetTransition(_stateMachine, out _nextState))
-                    {
-                        _transitionState = _transitionStates[i];
-                        ResetExitTime();
-                        break;
-                    }
-                }
+                TransitionNodeUtility.TryGetNextNode(_stateMachine, _transitionStates, out _nextNode, out _transitionState);
             }
 
-            if (_nextState != null && IsAllAwaitableActionCompleted())
+            if (_nextNode != null && IsAllAwaitableActionCompleted())
             {
                 if (!exitActionsExecutionStarted)
                 {
@@ -117,30 +119,23 @@ namespace SAS.StateMachineGraph
                     exitActionsExecutionStarted = true;
                     if (immediateExit)
                     {
-                        _stateMachine.nextState = _nextState;
-                        _nextState = null;
+                        _graph.QueueTransition(_nextNode);
+                        _nextNode = null;
                         _transitionState = null;
                     }
                 }
                 else
                 {
-                    _stateMachine.nextState = _nextState;
-                    _nextState = null;
+                    _graph.QueueTransition(_nextNode);
+                    _nextNode = null;
                     _transitionState = null;
                 }
             }
         }
 
-        private void ResetExitTime()
-        {
-            for (int i = 0; i < _transitionStates.Length; ++i)
-                _transitionStates[i].TimeElapsed = 0;
-        }
-
         internal void ResetTrigger()
         {
-            for (int i = 0; i < _transitionStates.Length; ++i)
-                _transitionStates[i].ResetTriggers(_stateMachine);
+            TransitionNodeUtility.ResetTriggers(_transitionStates, _stateMachine);
         }
 
         private bool IsAllAwaitableActionCompleted()
@@ -158,11 +153,23 @@ namespace SAS.StateMachineGraph
         private void FilterAwaitableAction(IStateAction[] stateActions)
         {
             _awaitableStateAction.Clear();
+            if (stateActions == null)
+                return;
+
             foreach (var action in stateActions)
             {
                 if (action is IAwaitableStateAction)
                     _awaitableStateAction.Add(action as IAwaitableStateAction);
             }
         }
+
+        void ITransitionNode.OnEnter() => OnEnter();
+        bool ITransitionNode.OnExit() => OnExit();
+        void ITransitionNode.OnEarlyUpdate() { }
+        void ITransitionNode.OnFixedUpdate() => OnFixedUpdate();
+        void ITransitionNode.OnUpdate() => OnUpdate();
+        void ITransitionNode.OnLateUpdate() => OnLateUpdate();
+        void ITransitionNode.TryTransition() => TryTransition();
+        void ITransitionNode.ResetTrigger() => ResetTrigger();
     }
 }

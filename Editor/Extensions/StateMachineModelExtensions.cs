@@ -13,6 +13,8 @@ namespace SAS.StateMachineGraph.Editor
         const string ParentStateMachineVar = "m_ParentStateMachine";
         const string ChildStateMachinesVar = "m_ChildStateMachines";
         const string StateModelsVar = "m_StateModels";
+        const string EntryNodeVar = "m_EntryNode";
+        const string ExitNodeVar = "m_ExitNode";
 
         public static StateMachineModel AddChildStateMachine(this RuntimeStateMachineController runtimeStateMachineController, StateMachineModel stateMachineModel, string name, Vector3Int position)
         {
@@ -22,8 +24,46 @@ namespace SAS.StateMachineGraph.Editor
             childStateMachine.SetPosition(position);
             runtimeStateMachineController.AddObjectToAsset(childStateMachine);
             childStateMachine.SetAnyStatePosition(new Vector3Int(300, 50, 0));
+            runtimeStateMachineController.EnsureEntryExitNodes(childStateMachine);
             stateMachineModel.AddChildStateMachine(childStateMachine);
             return childStateMachine;
+        }
+
+        internal static void EnsureEntryExitNodes(this RuntimeStateMachineController runtimeStateMachineController, StateMachineModel stateMachineModel)
+        {
+            var stateMachineModelSO = new SerializedObject(stateMachineModel);
+            var entryNodeProp = stateMachineModelSO.FindProperty(EntryNodeVar);
+            var exitNodeProp = stateMachineModelSO.FindProperty(ExitNodeVar);
+
+            if (entryNodeProp.objectReferenceValue == null)
+            {
+                var entryNode = ScriptableObject.CreateInstance<EntryStateModel>();
+                entryNode.name = "Entry";
+                runtimeStateMachineController.AddObjectToAsset(entryNode);
+                entryNode.SetPosition(new Vector3Int(80, 100, 0));
+                entryNodeProp.objectReferenceValue = entryNode;
+            }
+
+            if (exitNodeProp.objectReferenceValue == null)
+            {
+                var exitNode = ScriptableObject.CreateInstance<ExitStateModel>();
+                exitNode.name = "Exit";
+                runtimeStateMachineController.AddObjectToAsset(exitNode);
+                exitNode.SetPosition(new Vector3Int(600, 100, 0));
+                exitNodeProp.objectReferenceValue = exitNode;
+            }
+
+            stateMachineModelSO.ApplyModifiedProperties();
+        }
+
+        internal static EntryStateModel GetEntryNode(this StateMachineModel stateMachineModel)
+        {
+            return new SerializedObject(stateMachineModel).FindProperty(EntryNodeVar).objectReferenceValue as EntryStateModel;
+        }
+
+        internal static ExitStateModel GetExitNode(this StateMachineModel stateMachineModel)
+        {
+            return new SerializedObject(stateMachineModel).FindProperty(ExitNodeVar).objectReferenceValue as ExitStateModel;
         }
 
         private static void AddChildStateMachine(this StateMachineModel stateMachineModel, StateMachineModel childStateMachine)
@@ -134,10 +174,23 @@ namespace SAS.StateMachineGraph.Editor
             stateMachineModelSO.ApplyModifiedProperties();
         }
 
+        public static void SetPosition(this TransitionNodeModel transitionNodeModel, Vector3Int position)
+        {
+            var transitionNodeModelSO = new SerializedObject(transitionNodeModel);
+            transitionNodeModelSO.FindProperty(PositionVar).vector3IntValue = position;
+            transitionNodeModelSO.ApplyModifiedProperties();
+        }
+
         public static Vector3Int GetPosition(this StateMachineModel stateMachineModel)
         {
             var stateMachineModelSO = new SerializedObject(stateMachineModel);
             return stateMachineModelSO.FindProperty(PositionVar).vector3IntValue;
+        }
+
+        public static Vector3Int GetPosition(this TransitionNodeModel transitionNodeModel)
+        {
+            var transitionNodeModelSO = new SerializedObject(transitionNodeModel);
+            return transitionNodeModelSO.FindProperty(PositionVar).vector3IntValue;
         }
 
         public static Vector3Int GetPositionAsUpNode(this StateMachineModel stateMachineModel)

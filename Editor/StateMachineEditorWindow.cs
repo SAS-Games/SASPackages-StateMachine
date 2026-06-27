@@ -105,6 +105,10 @@ namespace SAS.StateMachineGraph.Editor
 
         private void Initialize()
         {
+            foreach (var stateMachineModel in _runtimeStateMachineController.GetAllStateMachines())
+                _runtimeStateMachineController.EnsureEntryExitNodes(stateMachineModel);
+            _runtimeStateMachineController.SyncRootEntryTransitionToDefault();
+
             _selectedChildStateMachines.Clear();
             _selectedChildStateMachines.Add(_runtimeStateMachineController.BaseStateMachineModel());
 
@@ -123,6 +127,8 @@ namespace SAS.StateMachineGraph.Editor
             var anyStateNode = new AnyStateNode(SelectedStateMachineModel, _runtimeStateMachineController.AnyStateModel(), SelectedStateMachineModel.GetAnyStatePosition(), StartTranstionFromAnyState);
             _nodes.Add(anyStateNode);
 
+            CreateEntryExitNodes();
+
             var stateMachineModels = SelectedStateMachineModel.GetChildStateMachines();
             for (int i = 0; i < stateMachineModels.Count; ++i)
                 CreateChildMachinelNode(stateMachineModels[i]);
@@ -139,31 +145,28 @@ namespace SAS.StateMachineGraph.Editor
             Repaint();
         }
 
+        private void CreateEntryExitNodes()
+        {
+            var entryNode = SelectedStateMachineModel.GetEntryNode();
+            if (entryNode != null)
+                _nodes.Add(new EntryStateNode(entryNode, (Vector2Int)entryNode.GetPosition(), StartTranstion));
+
+            var exitNode = SelectedStateMachineModel.GetExitNode();
+            if (exitNode != null)
+                _nodes.Add(new ExitStateNode(exitNode, (Vector2Int)exitNode.GetPosition(), MakeTranstion));
+        }
+
         private void CreateTransitions()
         {
             foreach (BaseNode sourceNode in _nodes)
             {
-                StateModel sourceStateModel = null;
-                if (sourceNode is StateNode stateNode)
-                {
-                    sourceStateModel = stateNode.Value;
-                    CreateTransitions(sourceNode, sourceStateModel);
-                }
-                else if (sourceNode is AnyStateNode anyStateNode)
-                {
-                    sourceStateModel = anyStateNode.Value;
-                    CreateTransitions(sourceNode, sourceStateModel);
-                }
-                else if (sourceNode is StateMachineNode stateMachineNode)
-                {
-                    var stateModels = stateMachineNode.Value.GetStates();
-                    foreach (var stateModel in stateModels)
-                        CreateTransitions(sourceNode, stateModel);
-                }
+                var sourceNodeModel = GetTransitionNodeModel(sourceNode);
+                if (sourceNodeModel != null)
+                    CreateTransitions(sourceNode, sourceNodeModel);
             }
         }
 
-        private void CreateTransitions(BaseNode sourceNode, StateModel sourceStateModel)
+        private void CreateTransitions(BaseNode sourceNode, TransitionNodeModel sourceStateModel)
         {
             if (sourceStateModel == null)
                 return;
@@ -172,7 +175,7 @@ namespace SAS.StateMachineGraph.Editor
             for (int i = 0; i < stateTransitions.arraySize; ++i)
             {
                 var element = (StateTransitionModel)stateTransitions.GetArrayElementAtIndex(i).objectReferenceValue;
-                var targetStateModel = element.serializedObject().FindProperty("m_TargetState").objectReferenceValue as StateModel;
+                var targetStateModel = element.TargetNodeModel;
                 var targetNode = _nodes.Find(ele => ele.TargetObject == targetStateModel);
                 if (targetNode == null)
                 {
@@ -183,7 +186,7 @@ namespace SAS.StateMachineGraph.Editor
                     {
                         if (node is StateMachineNode stateMachineNode)
                         {
-                            if (stateMachineNode.Value.Contains(targetStateModel))
+                            if (targetStateModel is StateModel stateModel && stateMachineNode.Value.Contains(stateModel))
                             {
                                 targetNode = node;
                                 break;
@@ -348,7 +351,7 @@ namespace SAS.StateMachineGraph.Editor
         private void AddState(Vector2 mousePosition)
         {
             var stateModel = _runtimeStateMachineController.AddState(SelectedStateMachineModel, "New State", mousePosition.ToVector3Int());
-            CreateStateModelNode(stateModel);
+            CreateSelectedStateMachineNodes();
         }
 
         private void AddChildStateMachine(Vector2 mousePosition)
@@ -383,25 +386,16 @@ namespace SAS.StateMachineGraph.Editor
 
         private void CreateChildMachinelNode(StateMachineModel stateMachineModel)
         {
-            var node = new StateMachineNode(stateMachineModel, (Vector2Int)stateMachineModel.GetPosition(), _runtimeStateMachineController.IsDefaultStateMachine(stateMachineModel), MakeTranstion, StateMachineModelMouseUp, RemoveStateMachineNode, SelectStateMachineNode, DuplicateStateMachine);
+            var node = new StateMachineNode(stateMachineModel, (Vector2Int)stateMachineModel.GetPosition(), _runtimeStateMachineController.IsDefaultStateMachine(stateMachineModel), StartTranstion, MakeTranstion, RemoveStateMachineNode, SelectStateMachineNode, DuplicateStateMachine);
             _nodes.Add(node);
             Repaint();
         }
 
         private void CreateParentMachinelNode(StateMachineModel stateMachineModel)
         {
-            var node = new ParentStateMachineNode(stateMachineModel, (Vector2Int)stateMachineModel.GetPositionAsUpNode(), _runtimeStateMachineController.IsDefaultStateMachine(stateMachineModel), MakeTranstion, StateMachineModelMouseUp, GoToMachineNode);
+            var node = new ParentStateMachineNode(stateMachineModel, (Vector2Int)stateMachineModel.GetPositionAsUpNode(), _runtimeStateMachineController.IsDefaultStateMachine(stateMachineModel), StartTranstion, MakeTranstion, GoToMachineNode);
             _nodes.Add(node);
         }
-
-        private void StateMachineModelMouseUp(StateMachineNode stateMachineNode)
-        {
-            if (_transition.SourceStateModel == null)
-                return;
-            if (!stateMachineNode.CreateAvailableStatesGenericMenu())
-                _transition.ClearConnectionSelection();
-        }
-
 
         private void StartTranstionFromAnyState(BaseNode sourceNode)
         {
@@ -411,20 +405,40 @@ namespace SAS.StateMachineGraph.Editor
 
         private void StartTranstion(BaseNode sourceNode)
         {
-            var stateNode = sourceNode as StateNode;
-            _transition.Start(stateNode, stateNode.Value);
+            var sourceNodeModel = GetTransitionNodeModel(sourceNode);
+            if (sourceNodeModel != null)
+                _transition.Start(sourceNode, sourceNodeModel);
         }
 
         private void MakeTranstion(BaseNode targetNode)
         {
-            var targetStateNode = targetNode as StateNode;
-            MakeTranstion(targetNode, targetStateNode.Value);
+            var targetNodeModel = GetTransitionNodeModel(targetNode);
+            if (targetNodeModel != null)
+                MakeTranstion(targetNode, targetNodeModel);
             Repaint();
         }
 
-        private void MakeTranstion(BaseNode targetNode, StateModel targetStateModel)
+        private void MakeTranstion(BaseNode targetNode, TransitionNodeModel targetStateModel)
         {
             _transition.Make(targetNode, targetStateModel);
+        }
+
+        private TransitionNodeModel GetTransitionNodeModel(BaseNode node)
+        {
+            if (node is ParentStateMachineNode)
+                return null;
+            if (node is StateNode stateNode)
+                return stateNode.Value;
+            if (node is AnyStateNode anyStateNode)
+                return anyStateNode.Value;
+            if (node is StateMachineNode stateMachineNode)
+                return stateMachineNode.Value;
+            if (node is EntryStateNode entryStateNode)
+                return entryStateNode.Value;
+            if (node is ExitStateNode exitStateNode)
+                return exitStateNode.Value;
+
+            return null;
         }
 
         private void RemoveStateMachineNode(StateMachineNode stateMachineNode)

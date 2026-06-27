@@ -30,6 +30,7 @@ namespace SAS.StateMachineGraph.Editor
             stateMachineModel.name = stateMachineModel.MakeUniqueStateMachineName(name);
 
             runtimeStateMachineController.AddObjectToAsset(stateMachineModel);
+            runtimeStateMachineController.EnsureEntryExitNodes(stateMachineModel);
             runtimeStateMachineController.AddStateMachine(stateMachineModel);
             runtimeStateMachineController.AddAnyState(stateMachineModel);
         }
@@ -79,6 +80,50 @@ namespace SAS.StateMachineGraph.Editor
                 allStateModels.AddRange(stateMachineModels[i].GetStates());
 
             return allStateModels;
+        }
+
+        internal static List<TransitionNodeModel> GetAllTransitionNodeModels(this RuntimeStateMachineController runtimeStateMachineController)
+        {
+            var allNodeModels = new List<TransitionNodeModel>();
+            var stateMachineModels = runtimeStateMachineController.GetAllStateMachines();
+            for (int i = 0; i < stateMachineModels.Count; ++i)
+            {
+                allNodeModels.Add(stateMachineModels[i]);
+                allNodeModels.AddRange(stateMachineModels[i].GetStates());
+
+                var entryNode = stateMachineModels[i].GetEntryNode();
+                if (entryNode != null)
+                    allNodeModels.Add(entryNode);
+
+                var exitNode = stateMachineModels[i].GetExitNode();
+                if (exitNode != null)
+                    allNodeModels.Add(exitNode);
+            }
+
+            var anyState = runtimeStateMachineController.AnyStateModel();
+            if (anyState != null)
+                allNodeModels.Add(anyState);
+
+            return allNodeModels;
+        }
+
+        internal static void SyncRootEntryTransitionToDefault(this RuntimeStateMachineController runtimeStateMachineController)
+        {
+            var rootStateMachine = runtimeStateMachineController.BaseStateMachineModel();
+            var defaultState = runtimeStateMachineController.GetDefaultState();
+            if (rootStateMachine == null || defaultState == null)
+                return;
+
+            runtimeStateMachineController.EnsureEntryExitNodes(rootStateMachine);
+
+            var entryNode = rootStateMachine.GetEntryNode();
+            if (entryNode == null)
+                return;
+
+            entryNode.ClearConnection();
+            entryNode.AddStateTransition(runtimeStateMachineController, defaultState);
+            EditorUtility.SetDirty(entryNode);
+            EditorUtility.SetDirty(runtimeStateMachineController);
         }
 
         internal static List<StateMachineModel> GetAllStateMachines(this RuntimeStateMachineController runtimeStateMachineController)
@@ -138,10 +183,14 @@ namespace SAS.StateMachineGraph.Editor
 
         public static StateModel AddState(this RuntimeStateMachineController runtimeStateMachineController, StateMachineModel stateMachineModel, string name, Vector3Int position)
         {
+            runtimeStateMachineController.EnsureEntryExitNodes(stateMachineModel);
             var stateModel = ScriptableObject.CreateInstance<StateModel>();
             stateModel.name = stateMachineModel.MakeUniqueStateName(name);
 
             runtimeStateMachineController.CreateStateModelAsset(stateMachineModel, stateModel, position);
+            var entryNode = stateMachineModel.GetEntryNode();
+            if (entryNode != null && entryNode.GetTransitionsProp().arraySize == 0)
+                entryNode.AddStateTransition(runtimeStateMachineController, stateModel);
 
             return stateModel;
         }
@@ -197,17 +246,25 @@ namespace SAS.StateMachineGraph.Editor
 
         private static void RemoveStateMachineInternal(this RuntimeStateMachineController runtimeStateMachineController, StateMachineModel stateMachineModel)
         {
+            runtimeStateMachineController.ClearAllTransition(stateMachineModel);
             runtimeStateMachineController.RemoveAllState(stateMachineModel);
+            var entryNode = stateMachineModel.GetEntryNode();
+            var exitNode = stateMachineModel.GetExitNode();
+            entryNode?.ClearConnection();
+            exitNode?.ClearConnection();
+            if (entryNode != null)
+                Object.DestroyImmediate(entryNode, true);
+            if (exitNode != null)
+                Object.DestroyImmediate(exitNode, true);
             stateMachineModel.RemoveStateMachineInternal();
             Object.DestroyImmediate(stateMachineModel, true);
             AssetDatabase.SaveAssets();
         }
 
-        internal static void ClearAllTransition(this RuntimeStateMachineController runtimeStateMachineController, StateModel targetStateModel)
+        internal static void ClearAllTransition(this RuntimeStateMachineController runtimeStateMachineController, TransitionNodeModel targetStateModel)
         {
-            var allStateModels = runtimeStateMachineController.GetAllStateModels();
+            var allStateModels = runtimeStateMachineController.GetAllTransitionNodeModels();
             allStateModels.Remove(targetStateModel);
-            allStateModels.Add(runtimeStateMachineController.AnyStateModel());
             foreach (var sourceStateModel in allStateModels)
                 sourceStateModel.ClearConnection(targetStateModel);
             targetStateModel.ClearConnection();
@@ -246,6 +303,7 @@ namespace SAS.StateMachineGraph.Editor
             var runtimeStateMachineControllerSO = runtimeStateMachineController.ToSerializedObject();
             runtimeStateMachineControllerSO.FindProperty(DefaultStateModelVar).objectReferenceValue = stateModel;
             runtimeStateMachineControllerSO.ApplyModifiedProperties();
+            runtimeStateMachineController.SyncRootEntryTransitionToDefault();
         }
 
         internal static bool IsDefaultStateMachine(this RuntimeStateMachineController runtimeStateMachineController, StateMachineModel stateMachineModel)

@@ -51,8 +51,9 @@ namespace SAS.StateMachineGraph.Editor
             _transitionConditions = new ReorderableList(_stateTransitionModelSO, _stateTransitionModelSO.FindProperty("m_Conditions"), true, true, true, true);
 
             var transitionStateModelSO = ((StateTransitionModel)target).serializedObject();
-            var sourceState = ((StateModel)transitionStateModelSO.FindProperty("m_SourceState").objectReferenceValue);
-            var targetState = ((StateModel)transitionStateModelSO.FindProperty("m_TargetState").objectReferenceValue);
+            var transition = (StateTransitionModel)target;
+            var sourceState = transition.SourceNodeModel;
+            var targetState = transition.TargetNodeModel;
             _sourceStateModelSO = new SerializedObject(sourceState);
             _transitionCount = sourceState.GetTransitionCount(targetState);
             DrawConditionBlock();
@@ -236,17 +237,16 @@ namespace SAS.StateMachineGraph.Editor
             {
                 var element =allTranstionFromThisState.GetArrayElementAtIndex(index);
                 var elementSO = ((StateTransitionModel)element.objectReferenceValue).serializedObject();
-                var targetState = elementSO.FindProperty("m_TargetState").objectReferenceValue;
-                var allTranstionsToTargetState = new List<SerializedProperty>();
+                    var targetState = ((StateTransitionModel)element.objectReferenceValue).TargetNodeModel;
+                    var allTranstionsToTargetState = new List<SerializedProperty>();
 
-                for (int i = 0; i < allTranstionFromThisState.arraySize; ++i)
-                {
-                    element = allTranstionFromThisState.GetArrayElementAtIndex(i);
-                    elementSO = ((StateTransitionModel)element.objectReferenceValue).serializedObject();
-                    var state = elementSO.FindProperty("m_TargetState").objectReferenceValue;
-                    if (targetState == state)
-                        allTranstionsToTargetState.Add(element);
-                }
+                    for (int i = 0; i < allTranstionFromThisState.arraySize; ++i)
+                    {
+                        element = allTranstionFromThisState.GetArrayElementAtIndex(i);
+                        var state = ((StateTransitionModel)element.objectReferenceValue).TargetNodeModel;
+                        if (targetState == state)
+                            allTranstionsToTargetState.Add(element);
+                    }
 
                 SetupTransitions(allTranstionsToTargetState, stateModelSO);
             }
@@ -304,9 +304,9 @@ namespace SAS.StateMachineGraph.Editor
 
             _allTranstionsToTargetState.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
             {
-                var element = ((StateTransitionModel)allTranstionsToTargetState[index].objectReferenceValue).serializedObject();
-                SerializedProperty property = element.FindProperty("m_TargetState");
-                string val = stateModelSO.targetObject.name + "  ->  " + property.objectReferenceValue.name;
+                var transition = (StateTransitionModel)allTranstionsToTargetState[index].objectReferenceValue;
+                var targetNode = transition.TargetNodeModel;
+                string val = stateModelSO.targetObject.name + "  ->  " + (targetNode != null ? targetNode.name : "None");
                 rect.y += 2;
                 EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight), val);
             };

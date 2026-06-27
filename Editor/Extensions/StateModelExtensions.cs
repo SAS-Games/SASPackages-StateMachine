@@ -8,6 +8,10 @@ namespace SAS.StateMachineGraph.Editor
     public static class StateModelExtensions
     {
         const string TransitionsVar = "m_Transitions";
+        const string SourceNodeVar = "m_SourceNode";
+        const string TargetNodeVar = "m_TargetNode";
+        const string SourceStateVar = "m_SourceState";
+        const string TargetStateVar = "m_TargetState";
         public static void SetPosition(this StateModel stateModel, Vector3Int position)
         {
             var stateModelSO = new SerializedObject(stateModel);
@@ -21,20 +25,24 @@ namespace SAS.StateMachineGraph.Editor
             return stateModelSO.FindProperty("m_Position").vector3IntValue;
         }
 
-        public static SerializedProperty GetTransitionsProp(this StateModel stateModel)
+        public static SerializedProperty GetTransitionsProp(this TransitionNodeModel stateModel)
         {
             return new SerializedObject(stateModel).FindProperty(TransitionsVar);
         }
 
-        public static void AddStateTransition(this StateModel sourceStateModel, RuntimeStateMachineController runtimeStateMachineController, StateModel targerStateModel)
+        public static void AddStateTransition(this TransitionNodeModel sourceStateModel, RuntimeStateMachineController runtimeStateMachineController, TransitionNodeModel targerStateModel)
         {
             var transitionStateModel = sourceStateModel.CreateStateTransitionModel(runtimeStateMachineController, targerStateModel);
 
             var transitionStateModelSO = new SerializedObject(transitionStateModel);
-            var sourceState = transitionStateModelSO.FindProperty("m_SourceState");
-            var targetState = transitionStateModelSO.FindProperty("m_TargetState");
-            sourceState.objectReferenceValue = sourceStateModel;
-            targetState.objectReferenceValue = targerStateModel;
+            var sourceNode = transitionStateModelSO.FindProperty(SourceNodeVar);
+            var targetNode = transitionStateModelSO.FindProperty(TargetNodeVar);
+            var sourceState = transitionStateModelSO.FindProperty(SourceStateVar);
+            var targetState = transitionStateModelSO.FindProperty(TargetStateVar);
+            sourceNode.objectReferenceValue = sourceStateModel;
+            targetNode.objectReferenceValue = targerStateModel;
+            sourceState.objectReferenceValue = sourceStateModel as StateModel;
+            targetState.objectReferenceValue = targerStateModel as StateModel;
             transitionStateModelSO.ApplyModifiedProperties();
 
             var conditions = transitionStateModelSO.FindProperty("m_Conditions");
@@ -48,7 +56,7 @@ namespace SAS.StateMachineGraph.Editor
             sourceStateModel.serializedObject().ApplyModifiedProperties();
         }
 
-        private static StateTransitionModel CreateStateTransitionModel(this StateModel sourceStateModel, RuntimeStateMachineController runtimeStateMachineController, StateModel targerStateModel)
+        private static StateTransitionModel CreateStateTransitionModel(this TransitionNodeModel sourceStateModel, RuntimeStateMachineController runtimeStateMachineController, TransitionNodeModel targerStateModel)
         {
             var stateTransitionModel = ScriptableObject.CreateInstance<StateTransitionModel>();
             stateTransitionModel.name = sourceStateModel.name + "->To->" + targerStateModel.name;
@@ -57,33 +65,33 @@ namespace SAS.StateMachineGraph.Editor
             return stateTransitionModel;
         }
 
-        internal static int GetTransitionStateIndex(this StateModel state, StateModel targetState)
+        internal static int GetTransitionStateIndex(this TransitionNodeModel state, TransitionNodeModel targetState)
         {
             var stateTransitions = state.GetTransitionsProp();
             for (int i = 0; i < stateTransitions.arraySize; ++i)
             {
                 var element = (StateTransitionModel)stateTransitions.GetArrayElementAtIndex(i).objectReferenceValue;
-                if (element.serializedObject().FindProperty("m_TargetState").objectReferenceValue == targetState)
+                if (element.TargetNodeModel == targetState)
                     return i;
             }
 
             return -1;
         }
 
-        internal static StateTransitionModel GetTransitionStateModel(this StateModel state, StateModel targetState)
+        internal static StateTransitionModel GetTransitionStateModel(this TransitionNodeModel state, TransitionNodeModel targetState)
         {
             var stateTransitions = state.GetTransitionsProp();
             for (int i = 0; i < stateTransitions.arraySize; ++i)
             {
                 var element = (StateTransitionModel)stateTransitions.GetArrayElementAtIndex(i).objectReferenceValue;
-                if (element.serializedObject().FindProperty("m_TargetState").objectReferenceValue == targetState)
+                if (element.TargetNodeModel == targetState)
                     return element;
             }
 
             return null;
         }
 
-        internal static int GetTransitionCount(this StateModel state, StateModel targetState)
+        internal static int GetTransitionCount(this TransitionNodeModel state, TransitionNodeModel targetState)
         {
             int count = 0;
             var stateTransitions = state.GetTransitionsProp();
@@ -92,7 +100,7 @@ namespace SAS.StateMachineGraph.Editor
                 var element = (StateTransitionModel)stateTransitions.GetArrayElementAtIndex(i).objectReferenceValue;
                 if (element != null)
                 {
-                    if (element.serializedObject().FindProperty("m_TargetState").objectReferenceValue == targetState)
+                    if (element.TargetNodeModel == targetState)
                         count++;
                 }
             }
@@ -101,6 +109,11 @@ namespace SAS.StateMachineGraph.Editor
         }
 
         internal static SerializedObject serializedObject(this StateModel stateModel)
+        {
+            return new SerializedObject(stateModel);
+        }
+
+        internal static SerializedObject serializedObject(this TransitionNodeModel stateModel)
         {
             return new SerializedObject(stateModel);
         }
@@ -117,14 +130,14 @@ namespace SAS.StateMachineGraph.Editor
         /// </summary>
         /// <param name="sourceStateModel"></param>
         /// <param name="targetStateModel"></param>
-        public static void ClearConnection(this StateModel sourceStateModel, StateModel targetStateModel = null)
+        public static void ClearConnection(this TransitionNodeModel sourceStateModel, TransitionNodeModel targetStateModel = null)
         {
             var stateTransitions = sourceStateModel.GetTransitionsProp();
             List<StateTransitionModel> stateTransitionModelsToDelete = new List<StateTransitionModel>();
             for (int i = 0; i < stateTransitions.arraySize; ++i)
             {
                 var element = ((StateTransitionModel)stateTransitions.GetArrayElementAtIndex(i).objectReferenceValue);
-                if (targetStateModel == null || element.serializedObject().FindProperty("m_TargetState").objectReferenceValue == targetStateModel)
+                if (targetStateModel == null || element.TargetNodeModel == targetStateModel)
                 {
                     stateTransitions.DeleteArrayElementAtIndex(i);
                     stateTransitions.serializedObject.ApplyModifiedProperties();
@@ -162,15 +175,24 @@ namespace SAS.StateMachineGraph.Editor
             var clonedStateTransitionModel = Object.Instantiate(stateTransitionModel);
             clonedStateTransitionModel.name = stateTransitionModel.name;
             runtimeStateMachineController.AddObjectToAsset(clonedStateTransitionModel);
-            var sourceStateName = stateTransitionModel.serializedObject().FindProperty("m_SourceState").objectReferenceValue.name;
-            var targetStateName = stateTransitionModel.serializedObject().FindProperty("m_TargetState").objectReferenceValue.name;
+            var sourceNodeModel = stateTransitionModel.SourceNodeModel;
+            var targetNodeModel = stateTransitionModel.TargetNodeModel;
+            var sourceStateModel = MapClonedNode(sourceNodeModel, toStateMachineModel) as StateModel;
+            var targetClonedNode = MapClonedNode(targetNodeModel, toStateMachineModel);
+
+            if (sourceStateModel == null || targetClonedNode == null)
+            {
+                clonedStateTransitionModel.DestroyImmediate();
+                return null;
+            }
 
             var transitionStateModelSO = clonedStateTransitionModel.serializedObject();
-            transitionStateModelSO.FindProperty("m_SourceState").objectReferenceValue = toStateMachineModel.GetStateModel(sourceStateName);
-            transitionStateModelSO.FindProperty("m_TargetState").objectReferenceValue = toStateMachineModel.GetStateModel(targetStateName);
+            transitionStateModelSO.FindProperty(SourceNodeVar).objectReferenceValue = sourceStateModel;
+            transitionStateModelSO.FindProperty(TargetNodeVar).objectReferenceValue = targetClonedNode;
+            transitionStateModelSO.FindProperty(SourceStateVar).objectReferenceValue = sourceStateModel;
+            transitionStateModelSO.FindProperty(TargetStateVar).objectReferenceValue = targetClonedNode as StateModel;
             transitionStateModelSO.ApplyModifiedProperties();
 
-            var sourceStateModel = toStateMachineModel.GetStateModel(sourceStateName);
             var stateTranstionsList = sourceStateModel.GetTransitionsProp();
             stateTranstionsList.InsertArrayElementAtIndex(stateTranstionsList.arraySize);
             var element = stateTranstionsList.GetArrayElementAtIndex(stateTranstionsList.arraySize - 1);
@@ -180,6 +202,20 @@ namespace SAS.StateMachineGraph.Editor
             sourceStateModel.serializedObject().ApplyModifiedProperties();
 
             return clonedStateTransitionModel;
+        }
+
+        private static TransitionNodeModel MapClonedNode(TransitionNodeModel nodeModel, StateMachineModel toStateMachineModel)
+        {
+            if (nodeModel is StateModel stateModel)
+                return toStateMachineModel.GetStateModel(stateModel.name);
+            if (nodeModel is EntryStateModel)
+                return toStateMachineModel.GetEntryNode();
+            if (nodeModel is ExitStateModel)
+                return toStateMachineModel.GetExitNode();
+            if (nodeModel is StateMachineModel stateMachineModel)
+                return toStateMachineModel.GetChildStateMachines().Find(child => child.name == stateMachineModel.name);
+
+            return null;
         }
 
         public static string[] GetUniqueActions(this StateModel stateModel)

@@ -35,25 +35,45 @@ namespace SAS.StateMachineGraph
             }
 
             StateMachine stateMachine = new StateMachine(actor, _parameters, stateOverrides, actionOverrides);
-            var cachedState = new Dictionary<ScriptableObject, object>();
+            var cachedNodes = new Dictionary<ScriptableObject, ITransitionNode>();
             var cachedActions = new Dictionary<StateActionModel, object[]>();
             var cachedTriggers = new Dictionary<string, ICustomCondition>();
 
-            var stateModels = m_BaseStateMachineModel.GetStatesRecursivily();
-            stateModels.Add(m_AnyStateModel);
+            var rootGraph = m_BaseStateMachineModel.CreateRuntimeGraph(
+                stateMachine,
+                cachedNodes,
+                cachedActions,
+                cachedTriggers,
+                m_DefaultStateModel);
 
-            List<State> states = new();
-            foreach (StateModel stateModel in stateModels)
+            stateMachine.SetRootGraph(rootGraph);
+            stateMachine.DefaultNode = rootGraph.DefaultNode;
+
+            foreach (var pair in cachedNodes)
             {
-                var state = stateModel.GetState(stateMachine, cachedState, cachedActions, cachedTriggers);
-                states.Add(state);
-                if (stateModel == m_DefaultStateModel)
-                    stateMachine.DefaultState = state;
-                else if (stateModel == m_AnyStateModel)
-                    stateMachine.AnyState = state;
+                stateMachine.nodes.Add(pair.Value);
+                if (pair.Value is State state)
+                {
+                    stateMachine.states.Add(state);
+                    if (pair.Key == m_DefaultStateModel)
+                        stateMachine.DefaultState = state;
+                }
             }
 
-            stateMachine.states.AddRange(states);
+            if (m_AnyStateModel != null)
+            {
+                var state = m_AnyStateModel.GetState(stateMachine, rootGraph, cachedNodes, cachedActions, cachedTriggers);
+                m_AnyStateModel.InitializeTransitions(stateMachine, cachedNodes, cachedActions, cachedTriggers);
+                if (!stateMachine.states.Contains(state))
+                    stateMachine.states.Add(state);
+                if (!stateMachine.nodes.Contains(state))
+                    stateMachine.nodes.Add(state);
+                stateMachine.AnyState = state;
+            }
+
+            if (stateMachine.DefaultState == null)
+                stateMachine.DefaultState = stateMachine.DefaultNode?.ActiveState;
+
             return stateMachine;
         }
 

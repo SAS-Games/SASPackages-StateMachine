@@ -7,6 +7,8 @@ namespace SAS.StateMachineGraph
     [Serializable]
     public sealed class StateTransitionModel : ScriptableObject
     {
+        [SerializeField] private TransitionNodeModel m_SourceNode;
+        [SerializeField] private TransitionNodeModel m_TargetNode;
         [SerializeField] private StateModel m_SourceState;
         [SerializeField] private StateModel m_TargetState = default;
         [SerializeField] private bool m_HasExitTime = false;
@@ -14,15 +16,59 @@ namespace SAS.StateMachineGraph
         [SerializeField] private bool m_WaitForAwaitableActionsToComplete = true;
         [SerializeField] private Condition[] m_Conditions = default;
 
-        internal TransitionState GetTransition(StateMachine stateMachine, Dictionary<ScriptableObject, object> cachedStates, Dictionary<StateActionModel, object[]> cachedActions, Dictionary<string, ICustomCondition> cachedTriggers)
+        public TransitionNodeModel SourceNodeModel => m_SourceNode != null ? m_SourceNode : m_SourceState;
+        public TransitionNodeModel TargetNodeModel => m_TargetNode != null ? m_TargetNode : m_TargetState;
+
+        internal TransitionState GetTransition(StateMachine stateMachine, Dictionary<ScriptableObject, ITransitionNode> cachedNodes, Dictionary<StateActionModel, object[]> cachedActions, Dictionary<string, ICustomCondition> cachedTriggers)
         {
-            var state = m_TargetState.GetState(stateMachine, cachedStates, cachedActions, cachedTriggers);
+            var targetModel = TargetNodeModel;
+            if (targetModel == null)
+            {
+                Debug.LogError($"Transition {name} does not define a target node.");
+                return new TransitionState(null, new Condition[0], m_HasExitTime, m_ExitTime, m_WaitForAwaitableActionsToComplete);
+            }
+
+            var sourceGraph = ResolveSourceGraph(cachedNodes);
+            var node = targetModel.GetNode(stateMachine, ResolveGraph(targetModel, cachedNodes), cachedNodes, cachedActions, cachedTriggers);
+            node = ResolveReachableTarget(sourceGraph, node);
             var conditions = GetConditions(stateMachine.Actor, cachedTriggers);
-            return new TransitionState(state, conditions, m_HasExitTime, m_ExitTime, m_WaitForAwaitableActionsToComplete);
+            return new TransitionState(node, conditions, m_HasExitTime, m_ExitTime, m_WaitForAwaitableActionsToComplete);
+        }
+
+        private RuntimeStateGraph ResolveSourceGraph(Dictionary<ScriptableObject, ITransitionNode> cachedNodes)
+        {
+            return SourceNodeModel != null && cachedNodes.TryGetValue(SourceNodeModel, out var sourceNode)
+                ? sourceNode.Graph
+                : null;
+        }
+
+        private RuntimeStateGraph ResolveGraph(TransitionNodeModel targetModel, Dictionary<ScriptableObject, ITransitionNode> cachedNodes)
+        {
+            if (targetModel != null && cachedNodes.TryGetValue(targetModel, out var cachedNode))
+                return cachedNode.Graph;
+
+            return SourceNodeModel != null && cachedNodes.TryGetValue(SourceNodeModel, out var sourceNode)
+                ? sourceNode.Graph
+                : null;
+        }
+
+        private ITransitionNode ResolveReachableTarget(RuntimeStateGraph sourceGraph, ITransitionNode targetNode)
+        {
+            if (sourceGraph == null || targetNode == null || targetNode.Graph == sourceGraph)
+                return targetNode;
+
+            var graph = targetNode.Graph;
+            while (graph != null && graph.ParentGraph != sourceGraph)
+                graph = graph.ParentGraph;
+
+            return graph?.OwnerSubStateMachine != null ? graph.OwnerSubStateMachine : targetNode;
         }
 
         private Condition[] GetConditions(Actor actor, Dictionary<string, ICustomCondition> cachedCustomConditions)
         {
+            if (m_Conditions == null)
+                return new Condition[0];
+
             var result = new Condition[m_Conditions.Length];
             for (int i = 0; i < m_Conditions.Length; ++i)
             {

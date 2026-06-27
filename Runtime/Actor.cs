@@ -96,8 +96,7 @@ namespace SAS.StateMachineGraph
             controller.Initialize(m_Controller);
             m_Controller = controller;
             StateMachineController = m_Controller?.CreateStateMachine(this, stateMachineOverrideController);
-            StateMachineController.nextState = StateMachineController.DefaultState;
-            StateMachineController.CurrentState = StateMachineController.DefaultState;
+            StateMachineController?.RootGraph?.Enter();
             enabled = true;
         }
 
