@@ -2,11 +2,7 @@ namespace SAS.StateMachineGraph
 {
     internal static class TransitionNodeUtility
     {
-        internal static bool TryGetNextNode(
-            StateMachine stateMachine,
-            TransitionState[] transitionStates,
-            out ITransitionNode nextNode,
-            out TransitionState transitionState)
+        internal static bool TryGetNextNode(StateMachine stateMachine, TransitionState[] transitionStates, out ITransitionNode nextNode, out TransitionState transitionState)
         {
             nextNode = null;
             transitionState = null;

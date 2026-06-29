@@ -412,10 +412,57 @@ namespace SAS.StateMachineGraph.Editor
 
         private void MakeTranstion(BaseNode targetNode)
         {
+            if (targetNode is StateMachineNode stateMachineNode && !(targetNode is ParentStateMachineNode))
+            {
+                MakeTransitionToStateMachine(stateMachineNode);
+                Repaint();
+                return;
+            }
+
             var targetNodeModel = GetTransitionNodeModel(targetNode);
             if (targetNodeModel != null)
                 MakeTranstion(targetNode, targetNodeModel);
             Repaint();
+        }
+
+        private void MakeTransitionToStateMachine(StateMachineNode targetNode)
+        {
+            if (_transition.SourceNodeModel == null)
+                return;
+
+            var genericMenu = new GenericMenu();
+            AddStateTargetMenuItems(genericMenu, targetNode, targetNode.Value, "States");
+            AddStateMachineTargetMenuItems(genericMenu, targetNode, targetNode.Value, "StateMachines");
+            genericMenu.ShowAsContext();
+        }
+
+        private void AddStateTargetMenuItems(GenericMenu genericMenu, BaseNode targetNode, StateMachineModel stateMachineModel, string path)
+        {
+            var states = stateMachineModel.GetStates();
+            for (int i = 0; i < states.Count; ++i)
+            {
+                var state = states[i];
+                genericMenu.AddItem(new GUIContent($"{path}/{state.name}"), false, () => MakeTranstion(targetNode, state));
+            }
+
+            var childStateMachines = stateMachineModel.GetChildStateMachines();
+            for (int i = 0; i < childStateMachines.Count; ++i)
+            {
+                var childStateMachine = childStateMachines[i];
+                AddStateTargetMenuItems(genericMenu, targetNode, childStateMachine, $"{path}/{childStateMachine.name}");
+            }
+        }
+
+        private void AddStateMachineTargetMenuItems(GenericMenu genericMenu, BaseNode targetNode, StateMachineModel stateMachineModel, string path)
+        {
+            genericMenu.AddItem(new GUIContent($"{path}/{stateMachineModel.name}"), false, () => MakeTranstion(targetNode, stateMachineModel));
+
+            var childStateMachines = stateMachineModel.GetChildStateMachines();
+            for (int i = 0; i < childStateMachines.Count; ++i)
+            {
+                var childStateMachine = childStateMachines[i];
+                AddStateMachineTargetMenuItems(genericMenu, targetNode, childStateMachine, $"{path}/{stateMachineModel.name}");
+            }
         }
 
         private void MakeTranstion(BaseNode targetNode, TransitionNodeModel targetStateModel)

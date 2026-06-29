@@ -12,6 +12,7 @@ namespace SAS.StateMachineGraph
         private float ExitTime { get; }
         public bool WaitForAwaitableActionsToComplete { get; }
         private Condition[] Conditions { get; }
+        private TransitionEntryOverride[] EntryOverrides { get; }
 
         internal float TimeElapsed = 0;
 
@@ -20,6 +21,8 @@ namespace SAS.StateMachineGraph
             var timeElapsed = !HasExitTime || TimeElapsed > ExitTime;
             TimeElapsed += Time.deltaTime;
             node = timeElapsed && ShouldTransition(stateMachine) ? TargetNode : null;
+            if (node != null)
+                ApplyEntryOverrides();
             return node != null;
         }
 
@@ -46,13 +49,23 @@ namespace SAS.StateMachineGraph
                 Conditions[i].ResetTrigger(stateMachine);
         }
 
-        internal TransitionState(ITransitionNode node, in Condition[] conditions, bool haxExitTime, float exitTime, bool waitForAwaitableActionsToComplete)
+        internal TransitionState(ITransitionNode node, in Condition[] conditions, bool haxExitTime, float exitTime, bool waitForAwaitableActionsToComplete, TransitionEntryOverride[] entryOverrides = null)
         {
             TargetNode = node;
             HasExitTime = haxExitTime;
             ExitTime = exitTime;
             Conditions = conditions;
             WaitForAwaitableActionsToComplete = waitForAwaitableActionsToComplete;
+            EntryOverrides = entryOverrides;
+        }
+
+        private void ApplyEntryOverrides()
+        {
+            if (EntryOverrides == null)
+                return;
+
+            for (int i = 0; i < EntryOverrides.Length; ++i)
+                EntryOverrides[i].Apply();
         }
 
 

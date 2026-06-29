@@ -22,11 +22,11 @@ namespace SAS.StateMachineGraph
         internal bool IsComplete { get; private set; }
         internal State CurrentState => CurrentNode?.ActiveState;
 
-        internal void Enter()
+        internal void Enter(ITransitionNode entryOverride = null)
         {
             IsComplete = false;
             NextNode = null;
-            SetCurrentNode(EntryNode ?? DefaultNode);
+            SetCurrentNode(entryOverride != null && entryOverride.Graph == this ? entryOverride : EntryNode ?? DefaultNode);
             ResolveTransientNodes();
         }
 

@@ -4,6 +4,7 @@ namespace SAS.StateMachineGraph
     {
         private readonly StateMachine _stateMachine;
         private ITransitionNode _nextNode;
+        private ITransitionNode _entryOverride;
         private TransitionState _transitionState;
 
         internal SubStateMachine(StateMachine stateMachine, RuntimeStateGraph graph, RuntimeStateGraph childGraph, string name)
@@ -22,11 +23,18 @@ namespace SAS.StateMachineGraph
         public State ActiveState => ChildGraph.CurrentState;
         public TransitionState[] TransitionStates { get; set; }
 
+        internal void SetEntryOverride(ITransitionNode entryOverride)
+        {
+            _entryOverride = entryOverride;
+        }
+
         public void OnEnter()
         {
             _nextNode = null;
             _transitionState = null;
-            ChildGraph.Enter();
+            var entryOverride = _entryOverride;
+            _entryOverride = null;
+            ChildGraph.Enter(entryOverride);
         }
 
         public bool OnExit()

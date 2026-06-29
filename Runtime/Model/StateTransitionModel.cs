@@ -30,9 +30,9 @@ namespace SAS.StateMachineGraph
 
             var sourceGraph = ResolveSourceGraph(cachedNodes);
             var node = targetModel.GetNode(stateMachine, ResolveGraph(targetModel, cachedNodes), cachedNodes, cachedActions, cachedTriggers);
-            node = ResolveReachableTarget(sourceGraph, node);
+            var entryOverrides = ResolveReachableTarget(sourceGraph, ref node);
             var conditions = GetConditions(stateMachine.Actor, cachedTriggers);
-            return new TransitionState(node, conditions, m_HasExitTime, m_ExitTime, m_WaitForAwaitableActionsToComplete);
+            return new TransitionState(node, conditions, m_HasExitTime, m_ExitTime, m_WaitForAwaitableActionsToComplete, entryOverrides);
         }
 
         private RuntimeStateGraph ResolveSourceGraph(Dictionary<ScriptableObject, ITransitionNode> cachedNodes)
@@ -52,16 +52,33 @@ namespace SAS.StateMachineGraph
                 : null;
         }
 
-        private ITransitionNode ResolveReachableTarget(RuntimeStateGraph sourceGraph, ITransitionNode targetNode)
+        private TransitionEntryOverride[] ResolveReachableTarget(RuntimeStateGraph sourceGraph, ref ITransitionNode targetNode)
         {
             if (sourceGraph == null || targetNode == null || targetNode.Graph == sourceGraph)
-                return targetNode;
+                return null;
+
+            var entryOverrides = new List<TransitionEntryOverride>();
+            var entryTarget = targetNode;
 
             var graph = targetNode.Graph;
             while (graph != null && graph.ParentGraph != sourceGraph)
-                graph = graph.ParentGraph;
+            {
+                if (graph.OwnerSubStateMachine != null)
+                {
+                    entryOverrides.Add(new TransitionEntryOverride(graph.OwnerSubStateMachine, entryTarget));
+                    entryTarget = graph.OwnerSubStateMachine;
+                }
 
-            return graph?.OwnerSubStateMachine != null ? graph.OwnerSubStateMachine : targetNode;
+                graph = graph.ParentGraph;
+            }
+
+            if (graph?.OwnerSubStateMachine == null)
+                return entryOverrides.Count > 0 ? entryOverrides.ToArray() : null;
+
+            entryOverrides.Add(new TransitionEntryOverride(graph.OwnerSubStateMachine, entryTarget));
+            targetNode = graph.OwnerSubStateMachine;
+
+            return entryOverrides.ToArray();
         }
 
         private Condition[] GetConditions(Actor actor, Dictionary<string, ICustomCondition> cachedCustomConditions)
