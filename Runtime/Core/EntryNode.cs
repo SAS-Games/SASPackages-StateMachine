@@ -44,14 +44,14 @@ namespace SAS.StateMachineGraph
 
         public void TryTransition()
         {
-            if (TransitionNodeUtility.TryGetNextNode(_stateMachine, TransitionStates, out var nextNode, out _))
+            if (TransitionNodeUtility.TryGetNextNode(_stateMachine, this, TransitionStates, out var nextNode, out var transitionState))
             {
-                Graph.QueueTransition(nextNode);
+                Graph.QueueTransition(nextNode, transitionState, this);
                 return;
             }
 
             if (FallbackTarget != null && FallbackTarget != this)
-                Graph.QueueTransition(FallbackTarget);
+                Graph.QueueTransition(FallbackTarget, null, this);
         }
 
         public void ResetTrigger()

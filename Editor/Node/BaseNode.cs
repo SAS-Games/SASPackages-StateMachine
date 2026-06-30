@@ -18,6 +18,8 @@ namespace SAS.StateMachineGraph.Editor
 
         public Port endPort;
         public Port startPort;
+        private string _debugActorName = string.Empty;
+        private string _debugGraphName = string.Empty;
 
         protected abstract void ProcessContextMenu();
         protected abstract void ProcessMouseUp(BaseNode baseNode, Event e);
@@ -28,7 +30,6 @@ namespace SAS.StateMachineGraph.Editor
         public BaseNode(Object targetObject, Vector2Int position, int width, int height)
         {
             TargetObject = targetObject;
-            Position = (Vector3Int)position;
             rect = new RectInt(position.x, position.y, width, height);
             endPort = new Port(this, 1);
             startPort = new Port(this, 2);
@@ -41,6 +42,53 @@ namespace SAS.StateMachineGraph.Editor
             endPort.Draw();
             startPort.Draw();
             GUI.Box(rect.ToRect(), $"{Prefix} {TargetObject?.name}", Style);
+        }
+
+        internal void SetDebugContext(Actor actor, string graphName)
+        {
+            _debugActorName = StateMachineDebugNodeKey.GetActorName(actor);
+            if (string.IsNullOrEmpty(_debugActorName))
+                _debugActorName = StateMachineDebugSession.Instance.CurrentActorName;
+
+            _debugGraphName = graphName;
+            if (string.IsNullOrEmpty(_debugGraphName))
+                _debugGraphName = StateMachineDebugSession.Instance.CurrentGraphName;
+        }
+
+        protected void AddDebugBreakpointMenu(GenericMenu genericMenu)
+        {
+            if (this is ParentStateMachineNode)
+                return;
+
+            var nodeKey = StateMachineDebugNodeKey.Create(_debugActorName, _debugGraphName, TargetObject);
+            if (string.IsNullOrEmpty(nodeKey))
+            {
+                genericMenu.AddDisabledItem(new GUIContent("Breakpoints/State Enter"));
+                genericMenu.AddDisabledItem(new GUIContent("Breakpoints/State Exit"));
+                return;
+            }
+
+            var session = StateMachineDebugSession.Instance;
+            var hasEnterBreakpoint = session.HasBreakpoint(nodeKey, StateMachineDebugEventType.NodeEnter);
+            var hasExitBreakpoint = session.HasBreakpoint(nodeKey, StateMachineDebugEventType.NodeExit);
+            genericMenu.AddItem(
+                new GUIContent("Breakpoints/State Enter"),
+                hasEnterBreakpoint,
+                () => session.ToggleBreakpoint(nodeKey, StateMachineDebugEventType.NodeEnter));
+            genericMenu.AddItem(
+                new GUIContent("Breakpoints/State Exit"),
+                hasExitBreakpoint,
+                () => session.ToggleBreakpoint(nodeKey, StateMachineDebugEventType.NodeExit));
+        }
+
+        private void ProcessDebugContextMenu()
+        {
+            if (this is ParentStateMachineNode)
+                return;
+
+            GenericMenu genericMenu = new GenericMenu();
+            AddDebugBreakpointMenu(genericMenu);
+            genericMenu.ShowAsContext();
         }
 
         public virtual void Drag(Vector2Int delta)
@@ -105,7 +153,11 @@ namespace SAS.StateMachineGraph.Editor
                         else if (e.button == 1)
                         {
                             if (isReadOnlyMode)
+                            {
+                                ProcessDebugContextMenu();
+                                e.Use();
                                 return false;
+                            }
                             ProcessContextMenu();
                             e.Use();
                         }
@@ -114,7 +166,7 @@ namespace SAS.StateMachineGraph.Editor
                     break;
 
                 case EventType.MouseDrag:
-                    if (e.button == 0 && _isDragged)
+                    if (e.button == 0 && _isDragged && !isReadOnlyMode)
                     {
                         Drag(e.delta.ToVector2Int());
                         return true;

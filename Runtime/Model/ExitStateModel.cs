@@ -8,7 +8,9 @@ namespace SAS.StateMachineGraph
 #if UNITY_EDITOR
         [SerializeField] private Vector3Int m_Position;
 #endif
+#pragma warning disable 0414
         [SerializeField] private StateTransitionModel[] m_Transitions = null;
+#pragma warning restore 0414
 
         internal override ITransitionNode GetNode(
             StateMachine stateMachine,

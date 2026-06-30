@@ -4,6 +4,11 @@ namespace SAS.StateMachineGraph
     {
         internal static bool TryGetNextNode(StateMachine stateMachine, TransitionState[] transitionStates, out ITransitionNode nextNode, out TransitionState transitionState)
         {
+            return TryGetNextNode(stateMachine, null, transitionStates, out nextNode, out transitionState);
+        }
+
+        internal static bool TryGetNextNode(StateMachine stateMachine, ITransitionNode sourceNode, TransitionState[] transitionStates, out ITransitionNode nextNode, out TransitionState transitionState)
+        {
             nextNode = null;
             transitionState = null;
 
@@ -12,9 +17,17 @@ namespace SAS.StateMachineGraph
 
             for (int i = 0; i < transitionStates.Length; ++i)
             {
-                if (transitionStates[i] != null && transitionStates[i].TryGetTransition(stateMachine, out nextNode))
+                var currentTransition = transitionStates[i];
+                if (currentTransition == null)
+                    continue;
+
+                StateMachineDebugRuntime.NotifyBeforeTransitionEvaluation(stateMachine.Actor, sourceNode?.Graph, sourceNode, currentTransition);
+                var transitionFound = currentTransition.TryGetTransition(stateMachine, out nextNode);
+                StateMachineDebugRuntime.NotifyAfterTransitionEvaluation(stateMachine.Actor, sourceNode?.Graph, sourceNode, currentTransition, nextNode, transitionFound);
+
+                if (transitionFound)
                 {
-                    transitionState = transitionStates[i];
+                    transitionState = currentTransition;
                     ResetExitTime(transitionStates);
                     return true;
                 }

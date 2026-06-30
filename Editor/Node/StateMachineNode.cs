@@ -40,6 +40,7 @@ namespace SAS.StateMachineGraph.Editor
             genericMenu.AddItem(new GUIContent("Make Transition"), false, () => _startTransition.Invoke(this));
             genericMenu.AddItem(new GUIContent("Delete"), false, () => _removeNode?.Invoke(this));
             genericMenu.AddItem(new GUIContent("Duplicate"), false, () => _duplicateNode?.Invoke(this));
+            AddDebugBreakpointMenu(genericMenu);
             genericMenu.ShowAsContext();
         }
 

@@ -23,6 +23,7 @@ namespace SAS.StateMachineGraph.Editor
         {
             GenericMenu genericMenu = new GenericMenu();
             genericMenu.AddItem(new GUIContent("Make Transition"), false, () => _startTransition?.Invoke(this));
+            AddDebugBreakpointMenu(genericMenu);
             genericMenu.ShowAsContext();
         }
 

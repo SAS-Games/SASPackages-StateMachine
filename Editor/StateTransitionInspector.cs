@@ -42,6 +42,7 @@ namespace SAS.StateMachineGraph.Editor
         private int _transitionCount;
         public static int SelectedTransitionIndex = -1;
         private Type[] _allCustomConditionTypes;
+        private bool IsReadOnlyTarget => StateMachineEditorWindow.IsReadOnlyMode || string.IsNullOrEmpty(AssetDatabase.GetAssetPath(target));
 
         private void OnEnable()
         {
@@ -50,14 +51,17 @@ namespace SAS.StateMachineGraph.Editor
             var runtimeStateMachineController = AssetDatabase.LoadMainAssetAtPath(AssetDatabase.GetAssetPath(target)) as RuntimeStateMachineController;
             _transitionConditions = new ReorderableList(_stateTransitionModelSO, _stateTransitionModelSO.FindProperty("m_Conditions"), true, true, true, true);
 
-            var transitionStateModelSO = ((StateTransitionModel)target).serializedObject();
-            var transition = (StateTransitionModel)target;
-            var sourceState = transition.SourceNodeModel;
-            var targetState = transition.TargetNodeModel;
-            _sourceStateModelSO = new SerializedObject(sourceState);
-            _transitionCount = sourceState.GetTransitionCount(targetState);
+            var transition = target as StateTransitionModel;
+            var sourceState = transition?.SourceNodeModel;
+            var targetState = transition?.TargetNodeModel;
+            if (sourceState != null)
+            {
+                _sourceStateModelSO = new SerializedObject(sourceState);
+                _transitionCount = targetState != null ? sourceState.GetTransitionCount(targetState) : 0;
+                Show(runtimeStateMachineController, sourceState.serializedObject());
+            }
+
             DrawConditionBlock();
-            Show(runtimeStateMachineController, sourceState.serializedObject());
         }
 
         protected override void OnHeaderGUI()
@@ -71,7 +75,7 @@ namespace SAS.StateMachineGraph.Editor
 
         public override void OnInspectorGUI()
         {
-            using (new EditorGUI.DisabledScope(StateMachineEditorWindow.IsReadOnlyMode))
+            using (new EditorGUI.DisabledScope(IsReadOnlyTarget))
             {
                 _allTranstionsToTargetState?.DoLayoutList();
 
@@ -197,6 +201,9 @@ namespace SAS.StateMachineGraph.Editor
 
         private void Show(RuntimeStateMachineController runtimeStateMachineController, SerializedObject stateModelSO)
         {
+            if (runtimeStateMachineController == null || stateModelSO == null)
+                return;
+
             if (SelectedTransitionIndex != -1)
             {
                 _stateMachineSO = runtimeStateMachineController.ToSerializedObject();
@@ -208,6 +215,9 @@ namespace SAS.StateMachineGraph.Editor
 
         private int GetParameterType(int index)
         {
+            if (_stateMachineSO == null)
+                return 10;
+
             var parameters = _stateMachineSO.FindProperty("_parameters");
             try
             {
@@ -227,23 +237,33 @@ namespace SAS.StateMachineGraph.Editor
 
         private int GetParameterIndex(string name)
         {
+            if (_parametersList == null)
+                return -1;
+
             return System.Array.IndexOf(_parametersList, name);
         }
 
         private void FilterTransitions(int index, SerializedObject stateModelSO)
         {
             var allTranstionFromThisState = stateModelSO.FindProperty("m_Transitions");
-            if (allTranstionFromThisState?.arraySize > 0)
+            if (allTranstionFromThisState?.arraySize > 0 && index >= 0 && index < allTranstionFromThisState.arraySize)
             {
                 var element =allTranstionFromThisState.GetArrayElementAtIndex(index);
-                var elementSO = ((StateTransitionModel)element.objectReferenceValue).serializedObject();
-                    var targetState = ((StateTransitionModel)element.objectReferenceValue).TargetNodeModel;
+                var selectedTransition = element.objectReferenceValue as StateTransitionModel;
+                if (selectedTransition == null)
+                    return;
+
+                var targetState = selectedTransition.TargetNodeModel;
                     var allTranstionsToTargetState = new List<SerializedProperty>();
 
                     for (int i = 0; i < allTranstionFromThisState.arraySize; ++i)
                     {
                         element = allTranstionFromThisState.GetArrayElementAtIndex(i);
-                        var state = ((StateTransitionModel)element.objectReferenceValue).TargetNodeModel;
+                        var transition = element.objectReferenceValue as StateTransitionModel;
+                        if (transition == null)
+                            continue;
+
+                        var state = transition.TargetNodeModel;
                         if (targetState == state)
                             allTranstionsToTargetState.Add(element);
                     }
@@ -263,23 +283,27 @@ namespace SAS.StateMachineGraph.Editor
 
             _allTranstionsToTargetState.onSelectCallback = list =>
             {
-                var stateTransitionModel = (StateTransitionModel)allTranstionsToTargetState[list.index].objectReferenceValue;
+                var stateTransitionModel = allTranstionsToTargetState[list.index].objectReferenceValue as StateTransitionModel;
+                if (stateTransitionModel == null)
+                    return;
+
                 SelectedTransitionIndex = list.index;
                 Selection.activeObject = stateTransitionModel;
             };
 
             _allTranstionsToTargetState.onRemoveCallback = list =>
             {
-                var selectedStateTransitionModel = (StateTransitionModel)allTranstionsToTargetState[list.index].objectReferenceValue;
+                var selectedStateTransitionModel = allTranstionsToTargetState[list.index].objectReferenceValue as StateTransitionModel;
+                if (selectedStateTransitionModel == null)
+                    return;
+
                 allTranstionsToTargetState.RemoveAt(list.index);
                 SelectedTransitionIndex = list.index - 1;
                 var allTranstionFromThisState = stateModelSO.FindProperty("m_Transitions");
                
                 for (int i = 0; i < allTranstionFromThisState.arraySize; ++i)
                 {
-                    var element = allTranstionFromThisState.GetArrayElementAtIndex(i).objectReferenceValue;
-
-                    var stateTransitionModel = ((StateTransitionModel)allTranstionFromThisState.GetArrayElementAtIndex(i).objectReferenceValue);
+                    var stateTransitionModel = allTranstionFromThisState.GetArrayElementAtIndex(i).objectReferenceValue as StateTransitionModel;
                     if (stateTransitionModel == selectedStateTransitionModel)
                     {
                         allTranstionFromThisState.DeleteArrayElementAtIndex(i);
@@ -296,16 +320,16 @@ namespace SAS.StateMachineGraph.Editor
                     }
                 }
 
-                if (SelectedTransitionIndex > 0)
-                    Selection.activeObject = (StateTransitionModel)allTranstionsToTargetState[list.index - 1].objectReferenceValue;
+                if (SelectedTransitionIndex > 0 && list.index - 1 >= 0 && list.index - 1 < allTranstionsToTargetState.Count)
+                    Selection.activeObject = allTranstionsToTargetState[list.index - 1].objectReferenceValue as StateTransitionModel;
                 else
                     Selection.activeObject = null;
             };
 
             _allTranstionsToTargetState.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
             {
-                var transition = (StateTransitionModel)allTranstionsToTargetState[index].objectReferenceValue;
-                var targetNode = transition.TargetNodeModel;
+                var transition = allTranstionsToTargetState[index].objectReferenceValue as StateTransitionModel;
+                var targetNode = transition != null ? transition.TargetNodeModel : null;
                 string val = stateModelSO.targetObject.name + "  ->  " + (targetNode != null ? targetNode.name : "None");
                 rect.y += 2;
                 EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight), val);
@@ -315,7 +339,7 @@ namespace SAS.StateMachineGraph.Editor
         private void ApplyConditionModifiedProperties()
         {
             _stateTransitionModelSO.ApplyModifiedProperties();
-            _sourceStateModelSO.ApplyModifiedProperties();
+            _sourceStateModelSO?.ApplyModifiedProperties();
         }
 
         private void SetSelectedCustomTrigger(SerializedProperty sp, int index)

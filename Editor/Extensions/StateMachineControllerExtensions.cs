@@ -77,7 +77,10 @@ namespace SAS.StateMachineGraph.Editor
             var allStateModels = new List<StateModel>();
             var stateMachineModels = runtimeStateMachineController.GetAllStateMachines();
             for (int i = 0; i < stateMachineModels.Count; ++i)
-                allStateModels.AddRange(stateMachineModels[i].GetStates());
+            {
+                if (stateMachineModels[i] != null)
+                    allStateModels.AddRange(stateMachineModels[i].GetStates().Where(stateModel => stateModel != null));
+            }
 
             return allStateModels;
         }
@@ -88,8 +91,11 @@ namespace SAS.StateMachineGraph.Editor
             var stateMachineModels = runtimeStateMachineController.GetAllStateMachines();
             for (int i = 0; i < stateMachineModels.Count; ++i)
             {
+                if (stateMachineModels[i] == null)
+                    continue;
+
                 allNodeModels.Add(stateMachineModels[i]);
-                allNodeModels.AddRange(stateMachineModels[i].GetStates());
+                allNodeModels.AddRange(stateMachineModels[i].GetStates().Where(stateModel => stateModel != null));
 
                 var entryNode = stateMachineModels[i].GetEntryNode();
                 if (entryNode != null)
@@ -109,6 +115,9 @@ namespace SAS.StateMachineGraph.Editor
 
         internal static void SyncRootEntryTransitionToDefault(this RuntimeStateMachineController runtimeStateMachineController)
         {
+            if (!runtimeStateMachineController.IsAssetBacked())
+                return;
+
             var rootStateMachine = runtimeStateMachineController.BaseStateMachineModel();
             var defaultState = runtimeStateMachineController.GetDefaultState();
             if (rootStateMachine == null || defaultState == null)
@@ -130,8 +139,12 @@ namespace SAS.StateMachineGraph.Editor
         {
             var baseStateMachineModel = runtimeStateMachineController.BaseStateMachineModel();
 
-            List<StateMachineModel> ret = new List<StateMachineModel>() { baseStateMachineModel };
-            ret.AddRange(baseStateMachineModel.GetStateMachineRecursivily());
+            List<StateMachineModel> ret = new List<StateMachineModel>();
+            if (baseStateMachineModel == null)
+                return ret;
+
+            ret.Add(baseStateMachineModel);
+            ret.AddRange(baseStateMachineModel.GetStateMachineRecursivily().Where(stateMachineModel => stateMachineModel != null));
             return ret;
         }
 
@@ -151,7 +164,10 @@ namespace SAS.StateMachineGraph.Editor
             var stateMachineModels = runtimeStateMachineController.GetAllStateMachines();
             foreach(var stateMachineModel in stateMachineModels)
             {
-                if (stateMachineModel.GetStates().Find(stateModel=> stateModel.State == state))
+                if (stateMachineModel == null)
+                    continue;
+
+                if (stateMachineModel.GetStates().Find(stateModel => stateModel != null && stateModel.State == state))
                     return stateMachineModel;
             }
 
@@ -174,6 +190,9 @@ namespace SAS.StateMachineGraph.Editor
 
         public static StateModel Clone(this StateModel stateModel, RuntimeStateMachineController runtimeStateMachineController, StateMachineModel stateMachineModel)
         {
+            if (!runtimeStateMachineController.IsAssetBacked())
+                return null;
+
             var clone = Object.Instantiate(stateModel);
             clone.name = stateMachineModel.MakeUniqueStateName(stateModel.name);
             runtimeStateMachineController.CreateStateModelAsset(stateMachineModel, clone, stateModel.GetPosition() + new Vector3Int(35, 65));
@@ -183,6 +202,9 @@ namespace SAS.StateMachineGraph.Editor
 
         public static StateModel AddState(this RuntimeStateMachineController runtimeStateMachineController, StateMachineModel stateMachineModel, string name, Vector3Int position)
         {
+            if (!runtimeStateMachineController.IsAssetBacked() || stateMachineModel == null)
+                return null;
+
             runtimeStateMachineController.EnsureEntryExitNodes(stateMachineModel);
             var stateModel = ScriptableObject.CreateInstance<StateModel>();
             stateModel.name = stateMachineModel.MakeUniqueStateName(name);
@@ -197,6 +219,9 @@ namespace SAS.StateMachineGraph.Editor
 
         private static void CreateStateModelAsset(this RuntimeStateMachineController runtimeStateMachineController, StateMachineModel stateMachineModel, StateModel stateModel, Vector3Int position)
         {
+            if (!runtimeStateMachineController.IsAssetBacked() || stateMachineModel == null || stateModel == null)
+                return;
+
             runtimeStateMachineController.AddObjectToAsset(stateModel);
             stateModel.SetPosition(position);
             stateMachineModel.AddState(stateModel);
@@ -300,6 +325,9 @@ namespace SAS.StateMachineGraph.Editor
 
         internal static void SetDefaultNode(this RuntimeStateMachineController runtimeStateMachineController, StateModel stateModel)
         {
+            if (!runtimeStateMachineController.IsAssetBacked())
+                return;
+
             var runtimeStateMachineControllerSO = runtimeStateMachineController.ToSerializedObject();
             runtimeStateMachineControllerSO.FindProperty(DefaultStateModelVar).objectReferenceValue = stateModel;
             runtimeStateMachineControllerSO.ApplyModifiedProperties();
@@ -343,9 +371,123 @@ namespace SAS.StateMachineGraph.Editor
 
         internal static void AddObjectToAsset(this RuntimeStateMachineController runtimeStateMachineController, Object objectToAdd)
         {
+            if (runtimeStateMachineController == null || objectToAdd == null)
+                return;
+
+            var assetPath = AssetDatabase.GetAssetPath(runtimeStateMachineController);
+            if (string.IsNullOrEmpty(assetPath))
+            {
+                Debug.LogWarning($"Cannot add '{objectToAdd.name}' to '{runtimeStateMachineController.name}' because the state machine controller is not an asset.");
+                return;
+            }
+
             objectToAdd.hideFlags = HideFlags.HideInHierarchy;
-            AssetDatabase.AddObjectToAsset(objectToAdd, AssetDatabase.GetAssetPath(runtimeStateMachineController));
+            AssetDatabase.AddObjectToAsset(objectToAdd, assetPath);
             AssetDatabase.SaveAssets();
+        }
+
+        internal static bool IsAssetBacked(this RuntimeStateMachineController runtimeStateMachineController)
+        {
+            return runtimeStateMachineController != null &&
+                   !string.IsNullOrEmpty(AssetDatabase.GetAssetPath(runtimeStateMachineController));
+        }
+
+        internal static RuntimeStateMachineController ResolveAssetBackedController(this RuntimeStateMachineController runtimeStateMachineController)
+        {
+            if (runtimeStateMachineController == null)
+                return null;
+
+            if (runtimeStateMachineController is StateMachineOverrideController overrideController &&
+                overrideController.runtimeStateMachineController != null)
+            {
+                runtimeStateMachineController = overrideController.runtimeStateMachineController;
+            }
+
+            if (runtimeStateMachineController.IsAssetBacked())
+                return runtimeStateMachineController;
+
+            var assetPath = GetControllerAssetPathFromModel(runtimeStateMachineController.BaseStateMachineModel());
+            if (string.IsNullOrEmpty(assetPath))
+                assetPath = GetControllerAssetPathFromModel(runtimeStateMachineController.AnyStateModel());
+            if (string.IsNullOrEmpty(assetPath))
+                assetPath = GetControllerAssetPathFromModel(runtimeStateMachineController.GetDefaultState());
+
+            if (string.IsNullOrEmpty(assetPath))
+                return runtimeStateMachineController;
+
+            var assetController = AssetDatabase.LoadMainAssetAtPath(assetPath) as RuntimeStateMachineController;
+            if (assetController is StateMachineOverrideController assetOverrideController &&
+                assetOverrideController.runtimeStateMachineController != null)
+            {
+                return assetOverrideController.runtimeStateMachineController;
+            }
+
+            return assetController != null ? assetController : runtimeStateMachineController;
+        }
+
+        internal static StateMachineModel ResolveAssetBackedStateMachineModel(
+            this RuntimeStateMachineController runtimeStateMachineController,
+            StateMachineModel stateMachineModel)
+        {
+            if (stateMachineModel == null)
+                return null;
+
+            if (!string.IsNullOrEmpty(AssetDatabase.GetAssetPath(stateMachineModel)))
+                return stateMachineModel;
+
+            var assetController = runtimeStateMachineController.ResolveAssetBackedController();
+            if (assetController == null || !assetController.IsAssetBacked())
+                return stateMachineModel;
+
+            var stateMachinePath = GetStateMachinePath(stateMachineModel);
+            var allStateMachines = assetController.GetAllStateMachines();
+            var assetStateMachine = allStateMachines.FirstOrDefault(candidate =>
+                GetStateMachinePath(candidate) == stateMachinePath);
+
+            if (assetStateMachine != null)
+                return assetStateMachine;
+
+            return allStateMachines.FirstOrDefault(candidate => candidate != null && candidate.name == stateMachineModel.name) ??
+                   stateMachineModel;
+        }
+
+        internal static EntryStateModel GetAssetBackedEntryNode(
+            this RuntimeStateMachineController runtimeStateMachineController,
+            StateMachineModel stateMachineModel)
+        {
+            return runtimeStateMachineController
+                .ResolveAssetBackedStateMachineModel(stateMachineModel)
+                ?.GetEntryNode();
+        }
+
+        internal static ExitStateModel GetAssetBackedExitNode(
+            this RuntimeStateMachineController runtimeStateMachineController,
+            StateMachineModel stateMachineModel)
+        {
+            return runtimeStateMachineController
+                .ResolveAssetBackedStateMachineModel(stateMachineModel)
+                ?.GetExitNode();
+        }
+
+        private static string GetStateMachinePath(StateMachineModel stateMachineModel)
+        {
+            if (stateMachineModel == null)
+                return string.Empty;
+
+            var names = new Stack<string>();
+            var current = stateMachineModel;
+            while (current != null)
+            {
+                names.Push(current.name);
+                current = current.GetParent();
+            }
+
+            return string.Join("/", names.ToArray());
+        }
+
+        private static string GetControllerAssetPathFromModel(Object model)
+        {
+            return model != null ? AssetDatabase.GetAssetPath(model) : string.Empty;
         }
 
         internal static void HideInHierarchySubObjectsOfType<T>(this RuntimeStateMachineController runtimeStateMachineController) where T : Object

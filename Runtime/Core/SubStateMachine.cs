@@ -42,6 +42,7 @@ namespace SAS.StateMachineGraph
             if (!ChildGraph.IsComplete)
                 ChildGraph.CurrentNode?.OnExit();
 
+            StateMachineDebugRuntime.NotifyNodeExit(_stateMachine.Actor, Graph, this);
             return true;
         }
 
@@ -74,12 +75,12 @@ namespace SAS.StateMachineGraph
             }
 
             if (_nextNode == null || _nextNode == this)
-                TransitionNodeUtility.TryGetNextNode(_stateMachine, TransitionStates, out _nextNode, out _transitionState);
+                TransitionNodeUtility.TryGetNextNode(_stateMachine, this, TransitionStates, out _nextNode, out _transitionState);
 
             if (_nextNode == null)
                 return;
 
-            Graph.QueueTransition(_nextNode);
+            Graph.QueueTransition(_nextNode, _transitionState, this);
             _nextNode = null;
             _transitionState = null;
         }

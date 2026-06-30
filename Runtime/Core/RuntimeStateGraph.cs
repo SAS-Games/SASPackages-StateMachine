@@ -33,13 +33,15 @@ namespace SAS.StateMachineGraph
         internal void SetCurrentNode(ITransitionNode node)
         {
             CurrentNode = node;
+            StateMachineDebugRuntime.NotifyNodeEnter(StateMachine.Actor, this, CurrentNode);
             CurrentNode?.OnEnter();
             IsComplete = CurrentNode == ExitNode;
         }
 
-        internal void QueueTransition(ITransitionNode node)
+        internal void QueueTransition(ITransitionNode node, TransitionState transitionState = null, ITransitionNode sourceNode = null)
         {
             NextNode = node;
+            StateMachineDebugRuntime.NotifyTransitionTaken(StateMachine.Actor, this, sourceNode ?? CurrentNode, transitionState, node);
         }
 
         internal void OnEarlyUpdate()

@@ -1,4 +1,5 @@
 using System;
+using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -21,6 +22,9 @@ namespace SAS.StateMachineGraph.Editor
 
         protected override void ProcessContextMenu()
         {
+            GenericMenu genericMenu = new GenericMenu();
+            AddDebugBreakpointMenu(genericMenu);
+            genericMenu.ShowAsContext();
         }
 
         protected override void ProcessMouseUp(BaseNode baseNode, Event e)

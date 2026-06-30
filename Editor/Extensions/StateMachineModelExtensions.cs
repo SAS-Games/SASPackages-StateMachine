@@ -18,6 +18,9 @@ namespace SAS.StateMachineGraph.Editor
 
         public static StateMachineModel AddChildStateMachine(this RuntimeStateMachineController runtimeStateMachineController, StateMachineModel stateMachineModel, string name, Vector3Int position)
         {
+            if (!runtimeStateMachineController.IsAssetBacked())
+                return null;
+
             StateMachineModel childStateMachine = ScriptableObject.CreateInstance<StateMachineModel>();
             childStateMachine.name = stateMachineModel.MakeUniqueStateMachineName(name);
 
@@ -31,6 +34,9 @@ namespace SAS.StateMachineGraph.Editor
 
         internal static void EnsureEntryExitNodes(this RuntimeStateMachineController runtimeStateMachineController, StateMachineModel stateMachineModel)
         {
+            if (!runtimeStateMachineController.IsAssetBacked() || stateMachineModel == null)
+                return;
+
             var stateMachineModelSO = new SerializedObject(stateMachineModel);
             var entryNodeProp = stateMachineModelSO.FindProperty(EntryNodeVar);
             var exitNodeProp = stateMachineModelSO.FindProperty(ExitNodeVar);
@@ -235,7 +241,11 @@ namespace SAS.StateMachineGraph.Editor
             var childStateMachinesProp = stateMachineModelSO.FindProperty(ChildStateMachinesVar);
             var usedNames = new List<string>();
             for (int i = 0; i < childStateMachinesProp.arraySize; ++i)
-                usedNames.Add(childStateMachinesProp.GetArrayElementAtIndex(i).objectReferenceValue.name);
+            {
+                var childStateMachine = childStateMachinesProp.GetArrayElementAtIndex(i).objectReferenceValue;
+                if (childStateMachine != null)
+                    usedNames.Add(childStateMachine.name);
+            }
 
             return usedNames;
         }
@@ -247,7 +257,11 @@ namespace SAS.StateMachineGraph.Editor
 
             var childStateMachines = new List<StateMachineModel>();
             for (int i = 0; i < childStateMachinesProp.arraySize; ++i)
-                childStateMachines.Add(childStateMachinesProp.GetArrayElementAtIndex(i).objectReferenceValue as StateMachineModel);
+            {
+                var childStateMachine = childStateMachinesProp.GetArrayElementAtIndex(i).objectReferenceValue as StateMachineModel;
+                if (childStateMachine != null)
+                    childStateMachines.Add(childStateMachine);
+            }
 
             return childStateMachines;
         }
@@ -259,7 +273,10 @@ namespace SAS.StateMachineGraph.Editor
             stateMachineModels.AddRange(childStateMachines);
 
             for (int i = 0; i < childStateMachines.Count; i++)
-                stateMachineModels.AddRange(childStateMachines[i].GetStateMachineRecursivily());
+            {
+                if (childStateMachines[i] != null)
+                    stateMachineModels.AddRange(childStateMachines[i].GetStateMachineRecursivily());
+            }
 
             return stateMachineModels;
         }
@@ -275,7 +292,10 @@ namespace SAS.StateMachineGraph.Editor
             var childStateMachinesModel = new List<StateMachineModel>() { stateMachineModel };
             childStateMachinesModel.AddRange(stateMachineModel.GetStateMachineRecursivily());
             foreach (var csmm in childStateMachinesModel)
-                stateModels.AddRange(csmm.GetStates());
+            {
+                if (csmm != null)
+                    stateModels.AddRange(csmm.GetStates());
+            }
 
             return stateModels;
         }
@@ -287,15 +307,26 @@ namespace SAS.StateMachineGraph.Editor
 
             var stateModels = new List<StateModel>();
             for (int i = 0; i < stateModelsProp.arraySize; ++i)
-                stateModels.Add(stateModelsProp.GetArrayElementAtIndex(i).objectReferenceValue as StateModel);
+            {
+                var stateModel = stateModelsProp.GetArrayElementAtIndex(i).objectReferenceValue as StateModel;
+                if (stateModel != null)
+                    stateModels.Add(stateModel);
+            }
 
             return stateModels;
         }
 
         internal static StateMachineModel CloneMachineRecursivily(this StateMachineModel stateMachineModel, RuntimeStateMachineController runtimeStateMachineController, StateMachineModel parentStateModel, Vector3Int position)
         {
+            if (!runtimeStateMachineController.IsAssetBacked() || stateMachineModel == null || parentStateModel == null)
+                return null;
+
             var childStateMachines = stateMachineModel.GetChildStateMachines();
             var clonedStateMachine = runtimeStateMachineController.AddChildStateMachine(parentStateModel, stateMachineModel.name, position);
+            if (clonedStateMachine == null)
+                return null;
+
+            stateMachineModel.CopyEntryExitLayoutTo(clonedStateMachine);
             stateMachineModel.CopyStateModels(runtimeStateMachineController, clonedStateMachine);
 
             for (int i = 0; i < childStateMachines.Count; i++)
@@ -312,6 +343,9 @@ namespace SAS.StateMachineGraph.Editor
 
         private static void CopyStateModels(this StateMachineModel fromStateMachineModel, RuntimeStateMachineController runtimeStateMachineController, StateMachineModel toStateMachineModel)
         {
+            if (!runtimeStateMachineController.IsAssetBacked() || fromStateMachineModel == null || toStateMachineModel == null)
+                return;
+
             var stateModels = fromStateMachineModel.GetStates();
             foreach (var stateModel in stateModels)
                 stateModel.Clone(runtimeStateMachineController, toStateMachineModel);
@@ -321,10 +355,32 @@ namespace SAS.StateMachineGraph.Editor
                 var stateTransitions = stateModels[i].GetTransitionsProp();
                 for (int j = 0; j < stateTransitions.arraySize; ++j)
                 {
-                    var stateTransitionModel = (StateTransitionModel)stateTransitions.GetArrayElementAtIndex(j).objectReferenceValue;
+                    var stateTransitionModel = stateTransitions.GetArrayElementAtIndex(j).objectReferenceValue as StateTransitionModel;
+                    if (stateTransitionModel == null)
+                        continue;
+
                     stateTransitionModel.Clone(runtimeStateMachineController, toStateMachineModel);
                 }
             }
+        }
+
+        private static void CopyEntryExitLayoutTo(this StateMachineModel fromStateMachineModel, StateMachineModel toStateMachineModel)
+        {
+            if (fromStateMachineModel == null || toStateMachineModel == null)
+                return;
+
+            var anyStatePosition = fromStateMachineModel.GetAnyStatePosition();
+            toStateMachineModel.SetAnyStatePosition(new Vector3Int(anyStatePosition.x, anyStatePosition.y, 0));
+
+            var sourceEntry = fromStateMachineModel.GetEntryNode();
+            var targetEntry = toStateMachineModel.GetEntryNode();
+            if (sourceEntry != null && targetEntry != null)
+                targetEntry.SetPosition(sourceEntry.GetPosition());
+
+            var sourceExit = fromStateMachineModel.GetExitNode();
+            var targetExit = toStateMachineModel.GetExitNode();
+            if (sourceExit != null && targetExit != null)
+                targetExit.SetPosition(sourceExit.GetPosition());
         }
 
         internal static StateModel GetStateModel(this StateMachineModel stateMachineModel, string stateName)

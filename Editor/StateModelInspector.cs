@@ -22,6 +22,8 @@ namespace SAS.StateMachineGraph.Editor
         private RuntimeStateMachineController _runtimeStateMachineController;
         private string[] _actionFullNames;
         private string[] _actionClassNames;
+        private bool IsReadOnlyTarget => StateMachineEditorWindow.IsReadOnlyMode || string.IsNullOrEmpty(AssetDatabase.GetAssetPath(target));
+
         private void OnEnable()
         {
             _runtimeStateMachineController = AssetDatabase.LoadMainAssetAtPath(AssetDatabase.GetAssetPath(target)) as RuntimeStateMachineController;
@@ -37,7 +39,7 @@ namespace SAS.StateMachineGraph.Editor
 
         protected override void OnHeaderGUI()
         {
-            using (new EditorGUI.DisabledScope(StateMachineEditorWindow.IsReadOnlyMode))
+            using (new EditorGUI.DisabledScope(IsReadOnlyTarget))
             {
                 base.OnHeaderGUI();
 
@@ -69,7 +71,7 @@ namespace SAS.StateMachineGraph.Editor
         {
             if (!target.name.Equals(Util.AnyStateModelName))
             {
-                using (new EditorGUI.DisabledScope(StateMachineEditorWindow.IsReadOnlyMode))
+                using (new EditorGUI.DisabledScope(IsReadOnlyTarget))
                 {
                     _stateActions.DoLayoutList();
                     _transitionStates.DoLayoutList();
@@ -79,6 +81,7 @@ namespace SAS.StateMachineGraph.Editor
             EditorGUI.BeginChangeCheck();
          
             serializedObject.ApplyModifiedProperties();
+            StateMachineDebugInspector.DrawForState((StateModel)target, _runtimeStateMachineController, serializedObject, ResolveEffectiveAction);
             Repaint();
         }
 
@@ -212,7 +215,7 @@ namespace SAS.StateMachineGraph.Editor
             _transitionStates.onRemoveCallback = list =>
             {
                 var allTranstionFromThisState = _transitionStates.serializedProperty;
-                var selectedStateTransitionModel = (StateTransitionModel)allTranstionFromThisState.GetArrayElementAtIndex(list.index).objectReferenceValue;
+                var selectedStateTransitionModel = allTranstionFromThisState.GetArrayElementAtIndex(list.index).objectReferenceValue as StateTransitionModel;
 
 
                 allTranstionFromThisState.DeleteArrayElementAtIndex(list.index);
@@ -224,13 +227,13 @@ namespace SAS.StateMachineGraph.Editor
                 //}
 
                 serializedObject.ApplyModifiedProperties();
-                selectedStateTransitionModel.DestroyImmediate();
+                selectedStateTransitionModel?.DestroyImmediate();
             };
           
 
             _transitionStates.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
             {
-                var transition = (StateTransitionModel)_transitionStates.serializedProperty.GetArrayElementAtIndex(index).objectReferenceValue;
+                var transition = _transitionStates.serializedProperty.GetArrayElementAtIndex(index).objectReferenceValue as StateTransitionModel;
                 rect.y += 2;
                 string val = serializedObject.targetObject.name + "  ->  ";
                 if (transition != null && transition.TargetNodeModel != null)
@@ -241,7 +244,10 @@ namespace SAS.StateMachineGraph.Editor
 
             _transitionStates.onMouseUpCallback = list =>
             {
-                var stateTransitionModel = (StateTransitionModel)_transitionStates.serializedProperty.GetArrayElementAtIndex(list.index).objectReferenceValue;
+                var stateTransitionModel = _transitionStates.serializedProperty.GetArrayElementAtIndex(list.index).objectReferenceValue as StateTransitionModel;
+                if (stateTransitionModel == null)
+                    return;
+
                 StateTransitionInspector.SelectedTransitionIndex = list.index;
                 Selection.activeObject = stateTransitionModel;
             };

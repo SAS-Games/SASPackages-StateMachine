@@ -27,12 +27,21 @@ namespace SAS.StateMachineGraph.Editor
             }
         }
 
-        public void ProcessConnectionEvents(Event e)
+        public void DrawDebugOverlays(Actor actor, string graphName)
         {
             if (_transitions != null)
             {
                 for (int i = 0; i < _transitions.Count; i++)
-                    _transitions[i].ProcessMouseEvent(e);
+                    _transitions[i].DrawDebugOverlay(actor, graphName);
+            }
+        }
+
+        public void ProcessConnectionEvents(Event e, bool isReadOnlyMode)
+        {
+            if (_transitions != null)
+            {
+                for (int i = 0; i < _transitions.Count; i++)
+                    _transitions[i].ProcessMouseEvent(e, isReadOnlyMode);
             }
         }
 
@@ -53,6 +62,9 @@ namespace SAS.StateMachineGraph.Editor
 
         public void Start(BaseNode node, TransitionNodeModel sourceNodeModel)
         {
+            if (!_runtimeStateMachineController.IsAssetBacked())
+                return;
+
             ClearConnectionSelection();
             _startPort = node.startPort;
             SourceNodeModel = sourceNodeModel;
@@ -60,6 +72,9 @@ namespace SAS.StateMachineGraph.Editor
 
         public void Make(BaseNode node, TransitionNodeModel targetNodeModel)
         {
+            if (!_runtimeStateMachineController.IsAssetBacked())
+                return;
+
             TargetNodeModel = targetNodeModel;
             if (_startPort != null)
             {
@@ -83,6 +98,9 @@ namespace SAS.StateMachineGraph.Editor
 
         private void RemoveTransition(Connection connection)
         {
+            if (!_runtimeStateMachineController.IsAssetBacked())
+                return;
+
             connection.SourceNodeModel.ClearConnection(connection.TargetNodeModel);
             _transitions.Remove(connection);
         }

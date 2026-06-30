@@ -61,17 +61,26 @@ namespace SAS.StateMachineGraph
             foreach (var stateEnterForCustomTrigger in _stateEnterEventForCustomTriggers)
                 stateEnterForCustomTrigger.Invoke();
             for (int i = 0; i < _onEnter.Length; ++i)
+            {
+                StateMachineDebugRuntime.NotifyBeforeAction(_stateMachine.Actor, _graph, this, _onEnter[i], ActionExecuteEvent.OnStateEnter);
                 _onEnter[i].Execute(ActionExecuteEvent.OnStateEnter);
+                StateMachineDebugRuntime.NotifyAfterAction(_stateMachine.Actor, _graph, this, _onEnter[i], ActionExecuteEvent.OnStateEnter);
+            }
         }
 
         internal bool OnExit()
         {
+            StateMachineDebugRuntime.NotifyNodeExit(_stateMachine.Actor, _graph, this);
             FilterAwaitableAction(_onExit);
             var result = _awaitableStateAction.Count == 0;
             if (_onExit == null)
                 return true;
             for (int i = 0; i < _onExit.Length; ++i)
+            {
+                StateMachineDebugRuntime.NotifyBeforeAction(_stateMachine.Actor, _graph, this, _onExit[i], ActionExecuteEvent.OnStateExit);
                 _onExit[i].Execute(ActionExecuteEvent.OnStateExit);
+                StateMachineDebugRuntime.NotifyAfterAction(_stateMachine.Actor, _graph, this, _onExit[i], ActionExecuteEvent.OnStateExit);
+            }
 
             foreach (var stateExitForCustomTrigger in _stateExitEventForCustomTriggers)
                 stateExitForCustomTrigger.Invoke();
@@ -85,7 +94,11 @@ namespace SAS.StateMachineGraph
             if (_onFixedUpdate == null || exitActionsExecutionStarted)
                 return;
             for (int i = 0; i < _onFixedUpdate.Length; ++i)
+            {
+                StateMachineDebugRuntime.NotifyBeforeAction(_stateMachine.Actor, _graph, this, _onFixedUpdate[i], ActionExecuteEvent.OnFixedUpdate);
                 _onFixedUpdate[i].Execute(ActionExecuteEvent.OnFixedUpdate);
+                StateMachineDebugRuntime.NotifyAfterAction(_stateMachine.Actor, _graph, this, _onFixedUpdate[i], ActionExecuteEvent.OnFixedUpdate);
+            }
         }
 
         internal void OnUpdate()
@@ -93,7 +106,11 @@ namespace SAS.StateMachineGraph
             if (_onUpdate == null || exitActionsExecutionStarted)
                 return;
             for (int i = 0; i < _onUpdate.Length; ++i)
+            {
+                StateMachineDebugRuntime.NotifyBeforeAction(_stateMachine.Actor, _graph, this, _onUpdate[i], ActionExecuteEvent.OnUpdate);
                 _onUpdate[i].Execute(ActionExecuteEvent.OnUpdate);
+                StateMachineDebugRuntime.NotifyAfterAction(_stateMachine.Actor, _graph, this, _onUpdate[i], ActionExecuteEvent.OnUpdate);
+            }
         }
 
         internal void OnLateUpdate()
@@ -101,14 +118,18 @@ namespace SAS.StateMachineGraph
             if (_onLateUpdate == null || exitActionsExecutionStarted)
                 return;
             for (int i = 0; i < _onLateUpdate.Length; ++i)
+            {
+                StateMachineDebugRuntime.NotifyBeforeAction(_stateMachine.Actor, _graph, this, _onLateUpdate[i], ActionExecuteEvent.OnLateUpdate);
                 _onLateUpdate[i].Execute(ActionExecuteEvent.OnLateUpdate);
+                StateMachineDebugRuntime.NotifyAfterAction(_stateMachine.Actor, _graph, this, _onLateUpdate[i], ActionExecuteEvent.OnLateUpdate);
+            }
         }
 
         internal void TryTransition()
         {
             if (_nextNode == null || _nextNode == this)
             {
-                TransitionNodeUtility.TryGetNextNode(_stateMachine, _transitionStates, out _nextNode, out _transitionState);
+                TransitionNodeUtility.TryGetNextNode(_stateMachine, this, _transitionStates, out _nextNode, out _transitionState);
             }
 
             if (_nextNode != null && IsAllAwaitableActionCompleted())
@@ -119,14 +140,14 @@ namespace SAS.StateMachineGraph
                     exitActionsExecutionStarted = true;
                     if (immediateExit)
                     {
-                        _graph.QueueTransition(_nextNode);
+                        _graph.QueueTransition(_nextNode, _transitionState, this);
                         _nextNode = null;
                         _transitionState = null;
                     }
                 }
                 else
                 {
-                    _graph.QueueTransition(_nextNode);
+                    _graph.QueueTransition(_nextNode, _transitionState, this);
                     _nextNode = null;
                     _transitionState = null;
                 }
