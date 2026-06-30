@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using UnityEditor;
 
 namespace SAS.StateMachineGraph.Editor
@@ -9,6 +10,8 @@ namespace SAS.StateMachineGraph.Editor
     {
         private static readonly PropertyInfo GraphNameProperty =
             typeof(RuntimeStateGraph).GetProperty("Name", BindingFlags.Instance | BindingFlags.NonPublic);
+        private static readonly StateMachineDebugTransitionStats[] EmptyTransitionStats =
+            new StateMachineDebugTransitionStats[0];
 
         internal static StateMachineDebugSession Instance { get; } = new StateMachineDebugSession();
 
@@ -16,6 +19,10 @@ namespace SAS.StateMachineGraph.Editor
             new HashSet<StateMachineDebugBreakpoint>();
         private readonly Dictionary<string, StateMachineDebugNodeStats> _nodeStats =
             new Dictionary<string, StateMachineDebugNodeStats>();
+        private readonly Dictionary<string, StateMachineDebugTransitionStats> _transitionStats =
+            new Dictionary<string, StateMachineDebugTransitionStats>();
+        private readonly Dictionary<string, List<StateMachineDebugTransitionStats>> _transitionStatsByNode =
+            new Dictionary<string, List<StateMachineDebugTransitionStats>>();
 
         private StateMachineDebugSession()
         {
@@ -117,6 +124,8 @@ namespace SAS.StateMachineGraph.Editor
         {
             Timeline.Clear();
             _nodeStats.Clear();
+            _transitionStats.Clear();
+            _transitionStatsByNode.Clear();
             CurrentActor = null;
             CurrentActorName = string.Empty;
             CurrentGraph = null;
@@ -244,6 +253,17 @@ namespace SAS.StateMachineGraph.Editor
                    nodeStats.TryGetActionStats(actionTypeName, executeEvent, out stats);
         }
 
+        internal IReadOnlyList<StateMachineDebugTransitionStats> GetTransitionStats(string nodeKey)
+        {
+            if (string.IsNullOrEmpty(nodeKey) ||
+                !_transitionStatsByNode.TryGetValue(nodeKey, out var stats))
+            {
+                return EmptyTransitionStats;
+            }
+
+            return stats;
+        }
+
         private void OnDebugEvent(StateMachineDebugEvent debugEvent)
         {
             UpdateCurrentState(debugEvent);
@@ -297,6 +317,12 @@ namespace SAS.StateMachineGraph.Editor
                 return;
             }
 
+            if (debugEvent.EventType == StateMachineDebugEventType.AfterTransitionEvaluation)
+            {
+                RecordTransitionEvaluation(debugEvent);
+                return;
+            }
+
             if (!IsActionEvent(debugEvent.EventType) || debugEvent.StateAction == null)
                 return;
 
@@ -306,6 +332,38 @@ namespace SAS.StateMachineGraph.Editor
                 actionStats.RecordBeforeExecute(debugEvent.ActionExecuteEvent, debugEvent.StateAction);
             else
                 actionStats.RecordAfterExecute(debugEvent.ActionExecuteEvent, debugEvent.StateAction, debugEvent.FrameCount, debugEvent.Realtime);
+        }
+
+        private void RecordTransitionEvaluation(StateMachineDebugEvent debugEvent)
+        {
+            if (debugEvent.TransitionState == null || string.IsNullOrEmpty(CurrentNodeKey))
+                return;
+
+            var transitionKey = CreateTransitionStatsKey(CurrentNodeKey, debugEvent.TransitionState);
+            if (!_transitionStats.TryGetValue(transitionKey, out var stats))
+            {
+                stats = new StateMachineDebugTransitionStats(CurrentNodeKey, transitionKey);
+                _transitionStats.Add(transitionKey, stats);
+
+                if (!_transitionStatsByNode.TryGetValue(CurrentNodeKey, out var nodeTransitions))
+                {
+                    nodeTransitions = new List<StateMachineDebugTransitionStats>();
+                    _transitionStatsByNode.Add(CurrentNodeKey, nodeTransitions);
+                }
+
+                nodeTransitions.Add(stats);
+            }
+
+            var targetName = StateMachineDebugNodeKey.GetNodeName(debugEvent.TargetNode);
+            var targetKey = StateMachineDebugNodeKey.Create(CurrentActorName, CurrentGraphName, targetName);
+            stats.RecordEvaluation(
+                targetName,
+                targetKey,
+                debugEvent.FrameCount,
+                debugEvent.Realtime,
+                debugEvent.HasTransitionResult,
+                debugEvent.TransitionResult,
+                debugEvent.ConditionResults);
         }
 
         private StateMachineDebugNodeStats GetOrCreateNodeStats(string nodeKey)
@@ -381,6 +439,11 @@ namespace SAS.StateMachineGraph.Editor
         {
             return eventType == StateMachineDebugEventType.NodeEnter ||
                    eventType == StateMachineDebugEventType.NodeExit;
+        }
+
+        private static string CreateTransitionStatsKey(string nodeKey, TransitionState transitionState)
+        {
+            return $"{nodeKey}|{RuntimeHelpers.GetHashCode(transitionState)}";
         }
 
         private static string GetGraphName(RuntimeStateGraph graph)

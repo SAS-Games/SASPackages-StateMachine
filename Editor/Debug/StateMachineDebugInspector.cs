@@ -20,6 +20,9 @@ namespace SAS.StateMachineGraph.Editor
         private static string _selectedActionNodeKey;
         private static string _selectedActionTypeName;
         private static ActionExecuteEvent _selectedActionExecuteEvent;
+        private static string _selectedConditionNodeKey;
+        private static string _selectedConditionTransitionKey;
+        private static int _selectedConditionIndex = -1;
 
         internal static void DrawForNode(TransitionNodeModel nodeModel, RuntimeStateMachineController controller)
         {
@@ -54,6 +57,7 @@ namespace SAS.StateMachineGraph.Editor
             {
                 EditorGUILayout.LabelField("Play Mode Debug", EditorStyles.boldLabel);
                 DrawNodeDebugInfo(session, nodeModel.name, nodeKey);
+                DrawConditionDebugInfo(session, nodeKey);
 
                 if (stateSerializedObject != null)
                     DrawActionDebugInfo(session, nodeKey, stateSerializedObject, resolveEffectiveAction);
@@ -101,6 +105,100 @@ namespace SAS.StateMachineGraph.Editor
                 DrawActionBucket(session, nodeKey, actions, ActionBuckets[i], resolveEffectiveAction);
 
             DrawSelectedActionInspector(session);
+        }
+
+        private static void DrawConditionDebugInfo(StateMachineDebugSession session, string nodeKey)
+        {
+            var transitionStats = session.GetTransitionStats(nodeKey);
+            if (transitionStats.Count == 0)
+                return;
+
+            EditorGUILayout.Space(6);
+            EditorGUILayout.LabelField("Condition Debug", EditorStyles.boldLabel);
+
+            for (int i = 0; i < transitionStats.Count; ++i)
+                DrawTransitionConditionStats(transitionStats[i]);
+
+            DrawSelectedConditionInspector(session);
+        }
+
+        private static void DrawTransitionConditionStats(StateMachineDebugTransitionStats stats)
+        {
+            using (new EditorGUILayout.VerticalScope(GUI.skin.box))
+            {
+                EditorGUILayout.LabelField(
+                    $"To {stats.TargetNodeName}",
+                    FormatTransitionStats(stats),
+                    EditorStyles.miniLabel);
+
+                var conditions = stats.ConditionResults;
+                if (conditions == null || conditions.Length == 0)
+                {
+                    EditorGUILayout.LabelField("Conditions", "None");
+                    return;
+                }
+
+                for (int i = 0; i < conditions.Length; ++i)
+                    DrawConditionRow(stats, conditions[i]);
+            }
+        }
+
+        private static string FormatTransitionStats(StateMachineDebugTransitionStats stats)
+        {
+            var result = stats.HasResult ? (stats.LastResult ? "True" : "False") : "-";
+            return $"Result: {result}   Count: {stats.EvaluationCount}   Frame: {stats.LastEvaluatedFrame}   Time: {stats.LastEvaluatedTime:F3}";
+        }
+
+        private static void DrawConditionRow(StateMachineDebugTransitionStats stats, StateMachineDebugConditionResult condition)
+        {
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                using (new EditorGUI.DisabledScope(condition.CustomCondition == null))
+                {
+                    if (GUILayout.Button("Select", GUILayout.Width(55)))
+                    {
+                        _selectedConditionNodeKey = stats.SourceNodeKey;
+                        _selectedConditionTransitionKey = stats.TransitionKey;
+                        _selectedConditionIndex = condition.Index;
+                    }
+                }
+
+                var status = FormatConditionStatus(condition);
+                EditorGUILayout.LabelField(
+                    $"{condition.Index + 1}. {condition.Name}",
+                    $"{condition.ParameterType} {condition.Mode}   {status}",
+                    EditorStyles.miniLabel);
+            }
+
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                GUILayout.Space(59);
+                EditorGUILayout.LabelField(
+                    $"Actual: {FormatMissing(condition.ActualValue)}   Expected: {FormatMissing(condition.ExpectedValue)}",
+                    EditorStyles.miniLabel);
+            }
+
+            if (!string.IsNullOrEmpty(condition.Error))
+            {
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    GUILayout.Space(59);
+                    EditorGUILayout.LabelField($"Error: {condition.Error}", EditorStyles.miniLabel);
+                }
+            }
+        }
+
+        private static string FormatConditionStatus(StateMachineDebugConditionResult condition)
+        {
+            if (!condition.WasEvaluated)
+                return "Not Evaluated";
+
+            return condition.Result ? "True" : "False";
+        }
+
+        private static string FormatMissing(string value)
+        {
+            return string.IsNullOrEmpty(value) ? "-" : value;
         }
 
         private static string FormatBreakpoints(StateMachineDebugSession session, string nodeKey)
@@ -215,8 +313,59 @@ namespace SAS.StateMachineGraph.Editor
                 }
 
                 EditorGUILayout.LabelField("Source", source);
-                DrawActionObject(action);
+                DrawInspectableObject(action);
             }
+        }
+
+        private static void DrawSelectedConditionInspector(StateMachineDebugSession session)
+        {
+            if (string.IsNullOrEmpty(_selectedConditionTransitionKey) || _selectedConditionIndex < 0)
+                return;
+
+            if (!TryGetSelectedCondition(session, out var condition))
+                return;
+
+            EditorGUILayout.Space(6);
+            using (new EditorGUILayout.VerticalScope(GUI.skin.box))
+            {
+                EditorGUILayout.LabelField("Selected Condition Instance", EditorStyles.boldLabel);
+
+                if (condition.CustomCondition == null)
+                {
+                    EditorGUILayout.HelpBox("This condition does not have a custom runtime instance to inspect.", MessageType.Info);
+                    return;
+                }
+
+                DrawInspectableObject(condition.CustomCondition);
+            }
+        }
+
+        private static bool TryGetSelectedCondition(
+            StateMachineDebugSession session,
+            out StateMachineDebugConditionResult selectedCondition)
+        {
+            selectedCondition = default;
+
+            foreach (var transitionStats in session.GetTransitionStats(_selectedConditionNodeKey))
+            {
+                if (transitionStats.TransitionKey != _selectedConditionTransitionKey)
+                    continue;
+
+                var conditions = transitionStats.ConditionResults;
+                if (conditions == null)
+                    return false;
+
+                for (int i = 0; i < conditions.Length; ++i)
+                {
+                    if (conditions[i].Index == _selectedConditionIndex)
+                    {
+                        selectedCondition = conditions[i];
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         private static IStateAction GetSelectedActionInstance(StateMachineDebugSession session, out string source)
@@ -319,15 +468,18 @@ namespace SAS.StateMachineGraph.Editor
             }
         }
 
-        private static void DrawActionObject(IStateAction action)
+        private static void DrawInspectableObject(object instance)
         {
-            if (action is UnityEngine.Object unityObject)
+            if (instance == null)
+                return;
+
+            if (instance is UnityEngine.Object unityObject)
             {
                 DrawUnityObject(unityObject);
                 return;
             }
 
-            DrawPlainObject(action);
+            DrawPlainObject(instance);
         }
 
         private static void DrawUnityObject(UnityEngine.Object unityObject)
@@ -337,15 +489,20 @@ namespace SAS.StateMachineGraph.Editor
             try
             {
                 var serializedObject = new SerializedObject(unityObject);
+                serializedObject.Update();
                 var property = serializedObject.GetIterator();
-                using (new EditorGUI.DisabledScope(true))
+                var enterChildren = true;
+                EditorGUI.BeginChangeCheck();
+                while (property.NextVisible(enterChildren))
                 {
-                    var enterChildren = true;
-                    while (property.NextVisible(enterChildren))
-                    {
-                        enterChildren = false;
-                        EditorGUILayout.PropertyField(property, true);
-                    }
+                    enterChildren = false;
+                    EditorGUILayout.PropertyField(property, true);
+                }
+
+                if (EditorGUI.EndChangeCheck())
+                {
+                    serializedObject.ApplyModifiedProperties();
+                    EditorUtility.SetDirty(unityObject);
                 }
             }
             catch (Exception exception)
@@ -358,11 +515,7 @@ namespace SAS.StateMachineGraph.Editor
         {
             var type = instance.GetType();
             EditorGUILayout.LabelField("Type", type.FullName);
-
-            using (new EditorGUI.DisabledScope(true))
-            {
-                DrawFields(instance, type);
-            }
+            DrawFields(instance, type);
         }
 
         private static void DrawFields(object instance, Type type)
@@ -396,12 +549,61 @@ namespace SAS.StateMachineGraph.Editor
             try
             {
                 var value = field.GetValue(instance);
-                EditorGUILayout.LabelField(field.Name, $"{field.FieldType.Name}: {FormatValue(value)}");
+                if (field.IsInitOnly || field.IsLiteral)
+                {
+                    using (new EditorGUI.DisabledScope(true))
+                        EditorGUILayout.LabelField(field.Name, $"{field.FieldType.Name}: {FormatValue(value)}");
+                    return;
+                }
+
+                EditorGUI.BeginChangeCheck();
+                var newValue = DrawEditableValue(field.Name, field.FieldType, value, out var handled);
+                if (EditorGUI.EndChangeCheck() && handled)
+                    field.SetValue(instance, newValue);
             }
             catch (Exception exception)
             {
                 EditorGUILayout.LabelField(field.Name, $"{field.FieldType.Name}: <{exception.GetType().Name}>");
             }
+        }
+
+        private static object DrawEditableValue(string label, Type type, object value, out bool handled)
+        {
+            handled = true;
+
+            if (type == typeof(bool))
+                return EditorGUILayout.Toggle(label, value is bool boolValue && boolValue);
+
+            if (type == typeof(int))
+                return EditorGUILayout.IntField(label, value is int intValue ? intValue : 0);
+
+            if (type == typeof(float))
+                return EditorGUILayout.FloatField(label, value is float floatValue ? floatValue : 0f);
+
+            if (type == typeof(double))
+                return EditorGUILayout.DoubleField(label, value is double doubleValue ? doubleValue : 0d);
+
+            if (type == typeof(string))
+                return EditorGUILayout.TextField(label, value as string ?? string.Empty);
+
+            if (type.IsEnum)
+                return EditorGUILayout.EnumPopup(label, value as Enum ?? (Enum)Enum.GetValues(type).GetValue(0));
+
+            if (type == typeof(Vector2))
+                return EditorGUILayout.Vector2Field(label, value is Vector2 vector2 ? vector2 : default);
+
+            if (type == typeof(Vector3))
+                return EditorGUILayout.Vector3Field(label, value is Vector3 vector3 ? vector3 : default);
+
+            if (type == typeof(Color))
+                return EditorGUILayout.ColorField(label, value is Color color ? color : default);
+
+            if (typeof(UnityEngine.Object).IsAssignableFrom(type))
+                return EditorGUILayout.ObjectField(label, value as UnityEngine.Object, type, true);
+
+            handled = false;
+            EditorGUILayout.LabelField(label, $"{type.Name}: {FormatValue(value)}");
+            return value;
         }
 
         private static string FormatValue(object value)

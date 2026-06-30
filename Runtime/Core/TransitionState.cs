@@ -16,8 +16,18 @@ namespace SAS.StateMachineGraph
 
         internal float TimeElapsed = 0;
 
+#if UNITY_EDITOR
+        private StateMachineDebugConditionResult[] _lastDebugConditionResults = new StateMachineDebugConditionResult[0];
+
+        internal ITransitionNode DebugTargetNode => TargetNode;
+        internal StateMachineDebugConditionResult[] DebugConditionResults => _lastDebugConditionResults;
+#endif
+
         internal bool TryGetTransition(StateMachine stateMachine, out ITransitionNode node)
         {
+#if UNITY_EDITOR
+            PrepareDebugConditionResults();
+#endif
             var timeElapsed = !HasExitTime || TimeElapsed > ExitTime;
             TimeElapsed += Time.deltaTime;
             node = timeElapsed && ShouldTransition(stateMachine) ? TargetNode : null;
@@ -33,12 +43,48 @@ namespace SAS.StateMachineGraph
 
             for (int i = 0; i < Conditions.Length; ++i)
             {
+#if UNITY_EDITOR
+                var conditionResult = Conditions[i].EvaluateDebug(stateMachine, i);
+                RecordDebugConditionResult(i, conditionResult);
+                if (!conditionResult.Result)
+                    return false;
+#else
                 if (!Conditions[i].IsValid(stateMachine))
                     return false;
+#endif
             }
 
             return true;
         }
+
+#if UNITY_EDITOR
+        private void PrepareDebugConditionResults()
+        {
+            if (Conditions == null || Conditions.Length == 0)
+            {
+                _lastDebugConditionResults = new StateMachineDebugConditionResult[0];
+                return;
+            }
+
+            if (_lastDebugConditionResults == null || _lastDebugConditionResults.Length != Conditions.Length)
+                _lastDebugConditionResults = new StateMachineDebugConditionResult[Conditions.Length];
+
+            for (int i = 0; i < Conditions.Length; ++i)
+                _lastDebugConditionResults[i] = Conditions[i].CreateDebugConditionResult(i);
+        }
+
+        private void RecordDebugConditionResult(int index, StateMachineDebugConditionResult conditionResult)
+        {
+            if (_lastDebugConditionResults == null ||
+                index < 0 ||
+                index >= _lastDebugConditionResults.Length)
+            {
+                return;
+            }
+
+            _lastDebugConditionResults[index] = conditionResult;
+        }
+#endif
 
         internal void ResetTriggers(StateMachine stateMachine)
         {

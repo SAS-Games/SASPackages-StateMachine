@@ -340,49 +340,55 @@ namespace SAS.StateMachineGraph.Editor
                 return;
 
             var session = StateMachineDebugSession.Instance;
-            GUILayout.BeginArea(rect);
-            using (new EditorGUILayout.HorizontalScope())
+            GUI.BeginGroup(rect);
+            try
             {
-                var enabled = GUILayout.Toggle(session.IsEnabled, "Debug", EditorStyles.toolbarButton, GUILayout.Width(60));
-                if (enabled != session.IsEnabled)
+                using (new EditorGUILayout.HorizontalScope())
                 {
-                    if (enabled)
-                        session.Enable();
-                    else
-                        session.Disable();
-                }
-
-                if (GUILayout.Button("Clear", EditorStyles.toolbarButton, GUILayout.Width(45)))
-                    session.Clear();
-
-                if (GUILayout.Button("Clear BP", EditorStyles.toolbarButton, GUILayout.Width(65)))
-                    session.ClearBreakpoints();
-
-                using (new EditorGUI.DisabledScope(!EditorApplication.isPlaying))
-                {
-                    var pauseLabel = EditorApplication.isPaused ? "Resume" : "Pause";
-                    if (GUILayout.Button(pauseLabel, EditorStyles.toolbarButton, GUILayout.Width(65)))
+                    var enabled = GUILayout.Toggle(session.IsEnabled, "Debug", EditorStyles.toolbarButton, GUILayout.Width(60));
+                    if (enabled != session.IsEnabled)
                     {
-                        if (EditorApplication.isPaused)
-                            session.Resume();
+                        if (enabled)
+                            session.Enable();
                         else
-                            session.Pause();
+                            session.Disable();
                     }
 
-                    using (new EditorGUI.DisabledScope(!EditorApplication.isPaused))
+                    if (GUILayout.Button("Clear", EditorStyles.toolbarButton, GUILayout.Width(45)))
+                        session.Clear();
+
+                    if (GUILayout.Button("Clear BP", EditorStyles.toolbarButton, GUILayout.Width(65)))
+                        session.ClearBreakpoints();
+
+                    using (new EditorGUI.DisabledScope(!EditorApplication.isPlaying))
                     {
-                        if (GUILayout.Button("Next Frame", EditorStyles.toolbarButton, GUILayout.Width(80)))
-                            session.StepFrame();
+                        var pauseLabel = EditorApplication.isPaused ? "Resume" : "Pause";
+                        if (GUILayout.Button(pauseLabel, EditorStyles.toolbarButton, GUILayout.Width(65)))
+                        {
+                            if (EditorApplication.isPaused)
+                                session.Resume();
+                            else
+                                session.Pause();
+                        }
+
+                        using (new EditorGUI.DisabledScope(!EditorApplication.isPaused))
+                        {
+                            if (GUILayout.Button("Next Frame", EditorStyles.toolbarButton, GUILayout.Width(80)))
+                                session.StepFrame();
+                        }
                     }
-                }
 
 #if !SAS_STATE_MACHINE_DEBUG
-                GUILayout.Label("No Symbol", EditorStyles.miniLabel, GUILayout.Width(65));
+                    GUILayout.Label("No Symbol", EditorStyles.miniLabel, GUILayout.Width(65));
 #else
-                GUILayout.Label($"BP {session.BreakpointCount}", EditorStyles.miniLabel, GUILayout.Width(40));
+                    GUILayout.Label($"BP {session.BreakpointCount}", EditorStyles.miniLabel, GUILayout.Width(40));
 #endif
+                }
             }
-            GUILayout.EndArea();
+            finally
+            {
+                GUI.EndGroup();
+            }
         }
 
         protected override void ProcessMouseEvent(Event e)

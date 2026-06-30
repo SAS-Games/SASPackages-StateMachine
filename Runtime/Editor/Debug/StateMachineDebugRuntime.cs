@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using System;
 using System.Diagnostics;
 using UnityEngine;
@@ -13,7 +14,7 @@ namespace SAS.StateMachineGraph
         {
             if (node == null)
                 return;
-            Emit(StateMachineDebugEventType.NodeEnter, actor, graph, node, node as State, null, null, null, default, false, false);
+            Emit(StateMachineDebugEventType.NodeEnter, actor, graph, node, node as State, null, null, null, default, false, false, null);
         }
 
         [Conditional("SAS_STATE_MACHINE_DEBUG")]
@@ -22,7 +23,7 @@ namespace SAS.StateMachineGraph
             if (node == null)
                 return;
 
-            Emit(StateMachineDebugEventType.NodeExit, actor, graph, node, node as State, null, null, null, default, false, false);
+            Emit(StateMachineDebugEventType.NodeExit, actor, graph, node, node as State, null, null, null, default, false, false, null);
         }
 
         [Conditional("SAS_STATE_MACHINE_DEBUG")]
@@ -55,7 +56,7 @@ namespace SAS.StateMachineGraph
             if (targetNode == null)
                 return;
 
-            Emit(StateMachineDebugEventType.TransitionTaken, actor, graph, node, node as State, null, transitionState, targetNode, default, true, true);
+            Emit(StateMachineDebugEventType.TransitionTaken, actor, graph, node, node as State, null, transitionState, targetNode, default, true, true, transitionState?.DebugConditionResults);
         }
 
         private static void NotifyAction(StateMachineDebugEventType eventType, Actor actor, RuntimeStateGraph graph, State state, IStateAction stateAction, ActionExecuteEvent executeEvent)
@@ -63,7 +64,7 @@ namespace SAS.StateMachineGraph
             if (stateAction == null)
                 return;
 
-            Emit(eventType, actor, graph, state, state, stateAction, null, null, executeEvent, false, false);
+            Emit(eventType, actor, graph, state, state, stateAction, null, null, executeEvent, false, false, null);
         }
 
         private static void NotifyTransitionEvaluation(StateMachineDebugEventType eventType, Actor actor, RuntimeStateGraph graph, ITransitionNode node, TransitionState transitionState, ITransitionNode targetNode, bool hasTransitionResult, bool transitionResult)
@@ -71,16 +72,18 @@ namespace SAS.StateMachineGraph
             if (transitionState == null)
                 return;
 
-            Emit(eventType, actor, graph, node, node as State, null, transitionState, targetNode, default, hasTransitionResult, transitionResult);
+            var eventTargetNode = targetNode ?? transitionState.DebugTargetNode;
+            Emit(eventType, actor, graph, node, node as State, null, transitionState, eventTargetNode, default, hasTransitionResult, transitionResult, transitionState.DebugConditionResults);
         }
 
-        private static void Emit(StateMachineDebugEventType eventType, Actor actor, RuntimeStateGraph graph, ITransitionNode node, State state, IStateAction stateAction, TransitionState transitionState, ITransitionNode targetNode, ActionExecuteEvent executeEvent, bool hasTransitionResult, bool transitionResult)
+        private static void Emit(StateMachineDebugEventType eventType, Actor actor, RuntimeStateGraph graph, ITransitionNode node, State state, IStateAction stateAction, TransitionState transitionState, ITransitionNode targetNode, ActionExecuteEvent executeEvent, bool hasTransitionResult, bool transitionResult, StateMachineDebugConditionResult[] conditionResults)
         {
             var eventEmitted = EventEmitted;
             if (eventEmitted == null)
                 return;
 
-            eventEmitted.Invoke(new StateMachineDebugEvent(eventType, actor, graph, node, state, stateAction, transitionState, targetNode, executeEvent, Time.frameCount, Time.realtimeSinceStartup, Time.realtimeSinceStartupAsDouble, hasTransitionResult, transitionResult));
+            eventEmitted.Invoke(new StateMachineDebugEvent(eventType, actor, graph, node, state, stateAction, transitionState, targetNode, executeEvent, Time.frameCount, Time.realtimeSinceStartup, Time.realtimeSinceStartupAsDouble, hasTransitionResult, transitionResult, conditionResults));
         }
     }
 }
+#endif
