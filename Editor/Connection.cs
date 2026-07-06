@@ -7,7 +7,6 @@ namespace SAS.StateMachineGraph.Editor
     public class Connection
     {
         private const float ReciprocalConnectionOffset = 8f;
-        private const float SelfConnectionOffset = 42f;
 
         public BaseNode StartNode { get; }
         public BaseNode EndNode { get; }
@@ -40,7 +39,7 @@ namespace SAS.StateMachineGraph.Editor
             if (StartNode == null || EndNode == null)
                 return;
 
-            if (SourceNodeModel != null && SourceNodeModel == TargetNodeModel)
+            if (IsSelfConnection())
             {
                 DrawSelfConnection();
                 return;
@@ -78,26 +77,18 @@ namespace SAS.StateMachineGraph.Editor
         private void DrawSelfConnection()
         {
             var rect = StartNode.rect.ToRect();
-            var y = rect.yMax;
-            _startPos = new Vector2(rect.xMax - 28f, y);
-            _endPos = new Vector2(rect.x + 28f, y);
-
-            var right = new Vector2(rect.xMax + SelfConnectionOffset, y + SelfConnectionOffset * 0.45f);
-            var bottom = new Vector2(rect.center.x, y + SelfConnectionOffset);
-            var left = new Vector2(rect.x - SelfConnectionOffset, y + SelfConnectionOffset * 0.45f);
+            var centerX = rect.center.x;
 
             _linePoints = new[]
             {
-                ToVector3(_startPos),
-                ToVector3(right),
-                ToVector3(bottom),
-                ToVector3(left),
-                ToVector3(_endPos)
+                ToVector3(new Vector2(centerX, rect.yMax + 26f)),
+                ToVector3(new Vector2(centerX, rect.yMax + 2f))
             };
 
-            Handles.color = Color.grey;
-            Handles.DrawAAPolyLine(5f, _linePoints);
-            EditorUtilities.DrawArrow(right, bottom, false);
+            _startPos = _linePoints[0];
+            _endPos = _linePoints[1];
+
+            EditorUtilities.DrawArrow(_startPos, _endPos, false);
 
             _hasLine = true;
         }
@@ -131,6 +122,12 @@ namespace SAS.StateMachineGraph.Editor
                    TargetNodeModel != null &&
                    SourceNodeModel != TargetNodeModel &&
                    TargetNodeModel.GetTransitionCount(SourceNodeModel) > 0;
+        }
+
+        private bool IsSelfConnection()
+        {
+            return StartNode == EndNode ||
+                   (SourceNodeModel != null && SourceNodeModel == TargetNodeModel);
         }
 
         private static Vector2 GetRectEdgePoint(Rect rect, Vector2 origin, Vector2 direction)
