@@ -11,8 +11,11 @@ namespace SAS.StateMachineGraph.Editor
         {
             get
             {
-                var parameters = _parametersList.serializedProperty.serializedObject?.FindProperty("_parameters");
                 HashSet<string> usedParameterNames = new HashSet<string>();
+                var parameters = _parametersList?.serializedProperty?.serializedObject?.FindProperty("_parameters");
+                if (parameters == null)
+                    return usedParameterNames;
+
                 for (int i = 0; i < parameters.arraySize; ++i)
                 {
                     var element = parameters.GetArrayElementAtIndex(i);
@@ -27,6 +30,8 @@ namespace SAS.StateMachineGraph.Editor
         public Rect rect;
         private Texture2D _texture;
         private RuntimeStateMachineController _runtimeStateMachineController;
+        private bool _isReadOnlyMode;
+        internal RuntimeStateMachineController TargetController => _runtimeStateMachineController;
 
         public StateMachineParameterEditor()
         { 
@@ -35,8 +40,14 @@ namespace SAS.StateMachineGraph.Editor
         public StateMachineParameterEditor(RuntimeStateMachineController runtimeStateMachineController)
         {
             _runtimeStateMachineController = runtimeStateMachineController;
+            if (_runtimeStateMachineController == null)
+                return;
+
             var serializedObject = new SerializedObject(runtimeStateMachineController);
             var parameters = serializedObject?.FindProperty("_parameters");
+            if (parameters == null)
+                return;
+
             _parametersList = new ReorderableList(serializedObject, parameters, true, true, false, true);
 
             for (int i = 0; i < parameters.arraySize; ++i)
@@ -81,7 +92,15 @@ namespace SAS.StateMachineGraph.Editor
 
         public void DrawParametersWindow(int windowId, bool isReadOnlyMode)
         {
+            _isReadOnlyMode = isReadOnlyMode;
             ProcessEvents(Event.current,isReadOnlyMode);
+            if (_parametersList != null)
+            {
+                _parametersList.draggable = !isReadOnlyMode;
+                _parametersList.displayRemove = !isReadOnlyMode;
+            }
+
+            _parametersList?.serializedProperty?.serializedObject?.Update();
             _parametersList?.DoList(rect);
             if (_runtimeStateMachineController)
                 _parametersList?.serializedProperty?.serializedObject?.ApplyModifiedProperties();
@@ -110,9 +129,12 @@ namespace SAS.StateMachineGraph.Editor
                 rect.y += 2;
                 SerializedProperty type = element.FindPropertyRelative("m_Type");
                 SerializedProperty parameterName = element.FindPropertyRelative("m_Name");
-                string paramName = EditorGUI.DelayedTextField(new Rect(rect.x, rect.y, rect.width / 1.5f, rect.height), parameterName?.stringValue);
-                if (parameterName?.stringValue != paramName)
-                    parameterName.stringValue = Util.MakeUniqueName(paramName, UsedParameterNames);
+                using (new EditorGUI.DisabledScope(_isReadOnlyMode))
+                {
+                    string paramName = EditorGUI.DelayedTextField(new Rect(rect.x, rect.y, rect.width / 1.5f, rect.height), parameterName?.stringValue);
+                    if (parameterName?.stringValue != paramName)
+                        parameterName.stringValue = Util.MakeUniqueName(paramName, UsedParameterNames);
+                }
 
                 if (type?.intValue == 1)
                 {

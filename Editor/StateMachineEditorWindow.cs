@@ -304,12 +304,30 @@ namespace SAS.StateMachineGraph.Editor
         {
             BeginWindows();
 
-            if (Application.isPlaying && _runtimeStateMachineController != null)
-                _parameterEditor = new StateMachineParameterEditor(_runtimeStateMachineController);
+            var parameterController = GetParameterController();
+            if (_parameterEditor == null || _parameterEditor.TargetController != parameterController)
+                _parameterEditor = new StateMachineParameterEditor(parameterController);
 
-            var windowRect = GUI.Window(1, new Rect(0, -2, Mathf.Max(200, position.width / 5), position.height - 2), id=>_parameterEditor.DrawParametersWindow(id, IsGraphReadOnly), "", new GUIStyle());
+            var windowRect = GUI.Window(1, new Rect(0, -2, Mathf.Max(200, position.width / 5), position.height - 2), id=>_parameterEditor.DrawParametersWindow(id, IsParameterWindowReadOnly(parameterController)), "", new GUIStyle());
             _parameterEditor.DrawRect(windowRect);
             EndWindows();
+        }
+
+        private RuntimeStateMachineController GetParameterController()
+        {
+            var actor = Actor;
+            if (Application.isPlaying && actor != null && actor.runtimeStateMachineController != null)
+                return actor.runtimeStateMachineController;
+
+            return _runtimeStateMachineController;
+        }
+
+        private bool IsParameterWindowReadOnly(RuntimeStateMachineController parameterController)
+        {
+            if (Application.isPlaying && parameterController != null && !parameterController.IsAssetBacked())
+                return true;
+
+            return IsGraphReadOnly;
         }
 
         int selectedIndex = 0;
