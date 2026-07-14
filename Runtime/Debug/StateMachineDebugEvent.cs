@@ -1,4 +1,3 @@
-#if UNITY_EDITOR
 namespace SAS.StateMachineGraph
 {
     public readonly struct StateMachineDebugEvent
@@ -42,4 +41,3 @@ namespace SAS.StateMachineGraph
         public StateMachineDebugConditionResult[] ConditionResults { get; }
     }
 }
-#endif

@@ -15,6 +15,7 @@ namespace SAS.StateMachineGraph.Editor
         protected RuntimeStateMachineController _runtimeStateMachineController;
         private StateMachineParameterEditor _parameterEditor = new StateMachineParameterEditor();
         private StateTransitionEditor _transition;
+        private RuntimeStateMachineController _initializedGraphController;
 
         private List<BaseNode> _nodes = new List<BaseNode>();
         private Actor Actor => Selection.activeGameObject?.GetComponent<Actor>();
@@ -90,16 +91,24 @@ namespace SAS.StateMachineGraph.Editor
 
             if (stateMachineModel != null)
             {
-                _runtimeStateMachineController = stateMachineModel.ResolveAssetBackedController();
-                if (_runtimeStateMachineController == null)
+                var resolvedController = stateMachineModel.ResolveAssetBackedController();
+                if (resolvedController == null)
                 {
                     if (EditorPrefs.HasKey("StateMachine"))
-                        _runtimeStateMachineController = AssetDatabase.LoadAssetAtPath(EditorPrefs.GetString("StateMachine"), typeof(RuntimeStateMachineController)) as RuntimeStateMachineController;
-                    if (_runtimeStateMachineController == null)
+                        resolvedController = AssetDatabase.LoadAssetAtPath(EditorPrefs.GetString("StateMachine"), typeof(RuntimeStateMachineController)) as RuntimeStateMachineController;
+                    if (resolvedController == null)
                         return;
                 }
 
-                Initialize();
+                if (_initializedGraphController == resolvedController && _transition != null && SelectedStateMachineModel != null)
+                {
+                    _runtimeStateMachineController = resolvedController;
+                    Repaint();
+                    return;
+                }
+
+                _runtimeStateMachineController = resolvedController;
+                Initialize(!Application.isPlaying);
             }
         }
 
@@ -128,9 +137,10 @@ namespace SAS.StateMachineGraph.Editor
             Repaint();
         }
 
-        private void Initialize()
+        private void Initialize(bool syncAssetModel)
         {
-            if (_runtimeStateMachineController.IsAssetBacked())
+            _initializedGraphController = _runtimeStateMachineController;
+            if (syncAssetModel && _runtimeStateMachineController.IsAssetBacked())
             {
                 foreach (var stateMachineModel in _runtimeStateMachineController.GetAllStateMachines())
                     _runtimeStateMachineController.EnsureEntryExitNodes(stateMachineModel);
@@ -739,8 +749,6 @@ namespace SAS.StateMachineGraph.Editor
         {
             if (!Application.isPlaying)
                 return;
-
-            Repaint();
 
             if (Actor == null)
                 return;

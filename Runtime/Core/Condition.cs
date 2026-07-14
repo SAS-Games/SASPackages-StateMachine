@@ -55,7 +55,7 @@ namespace SAS.StateMachineGraph
             }
         }
 
-#if UNITY_EDITOR
+#if UNITY_EDITOR || SAS_STATE_MACHINE_DEBUG
         internal StateMachineDebugConditionResult CreateDebugConditionResult(int index)
         {
             return new StateMachineDebugConditionResult(

@@ -23,6 +23,7 @@ namespace SAS.StateMachineGraph.Editor
             new Dictionary<string, StateMachineDebugTransitionStats>();
         private readonly Dictionary<string, List<StateMachineDebugTransitionStats>> _transitionStatsByNode =
             new Dictionary<string, List<StateMachineDebugTransitionStats>>();
+        private bool _changedNotificationQueued;
 
         private StateMachineDebugSession()
         {
@@ -467,6 +468,16 @@ namespace SAS.StateMachineGraph.Editor
 
         private void NotifyChanged()
         {
+            if (_changedNotificationQueued)
+                return;
+
+            _changedNotificationQueued = true;
+            EditorApplication.delayCall += NotifyChangedDelayed;
+        }
+
+        private void NotifyChangedDelayed()
+        {
+            _changedNotificationQueued = false;
             Changed?.Invoke();
         }
     }

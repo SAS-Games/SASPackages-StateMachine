@@ -1,4 +1,3 @@
-#if UNITY_EDITOR
 namespace SAS.StateMachineGraph
 {
     public enum StateMachineDebugEventType
@@ -12,4 +11,3 @@ namespace SAS.StateMachineGraph
         TransitionTaken
     }
 }
-#endif

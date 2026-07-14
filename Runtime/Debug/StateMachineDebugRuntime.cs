@@ -1,4 +1,3 @@
-#if UNITY_EDITOR
 using System;
 using System.Diagnostics;
 using UnityEngine;
@@ -86,4 +85,3 @@ namespace SAS.StateMachineGraph
         }
     }
 }
-#endif
