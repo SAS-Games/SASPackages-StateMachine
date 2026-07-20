@@ -8,7 +8,7 @@ namespace SAS.StateMachineGraph.Editor
         [OnOpenAsset(1)]
         public static bool OpenStateMachineGraph(int instanceID, int line)
         {
-            var stateMachineController = EditorUtility.InstanceIDToObject(instanceID);
+            var stateMachineController = EditorUtility.EntityIdToObject(instanceID);
             if(stateMachineController.GetType() == typeof(RuntimeStateMachineController))
                 StateMachineEditorWindow.ShowBehaviourGraphEditor(stateMachineController as RuntimeStateMachineController);
             return false;

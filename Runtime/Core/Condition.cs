@@ -55,20 +55,10 @@ namespace SAS.StateMachineGraph
             }
         }
 
-#if UNITY_EDITOR || SAS_STATE_MACHINE_DEBUG
+#if STATE_MACHINE_DEBUG
         internal StateMachineDebugConditionResult CreateDebugConditionResult(int index)
         {
-            return new StateMachineDebugConditionResult(
-                index,
-                GetDebugName(),
-                m_Type.ToString(),
-                m_Mode.ToString(),
-                string.Empty,
-                GetDebugExpectedValue(),
-                false,
-                false,
-                string.Empty,
-                Custom);
+            return new StateMachineDebugConditionResult(index, GetDebugName(), m_Type.ToString(), m_Mode.ToString(), string.Empty, GetDebugExpectedValue(), false, false, string.Empty, Custom);
         }
 
         internal StateMachineDebugConditionResult EvaluateDebug(StateMachine stateMachine, int index)

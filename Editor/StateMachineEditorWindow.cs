@@ -406,7 +406,7 @@ namespace SAS.StateMachineGraph.Editor
                         }
                     }
 
-#if !SAS_STATE_MACHINE_DEBUG
+#if !STATE_MACHINE_DEBUG
                     GUILayout.Label("No Symbol", EditorStyles.miniLabel, GUILayout.Width(65));
 #else
                     GUILayout.Label($"BP {session.BreakpointCount}", EditorStyles.miniLabel, GUILayout.Width(40));

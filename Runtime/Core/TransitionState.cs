@@ -16,7 +16,7 @@ namespace SAS.StateMachineGraph
 
         internal float TimeElapsed = 0;
 
-#if UNITY_EDITOR || SAS_STATE_MACHINE_DEBUG
+#if STATE_MACHINE_DEBUG
         private StateMachineDebugConditionResult[] _lastDebugConditionResults = new StateMachineDebugConditionResult[0];
 
         internal StateMachineDebugConditionResult[] DebugConditionResults => _lastDebugConditionResults;
@@ -28,7 +28,7 @@ namespace SAS.StateMachineGraph
 
         internal bool TryGetTransition(StateMachine stateMachine, out ITransitionNode node)
         {
-#if UNITY_EDITOR || SAS_STATE_MACHINE_DEBUG
+#if STATE_MACHINE_DEBUG
             PrepareDebugConditionResults();
 #endif
             var timeElapsed = !HasExitTime || TimeElapsed > ExitTime;
@@ -46,7 +46,7 @@ namespace SAS.StateMachineGraph
 
             for (int i = 0; i < Conditions.Length; ++i)
             {
-#if UNITY_EDITOR || SAS_STATE_MACHINE_DEBUG
+#if STATE_MACHINE_DEBUG
                 var conditionResult = Conditions[i].EvaluateDebug(stateMachine, i);
                 RecordDebugConditionResult(i, conditionResult);
                 if (!conditionResult.Result)
@@ -60,7 +60,7 @@ namespace SAS.StateMachineGraph
             return true;
         }
 
-#if UNITY_EDITOR || SAS_STATE_MACHINE_DEBUG
+#if STATE_MACHINE_DEBUG
         private void PrepareDebugConditionResults()
         {
             if (Conditions == null || Conditions.Length == 0)

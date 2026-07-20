@@ -8,7 +8,7 @@ namespace SAS.StateMachineGraph
     {
         public static event Action<StateMachineDebugEvent> EventEmitted;
 
-        [Conditional("SAS_STATE_MACHINE_DEBUG")]
+        [Conditional("STATE_MACHINE_DEBUG")]
         internal static void NotifyNodeEnter(Actor actor, RuntimeStateGraph graph, ITransitionNode node)
         {
             if (node == null)
@@ -16,7 +16,7 @@ namespace SAS.StateMachineGraph
             Emit(StateMachineDebugEventType.NodeEnter, actor, graph, node, node as State, null, null, null, default, false, false, null);
         }
 
-        [Conditional("SAS_STATE_MACHINE_DEBUG")]
+        [Conditional("STATE_MACHINE_DEBUG")]
         internal static void NotifyNodeExit(Actor actor, RuntimeStateGraph graph, ITransitionNode node)
         {
             if (node == null)
@@ -25,31 +25,31 @@ namespace SAS.StateMachineGraph
             Emit(StateMachineDebugEventType.NodeExit, actor, graph, node, node as State, null, null, null, default, false, false, null);
         }
 
-        [Conditional("SAS_STATE_MACHINE_DEBUG")]
+        [Conditional("STATE_MACHINE_DEBUG")]
         internal static void NotifyBeforeAction(Actor actor, RuntimeStateGraph graph, State state, IStateAction stateAction, ActionExecuteEvent executeEvent)
         {
             NotifyAction(StateMachineDebugEventType.BeforeAction, actor, graph, state, stateAction, executeEvent);
         }
 
-        [Conditional("SAS_STATE_MACHINE_DEBUG")]
+        [Conditional("STATE_MACHINE_DEBUG")]
         internal static void NotifyAfterAction(Actor actor, RuntimeStateGraph graph, State state, IStateAction stateAction, ActionExecuteEvent executeEvent)
         {
             NotifyAction(StateMachineDebugEventType.AfterAction, actor, graph, state, stateAction, executeEvent);
         }
 
-        [Conditional("SAS_STATE_MACHINE_DEBUG")]
+        [Conditional("STATE_MACHINE_DEBUG")]
         internal static void NotifyBeforeTransitionEvaluation(Actor actor, RuntimeStateGraph graph, ITransitionNode node, TransitionState transitionState)
         {
             NotifyTransitionEvaluation(StateMachineDebugEventType.BeforeTransitionEvaluation, actor, graph, node, transitionState, null, false, false);
         }
 
-        [Conditional("SAS_STATE_MACHINE_DEBUG")]
+        [Conditional("STATE_MACHINE_DEBUG")]
         internal static void NotifyAfterTransitionEvaluation(Actor actor, RuntimeStateGraph graph, ITransitionNode node, TransitionState transitionState, ITransitionNode targetNode, bool result)
         {
             NotifyTransitionEvaluation(StateMachineDebugEventType.AfterTransitionEvaluation, actor, graph, node, transitionState, targetNode, true, result);
         }
 
-        [Conditional("SAS_STATE_MACHINE_DEBUG")]
+        [Conditional("STATE_MACHINE_DEBUG")]
         internal static void NotifyTransitionTaken(Actor actor, RuntimeStateGraph graph, ITransitionNode node, TransitionState transitionState, ITransitionNode targetNode)
         {
             if (targetNode == null)
