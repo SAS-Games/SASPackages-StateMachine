@@ -27,6 +27,7 @@ namespace SAS.StateMachineGraph
         public State CurrentState => StateMachineController?.CurrentState;
 
         private Blackboard _blackboard = new Blackboard();
+        public Blackboard Blackboard => _blackboard;
         private Dictionary<string, List<object>> _configs = new Dictionary<string, List<object>>();
         private bool _isConfigsCached = false;
         private bool _initialized = false;
